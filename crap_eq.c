@@ -111,7 +111,7 @@ instantiate_eq(const LADSPA_Descriptor *descriptor, ulong s_rate) {
 		eq->old_chg[i] = g;
 		eq->old_chf[i] = f;
 		eq->old_chb[i] = b;
-		biquad_gen(&filters[i], 1, f, g, b, fs);
+		filters[i] = biquad_gen(1, f, g, b, fs);
 	}
 
 	return (LADSPA_Handle) eq;
@@ -138,7 +138,7 @@ run_eq_for_real(LADSPA_Handle instance, ulong sample_count, int running) {
 			eq->old_chg[i] = g;
 			eq->old_chf[i] = f;
 			eq->old_chb[i] = b;
-			biquad_gen(&filters[i], 1, f, g, b, fs);
+			filters[i] = biquad_gen(1, f, g, b, fs);
 		}
 	}
 

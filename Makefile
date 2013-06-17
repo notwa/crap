@@ -1,15 +1,18 @@
 DISTNAME = crap
 VERSION = git
 
+EXE = design
 SHOBJ = crap_eq.so
 MID = crap_util.o
-OBJ = ${SHOBJ:.so=.o} ${MID}
-SRC = ${OBJ:.o=.c}
 HEADERS = crap_util.h ladspa.h
+
+OBJ = ${SHOBJ:.so=.o} ${EXE:=.o} ${MID}
+SRC = ${OBJ:.o=.c}
 
 PLACEBO_FLAGS = -fomit-frame-pointer -fstrength-reduce -funroll-loops -ffast-math
 ALL_CFLAGS = -O3 ${PLACEBO_FLAGS} -std=c99 -fPIC -Wall ${CFLAGS}
-ALL_LDFLAGS = -nostartfiles -shared ${LDFLAGS}
+ALL_LDFLAGS = -lm ${LDFLAGS}
+SHARED_LDFLAGS = -nostartfiles -shared
 
 PREFIX ?= /usr/local
 EXEC_PREFIX ?= ${PREFIX}
@@ -19,19 +22,24 @@ LADSPADIR ?= ${LIBDIR}/ladspa
 # should CFLAGS really be used in linking too? seems odd
 
 FULLNAME = ${DISTNAME}-${VERSION}
-ALL = ${OBJ} ${SHOBJ}
+ALL = ${OBJ} ${SHOBJ} ${EXE}
 LADSPADEST = ${DESTDIR}${LADSPADIR}
 
 all: options ${ALL}
 
 .PHONY: options
 options:
-	@echo "ALL_CFLAGS  = ${ALL_CFLAGS}"
-	@echo "CPPFLAGS    = ${CPPFLAGS}"
-	@echo "ALL_LDFLAGS = ${ALL_LDFLAGS}"
-	@echo "CC          = ${CC}"
+	@echo "ALL_CFLAGS     = ${ALL_CFLAGS}"
+	@echo "CPPFLAGS       = ${CPPFLAGS}"
+	@echo "ALL_LDFLAGS    = ${ALL_LDFLAGS}"
+	@echo "SHARED_LDFLAGS = ${SHARED_LDFLAGS}"
+	@echo "CC             = ${CC}"
 
-%.so: %.o
+%.so: %.o ${MID}
+	@echo LD $< ${MID} -o $@
+	@${CC} ${ALL_LDFLAGS} ${SHARED_LDFLAGS} $< ${MID} -o $@
+
+%: %.o ${MID}
 	@echo LD $< ${MID} -o $@
 	@${CC} ${ALL_LDFLAGS} $< ${MID} -o $@
 

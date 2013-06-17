@@ -23,6 +23,8 @@
 
 /* http://musicdsp.org/showone.php?id=51 */
 /* http://musicdsp.org/files/denormal.pdf */
+/* this is pretty gross;
+ * it's too easy to define BIQUAD_DOUBLE in one file and not another */
 #ifdef BIQUAD_DOUBLE
 typedef double bq_t;
 #define IS_DENORMAL(f) (((*(uint64_t *)&f)&0x7FF0000000000000)==0)
@@ -51,8 +53,8 @@ highpass(double cw, double g);
 biquad_interim
 orfanidi(double w0, double Gf, double g);
 
-void
-biquad_gen(biquad *bq, int type, double fc, double gain, double bw, double fs);
+biquad
+biquad_gen(int type, double fc, double gain, double bw, double fs);
 
 bq_t
 biquad_run(biquad *bq, bq_t x);

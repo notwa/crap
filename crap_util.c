@@ -30,9 +30,9 @@ peaking(double cw, double Gf, double g) {
 biquad_interim
 highpass(double cw, double g) {
 	return (biquad_interim) {
-		.b0 = 1 + cw*0.5,
+		.b0 = (1 + cw)*0.5,
 		.b1 = -cw - 1,
-		.b2 = 1 + cw*0.5,
+		.b2 = (1 + cw)*0.5,
 		.a0 = 1 + g,
 		.a1 = -2*cw,
 		.a2 = 1 - g
@@ -92,8 +92,8 @@ orfanidi(double w0, double Gf, double g) {
 	};
 }
 
-void
-biquad_gen(biquad *bq, int type, double fc, double gain, double bw, double fs) {
+biquad
+biquad_gen(int type, double fc, double gain, double bw, double fs) {
 	/* TODO: use enum for type instead of just int */
 	double w0, cw, sw, Gf, Q, a_peak, a_pass;
 	w0 = ANGULAR_LIM(fc, fs);
@@ -111,11 +111,14 @@ biquad_gen(biquad *bq, int type, double fc, double gain, double bw, double fs) {
 	if (type == 2) bqi = highpass(cw, a_pass);
 
 	double a0r = 1/bqi.a0;
-	bq->b0 = a0r * bqi.b0;
-	bq->b1 = a0r * bqi.b1;
-	bq->b2 = a0r * bqi.b2;
-	bq->a1 = -a0r * bqi.a1;
-	bq->a2 = -a0r * bqi.a2;
+
+	return (biquad) {
+		.b0 = a0r * bqi.b0,
+		.b1 = a0r * bqi.b1,
+		.b2 = a0r * bqi.b2,
+		.a1 = -a0r * bqi.a1,
+		.a2 = -a0r * bqi.a2
+	};
 }
 
 bq_t
