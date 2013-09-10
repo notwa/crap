@@ -1,7 +1,8 @@
 # crap
 
 connor's rancid audio plugins. LADSPA.
-alternatively, crazy-revealing androgynous panties
+
+alternatively, crazy-revealing androgynous panties.
 
 ### crap_eq
 

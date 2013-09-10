@@ -37,11 +37,11 @@ options:
 
 %.so: %.o ${MID}
 	@echo LD $< ${MID} -o $@
-	@${CC} ${ALL_LDFLAGS} ${SHARED_LDFLAGS} $< ${MID} -o $@
+	@${CC} ${SHARED_LDFLAGS} $< ${MID} -o $@ ${ALL_LDFLAGS}
 
 %: %.o ${MID}
 	@echo LD $< ${MID} -o $@
-	@${CC} ${ALL_LDFLAGS} $< ${MID} -o $@
+	@${CC} $< ${MID} -o $@ ${ALL_LDFLAGS}
 
 %.o: %.c ${HEADERS}
 	@echo CC $< -o $@
