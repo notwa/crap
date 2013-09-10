@@ -44,17 +44,26 @@ typedef struct {
 void
 biquad_init(biquad *bq);
 
-biquad_interim
-peaking(double cw, double Gf, double g);
-
-biquad_interim
-highpass(double cw, double g);
-
-biquad_interim
-orfanidi(double w0, double Gf, double g);
-
+/* types: TODO: enum
+ 0: peaking
+ 1: lowshelf
+ 2: highshelf
+ 3: lowpass
+ 4: highpass
+ 5: allpass
+ 6: bandpass 1
+ 7: bandpass 2
+ 8: notch
+ 9: gain
+*/
 biquad
 biquad_gen(int type, double fc, double gain, double bw, double fs);
+
+/* s-plane to z-plane */
+biquad_interim
+design(double cw, double sw,
+    double num0, double num1, double num2,
+    double den0, double den1, double den2);
 
 bq_t
 biquad_run(biquad *bq, bq_t x);

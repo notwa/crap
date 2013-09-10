@@ -15,100 +15,43 @@ biquad_init(biquad *bq) {
 }
 
 biquad_interim
-peaking(double cw, double Gf, double g) {
-	double GB = sqrt(Gf);
+design(double cw, double sw,
+    double num0, double num1, double num2,
+    double den0, double den1, double den2) {
 	return (biquad_interim) {
-		.b0 = 1 + g * GB,
-		.b1 = -2 * cw,
-		.b2 = 1 - g * GB,
-		.a0 = 1 + g / GB,
-		.a1 = -2 * cw,
-		.a2 = 1 - g / GB
-	};
-}
-
-biquad_interim
-highpass(double cw, double g) {
-	return (biquad_interim) {
-		.b0 = (1 + cw)*0.5,
-		.b1 = -cw - 1,
-		.b2 = (1 + cw)*0.5,
-		.a0 = 1 + g,
-		.a1 = -2*cw,
-		.a2 = 1 - g
-	};
-}
-
-/* TODO: rename */
-biquad_interim
-orfanidi(double w0, double Gf, double g) {
-	/* simplified http://ece.rutgers.edu/~orfanidi/intro2sp/mdir/peq.m */
-	double Dw, GfS, F, G00, F00, term1, term2, num, den;
-	double G1S, G1, G01, G11, F01, F11, W2, DO, coeff, C, D, A, B;
-	double v;
-
-	Dw = atan(g)*2;
-	GfS = SQR(Gf);
-
-	v = (Gf > 1) ? 1 : -1;
-
-	F   = v*(GfS - Gf);
-	G00 = v*(GfS - 1);
-	F00 = v*(Gf - 1);
-
-	term1 = SQR(SQR(w0) - SQR(M_PI));
-	term2 = F00 * SQR(M_PI) * SQR(Dw) / F;
-	num = term1 + term2 * GfS;
-	den = term1 + term2;
-
-	G1S = num/den;
-	G1 = sqrt(G1S);
-
-	G01 = v*(GfS - G1);
-	G11 = v*(GfS - G1S);
-	F01 = v*(Gf - G1);
-	F11 = fabs(Gf - G1S);
-
-	/* bandwidth compensation goes nuts
-	 * skip |= v*(Gf - G1S) < 0; */
-
-	W2 = sqrt(G11 / G00) * SQR(tan(w0/2));
-	DO = (1 + sqrt(F00 / F11) * W2) * g;
-
-	coeff = 2 * W2 / F;
-	C = F11 * SQR(DO) / F - coeff * (F01 - sqrt(F00 * F11));
-	D =                     coeff * (G01 - sqrt(G00 * G11));
-
-	A = sqrt(      C +      D);
-	B = sqrt(GfS * C + Gf * D);
-
-	return (biquad_interim) {
-		.b0 = -(G1 + W2 + B),
-		.b1 = 2*(G1 - W2),
-		.b2 = -(G1 - B + W2),
-		.a0 = -(1 + W2 + A),
-		.a1 = 2*(1 - W2),
-		.a2 = -(1 + W2 - A)
+		.b0 = num0*   (1 + cw) + num1*sw + num2*  (1 - cw),
+		.b1 = num0*-2*(1 + cw)           + num2*2*(1 - cw),
+		.b2 = num0*   (1 + cw) - num1*sw + num2*  (1 - cw),
+		.a0 = den0*   (1 + cw) + den1*sw + den2*  (1 - cw),
+		.a1 = den0*-2*(1 + cw)           + den2*2*(1 - cw),
+		.a2 = den0*   (1 + cw) - den1*sw + den2*  (1 - cw),
 	};
 }
 
 biquad
 biquad_gen(int type, double fc, double gain, double bw, double fs) {
 	/* TODO: use enum for type instead of just int */
-	double w0, cw, sw, Gf, Q, a_peak, a_pass;
+	double w0, cw, sw, A, As, Q;
 	w0 = ANGULAR_LIM(fc, fs);
 	cw = cos(w0);
 	sw = sin(w0);
-	Gf = DB2LIN(gain);
-	Q = 1/(2 * sinh(LN_2_2 * bw * w0/sw));
+	A = DB2LIN(gain/2);
+	As = sqrt(A);
+	Q = 1/(4 * sinh(LN_2_2 * bw * w0/sw));
+	//Q = bw? - (w0/M_PI)^2;
+	/* skip = (fabs(A - 1) <= TINY); */
 
-	a_peak = sw * (2 / Q);
-	a_pass = sw / (1 * Q);
-	/* skip = (fabs(Gf - 1) <= TINY); */
 	biquad_interim bqi;
-	if (type == 0) bqi = peaking(cw, Gf, a_peak);
-	if (type == 1) bqi = orfanidi(w0, Gf, a_peak);
-	if (type == 2) bqi = highpass(cw, a_pass);
+	if (type == 0) bqi = design(cw,sw, 1,  A/Q, 1,   1,  1/A/Q,   1);
+	if (type == 1) bqi = design(cw,sw, 1, As/Q, A,   1, 1/As/Q, 1/A);
+	if (type == 2) bqi = design(cw,sw, A, As/Q, 1, 1/A, 1/As/Q,   1);
+	if (type == 3) bqi = design(cw,sw, 0,    0, 1,   1,    1/Q,   1);
+	if (type == 4) bqi = design(cw,sw, 1,    0, 0,   1,    1/Q,   1);
+	if (type == 5) bqi = design(cw,sw, 1, -1/Q, 1,   1,    1/Q,   1);
+	if (type == 6) bqi = design(cw,sw, 0,    1, 0,   1,    1/Q,   1);
+	if (type == 7) bqi = design(cw,sw, 0,  1/Q, 0,   1,    1/Q,   1);
+	if (type == 8) bqi = design(cw,sw, 1,    0, 1,   1,    1/Q,   1);
+	if (type == 9) bqi = design(cw,sw, A,    A, A, 1/A,    1/A, 1/A);
 
 	double a0r = 1/bqi.a0;
 
