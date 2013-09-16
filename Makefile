@@ -2,7 +2,7 @@ DISTNAME = crap
 VERSION = git
 
 EXE = design
-SHOBJ = crap_eq.so
+SHOBJ = crap_eq.so crap_eq_const.so
 MID = crap_util.o
 HEADERS = crap_util.h ladspa.h
 

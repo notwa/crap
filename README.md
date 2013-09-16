@@ -2,7 +2,7 @@
 
 connor's rancid audio plugins. LADSPA.
 
-alternatively, crazy-revealing androgynous panties.
+alternatively, chocolate recipes are powerful.
 
 ### crap_eq
 
@@ -10,4 +10,4 @@ multiband parametric EQ. try redefining BANDS.
 
 ### crap_eq_const
 
-workinonit...
+simplified code for a response defined at compile-time.
