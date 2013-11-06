@@ -12,7 +12,7 @@ SRC = ${OBJ:.o=.c}
 PLACEBO_FLAGS = -fomit-frame-pointer -fstrength-reduce -funroll-loops -ffast-math
 ALL_CFLAGS = -O3 ${PLACEBO_FLAGS} -std=c99 -fPIC -Wall ${CFLAGS}
 ALL_LDFLAGS = -lm ${LDFLAGS}
-SHARED_LDFLAGS = -nostartfiles -shared
+SHARED_LDFLAGS = -shared
 
 PREFIX ?= /usr/local
 EXEC_PREFIX ?= ${PREFIX}
