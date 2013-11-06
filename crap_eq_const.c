@@ -107,9 +107,6 @@ set_run_adding_gain(LADSPA_Handle instance, LADSPA_Data gain) {
 	eq->run_adding_gain = gain;
 }
 
-void _init() {} 
-void _fini() {}
-
 static const LADSPA_Descriptor eqDescriptor = {
 	.UniqueID = 0xDEFACED,
 	.Label = "crap_eq_const",

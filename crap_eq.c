@@ -26,8 +26,7 @@ typedef unsigned long ulong;
 #define BW_MIN 0.02
 #define BW_MAX 8
 
-static int ready = 0;
-void _init();
+void __attribute__ ((constructor)) eq_init();
 
 LADSPA_PortDescriptor p_discs[PCOUNT];
 LADSPA_PortRangeHint p_hints[PCOUNT];
@@ -62,10 +61,8 @@ typedef struct {
 	LADSPA_Data run_adding_gain;
 } eq_t;
 
-DLL_EXPORT const LADSPA_Descriptor *
+const LADSPA_Descriptor *
 ladspa_descriptor(ulong index) {
-	if (!ready) _init();
-
 	if (index != 0)
 		return NULL;
 	return &eqDescriptor;
@@ -180,7 +177,7 @@ set_run_adding_gain(LADSPA_Handle instance, LADSPA_Data gain) {
 }
 
 void
-_init() {
+eq_init() {
 	#define INCTRL (LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL)
 	#define BOUNDED (LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_BOUNDED_ABOVE)
 	for (int i = 0; i < BANDS; i++) {
@@ -229,11 +226,4 @@ _init() {
 	eqDescriptor.run = run_eq;
 	eqDescriptor.run_adding = run_adding_eq;
 	eqDescriptor.set_run_adding_gain = set_run_adding_gain;
-
-	ready = 1;
 }
-
-void
-_fini() {
-}
-
