@@ -3,7 +3,7 @@ VERSION = git
 
 EXE = design
 SHOBJ = crap_eq.so crap_eq_const.so
-MID = crap_util.o
+MID =
 HEADERS = crap_util.h ladspa.h
 
 OBJ = ${SHOBJ:.so=.o} ${EXE:=.o} ${MID}

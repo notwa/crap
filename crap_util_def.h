@@ -2,19 +2,14 @@
 #include <math.h>
 #include <stdint.h>
 
-#include "crap_util.h"
-
 /* used to resemble https://github.com/swh/ladspa/blob/master/util/biquad.h */
 
-void
+static void
 biquad_init(biquad *bq) {
-	bq->x1 = 0;
-	bq->x2 = 0;
-	bq->y1 = 0;
-	bq->y2 = 0;
+	bq->x1 = bq->x2 = bq->y1 = bq->y2 = 0;
 }
 
-biquad_interim
+static biquad_interim
 design(double cw, double sw,
     double num0, double num1, double num2,
     double den0, double den1, double den2) {
@@ -28,19 +23,19 @@ design(double cw, double sw,
 	};
 }
 
-biquad
+static biquad
 biquad_gen(int type, double fc, double gain, double bw, double fs) {
-	/* TODO: use enum for type instead of just int */
 	double w0, cw, sw, A, As, Q;
 	w0 = ANGULAR_LIM(fc, fs);
 	cw = cos(w0);
 	sw = sin(w0);
 	A = DB2LIN(gain/2);
 	As = sqrt(A);
-	Q = 1/(4 * sinh(LN_2_2 * bw * w0/sw));
-	//Q = bw? - (w0/M_PI)^2;
+	Q = 1/(4*sinh(M_LN2/2*bw*w0/sw));
+	//Q = M_SQRT1_2*(1 - SQR(w0/M_PI))/bw;
 	/* skip = (fabs(A - 1) <= TINY); */
 
+	/* TODO: use enum for type instead of just int */
 	biquad_interim bqi;
 	if (type == 0) bqi = design(cw,sw, 1,  A/Q, 1,   1,  1/A/Q,   1);
 	if (type == 1) bqi = design(cw,sw, 1, As/Q, A,   1, 1/As/Q, 1/A);
@@ -64,13 +59,12 @@ biquad_gen(int type, double fc, double gain, double bw, double fs) {
 	};
 }
 
-bq_t
+static bq_t
 biquad_run(biquad *bq, bq_t x) {
 	bq_t y;
 
 	y = bq->b0 * x + bq->b1 * bq->x1 + bq->b2 * bq->x2
 	               + bq->a1 * bq->y1 + bq->a2 * bq->y2;
-	if (IS_DENORMAL(y)) y = 0;
 	bq->x2 = bq->x1;
 	bq->x1 = x;
 	bq->y2 = bq->y1;
@@ -78,4 +72,3 @@ biquad_run(biquad *bq, bq_t x) {
 
 	return y;
 }
-
