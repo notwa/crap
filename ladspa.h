@@ -107,10 +107,16 @@ typedef struct _LADSPA_Descriptor {
 	void (*deactivate)(LADSPA_Handle Instance);
 	void (*cleanup)(LADSPA_Handle Instance);
 } LADSPA_Descriptor;
+#ifdef WIN32
+// weird clang bug workaround
+#if (__clang__ != 1) || (_X86_ != 1)
+__declspec(dllexport)
+#endif
+#endif
 const LADSPA_Descriptor * ladspa_descriptor(unsigned long Index);
 typedef const LADSPA_Descriptor *
     (*LADSPA_Descriptor_Function)(unsigned long Index);
 #ifdef __cplusplus
 }
 #endif
-#endif 
+#endif
