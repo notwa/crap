@@ -146,14 +146,15 @@ run_eq(LADSPA_Handle instance, ulong sample_count) {
 	eq_t *eq = (eq_t *) instance;
 	biquad *filters = eq->filters;
 
+	watch_parameters(eq);
+
 	const LADSPA_Data *input = eq->input;
 	LADSPA_Data *output = eq->output;
 
 	for (ulong pos = 0; pos < sample_count; pos++) {
 		LADSPA_Data samp = input[pos];
-		for (int i = 0; i < BANDS; i++) {
+		for (int i = 0; i < BANDS; i++)
 			samp = biquad_run(&filters[i], samp);
-		}
 		output[pos] = samp;
 	}
 }

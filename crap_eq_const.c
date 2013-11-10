@@ -78,9 +78,8 @@ run_eq(LADSPA_Handle instance, ulong sample_count) {
 
 	for (ulong pos = 0; pos < sample_count; pos++) {
 		LADSPA_Data samp = input[pos];
-		for (int i = 0; i < REALBANDS; i++) {
+		for (int i = 0; i < REALBANDS; i++)
 			samp = biquad_run(&filters[i], samp);
-		}
 		output[pos] = samp;
 	}
 }
