@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "ladspa.h"
 #include "crap_util.h"
@@ -27,10 +29,11 @@ typedef unsigned long ulong;
 #define BW_MAX 8
 
 void __attribute__ ((constructor)) eq_init();
+void __attribute__ ((destructor)) eq_fini();
 
 LADSPA_PortDescriptor p_discs[PCOUNT];
 LADSPA_PortRangeHint p_hints[PCOUNT];
-const char *p_names[PCOUNT];
+char *p_names[PCOUNT];
 
 static LADSPA_Descriptor eqDescriptor = {
 	.UniqueID = 0xCAFED,
@@ -57,8 +60,6 @@ typedef struct {
 
 	biquad filters[BANDS];
 	LADSPA_Data fs;
-
-	LADSPA_Data run_adding_gain;
 } eq_t;
 
 const LADSPA_Descriptor *
@@ -104,7 +105,6 @@ instantiate_eq(const LADSPA_Descriptor *descriptor, ulong s_rate) {
 	LADSPA_Data fs = s_rate;
 
 	eq->fs = fs;
-	eq->run_adding_gain = 1;
 
 	const LADSPA_Data g = 0;
 	const LADSPA_Data f = 440;
@@ -120,29 +120,31 @@ instantiate_eq(const LADSPA_Descriptor *descriptor, ulong s_rate) {
 }
 
 static void
-run_eq_for_real(LADSPA_Handle instance, ulong sample_count, int running) {
-	eq_t *eq = (eq_t *) instance;
-
-	const LADSPA_Data fs = eq->fs;
+watch_parameters(eq_t *eq) {
 	biquad *filters = eq->filters;
-
-	/* TODO: I don't think this should be here at all */
+	const LADSPA_Data fs = eq->fs;
 	for (int i = 0; i < BANDS; i++) {
 		const LADSPA_Data rg = *(eq->chg[i]);
 		const LADSPA_Data rf = *(eq->chf[i]);
 		const LADSPA_Data rb = *(eq->chb[i]);
-		const LADSPA_Data g = LIMIT(rg, GAIN_MIN, GAIN_MAX);
-		const LADSPA_Data f = LIMIT(rf, FREQ_MIN, FREQ_MAX);
-		const LADSPA_Data b = LIMIT(rb, BW_MIN, BW_MAX);
-		if ((g != eq->old_chg[i])
-		 || (f != eq->old_chf[i])
-		 || (b != eq->old_chb[i])) {
+		if ((rg != eq->old_chg[i])
+		 || (rf != eq->old_chf[i])
+		 || (rb != eq->old_chb[i])) {
+			const LADSPA_Data g = LIMIT(rg, GAIN_MIN, GAIN_MAX);
+			const LADSPA_Data f = LIMIT(rf, FREQ_MIN, FREQ_MAX);
+			const LADSPA_Data b = LIMIT(rb, BW_MIN, BW_MAX);
 			eq->old_chg[i] = g;
 			eq->old_chf[i] = f;
 			eq->old_chb[i] = b;
 			filters[i] = biquad_gen(1, f, g, b, fs);
 		}
 	}
+}
+
+static void
+run_eq(LADSPA_Handle instance, ulong sample_count) {
+	eq_t *eq = (eq_t *) instance;
+	biquad *filters = eq->filters;
 
 	const LADSPA_Data *input = eq->input;
 	LADSPA_Data *output = eq->output;
@@ -150,31 +152,15 @@ run_eq_for_real(LADSPA_Handle instance, ulong sample_count, int running) {
 	for (ulong pos = 0; pos < sample_count; pos++) {
 		LADSPA_Data samp = input[pos];
 		for (int i = 0; i < BANDS; i++) {
-			/* TODO: skip over 0 gains? */
 			samp = biquad_run(&filters[i], samp);
 		}
-		if (running)
-			output[pos] += eq->run_adding_gain * samp;
-		else
-			output[pos] = samp;
+		output[pos] = samp;
 	}
 }
 
-static void
-run_eq(LADSPA_Handle instance, ulong sample_count) {
-	run_eq_for_real(instance, sample_count, 0);
-}
-
-static void
-run_adding_eq(LADSPA_Handle instance, ulong sample_count) {
-	run_eq_for_real(instance, sample_count, 1);
-}
-
-void
-set_run_adding_gain(LADSPA_Handle instance, LADSPA_Data gain) {
-	eq_t *eq = (eq_t *) instance;
-	eq->run_adding_gain = gain;
-}
+static const char *gain_desc = "Band %i Gain [dB]";
+static const char *freq_desc = "Band %i Freq [Hz]";
+static const char *band_desc = "Band %i Bandwidth [octaves]";
 
 void
 eq_init() {
@@ -189,10 +175,12 @@ eq_init() {
 		p_discs[fi] = INCTRL;
 		p_discs[bi] = INCTRL;
 
-		/* TODO: generate strings per band */
-		p_names[gi] = "Band x Gain [dB]";
-		p_names[fi] = "Band x Freq [Hz]";
-		p_names[bi] = "Band x Bandwidth [octaves]";
+		p_names[gi] = calloc(strlen(gain_desc), sizeof(char));
+		p_names[fi] = calloc(strlen(freq_desc), sizeof(char));
+		p_names[bi] = calloc(strlen(band_desc), sizeof(char));
+		sprintf(p_names[gi], gain_desc, i);
+		sprintf(p_names[fi], freq_desc, i);
+		sprintf(p_names[bi], band_desc, i);
 
 		p_hints[gi].HintDescriptor = BOUNDED
 		    | LADSPA_HINT_DEFAULT_0;
@@ -224,6 +212,19 @@ eq_init() {
 	eqDescriptor.deactivate = NULL;
 	eqDescriptor.instantiate = instantiate_eq;
 	eqDescriptor.run = run_eq;
-	eqDescriptor.run_adding = run_adding_eq;
-	eqDescriptor.set_run_adding_gain = set_run_adding_gain;
+	eqDescriptor.run_adding = NULL;
+	eqDescriptor.set_run_adding_gain = NULL;
+}
+
+void
+eq_fini() {
+	for (int i = 0; i < BANDS; i++) {
+		const int gi = i;
+		const int fi = i + BANDS;
+		const int bi = i + BANDS*2;
+
+		free(p_names[gi]);
+		free(p_names[fi]);
+		free(p_names[bi]);
+	}
 }

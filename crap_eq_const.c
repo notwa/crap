@@ -27,8 +27,6 @@ typedef struct {
 
 	biquad filters[REALBANDS];
 	LADSPA_Data fs;
-
-	LADSPA_Data run_adding_gain;
 } eq_t;
 
 static void
@@ -61,7 +59,6 @@ instantiate_eq(const LADSPA_Descriptor *descriptor, ulong s_rate) {
 	LADSPA_Data fs = s_rate;
 
 	eq->fs = fs;
-	eq->run_adding_gain = 1;
 
 	filters[0] = biquad_gen(4,   10,  0.0, 1.00, fs);
 	filters[1] = biquad_gen(0,   36,  4.3, 1.25, fs);
@@ -72,9 +69,8 @@ instantiate_eq(const LADSPA_Descriptor *descriptor, ulong s_rate) {
 }
 
 static void
-run_eq_for_real(LADSPA_Handle instance, ulong sample_count, const int running) {
+run_eq(LADSPA_Handle instance, ulong sample_count) {
 	eq_t *eq = (eq_t *) instance;
-
 	biquad *filters = eq->filters;
 
 	const LADSPA_Data *input = eq->input;
@@ -82,29 +78,11 @@ run_eq_for_real(LADSPA_Handle instance, ulong sample_count, const int running) {
 
 	for (ulong pos = 0; pos < sample_count; pos++) {
 		LADSPA_Data samp = input[pos];
-		for (int i = 0; i < REALBANDS; i++)
+		for (int i = 0; i < REALBANDS; i++) {
 			samp = biquad_run(&filters[i], samp);
-		if (running)
-			output[pos] += eq->run_adding_gain * samp;
-		else
-			output[pos] = samp;
+		}
+		output[pos] = samp;
 	}
-}
-
-static void
-run_eq(LADSPA_Handle instance, ulong sample_count) {
-	run_eq_for_real(instance, sample_count, 0);
-}
-
-static void
-run_adding_eq(LADSPA_Handle instance, ulong sample_count) {
-	run_eq_for_real(instance, sample_count, 1);
-}
-
-void
-set_run_adding_gain(LADSPA_Handle instance, LADSPA_Data gain) {
-	eq_t *eq = (eq_t *) instance;
-	eq->run_adding_gain = gain;
 }
 
 static const LADSPA_Descriptor eqDescriptor = {
@@ -125,8 +103,8 @@ static const LADSPA_Descriptor eqDescriptor = {
 	.deactivate = NULL,
 	.instantiate = instantiate_eq,
 	.run = run_eq,
-	.run_adding = run_adding_eq,
-	.set_run_adding_gain = set_run_adding_gain
+	.run_adding = NULL,
+	.set_run_adding_gain = NULL
 };
 
 const LADSPA_Descriptor *
