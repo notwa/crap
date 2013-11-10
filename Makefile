@@ -9,17 +9,14 @@ HEADERS = crap_util.h ladspa.h
 OBJ = ${SHOBJ:.so=.o} ${EXE:=.o} ${MID}
 SRC = ${OBJ:.o=.c}
 
-PLACEBO_FLAGS = -fomit-frame-pointer -fstrength-reduce -funroll-loops -ffast-math
-ALL_CFLAGS = -O3 ${PLACEBO_FLAGS} -std=c99 -fPIC -Wall ${CFLAGS}
+WARNING_FLAGS = -Wall -Wno-unused-function
+ALL_CFLAGS = -std=gnu99 -fpic ${WARNING_FLAGS} ${CFLAGS}
 ALL_LDFLAGS = -lm ${LDFLAGS}
-SHARED_LDFLAGS = -shared
 
 PREFIX ?= /usr/local
 EXEC_PREFIX ?= ${PREFIX}
 LIBDIR ?= ${EXEC_PREFIX}/lib
 LADSPADIR ?= ${LIBDIR}/ladspa
-
-# should CFLAGS really be used in linking too? seems odd
 
 FULLNAME = ${DISTNAME}-${VERSION}
 ALL = ${OBJ} ${SHOBJ} ${EXE}
@@ -32,16 +29,15 @@ options:
 	@echo "ALL_CFLAGS     = ${ALL_CFLAGS}"
 	@echo "CPPFLAGS       = ${CPPFLAGS}"
 	@echo "ALL_LDFLAGS    = ${ALL_LDFLAGS}"
-	@echo "SHARED_LDFLAGS = ${SHARED_LDFLAGS}"
 	@echo "CC             = ${CC}"
 
 %.so: %.o ${MID}
 	@echo LD $< ${MID} -o $@
-	@${CC} ${SHARED_LDFLAGS} $< ${MID} -o $@ ${ALL_LDFLAGS}
+	@${CC} ${ALL_CFLAGS} -shared $< ${MID} -o $@ ${ALL_LDFLAGS}
 
 %: %.o ${MID}
 	@echo LD $< ${MID} -o $@
-	@${CC} $< ${MID} -o $@ ${ALL_LDFLAGS}
+	@${CC} ${ALL_CFLAGS} $< ${MID} -o $@ ${ALL_LDFLAGS}
 
 %.o: %.c ${HEADERS}
 	@echo CC $< -o $@
