@@ -6,6 +6,9 @@ SHOBJ = crap_eq.so crap_eq_const.so crap_noise.so
 MID =
 HEADERS = crap_util.h crap_util_def.h ladspa.h
 
+BENCH = bench.o
+AGAINST = ./crap_eq_const.so
+
 OBJ = ${SHOBJ:.so=.o} ${EXE:=.o} ${MID}
 SRC = ${OBJ:.o=.c}
 
@@ -23,6 +26,11 @@ ALL = ${OBJ} ${SHOBJ} ${EXE}
 LADSPADEST = ${DESTDIR}${LADSPADIR}
 
 all: options ${ALL}
+
+bench: all ${BENCH}
+	@echo LD ${BENCH} ${MID} -o $@
+	@${CC} ${ALL_CFLAGS} ${BENCH} -o $@ ${ALL_LDFLAGS} -rdynamic -ldl
+	./bench.sh ./bench ${AGAINST}
 
 .PHONY: options
 options:
@@ -49,12 +57,13 @@ install: all
 	install -m 644 ${SHOBJ} ${LADSPADEST}
 
 clean:
-	-rm -f ${ALL}
+	-rm -f ${ALL} bench ${BENCH}
 
 dist:
 	-rm -f ${FULLNAME}.tar.gz
 	mkdir -p ${FULLNAME}
 	cp LICENSE README.md Makefile ${HEADERS} ${SRC} ${FULLNAME}
+	cp bench.sh ${BENCH:.o=.c} ${FULLNAME}
 	tar -cf ${FULLNAME}.tar ${FULLNAME}
 	gzip ${FULLNAME}.tar
 	rm -rf ${FULLNAME}
