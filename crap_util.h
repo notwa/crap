@@ -23,6 +23,9 @@ typedef struct {
 	double b0, b1, b2, a0, a1, a2;
 } biquad_interim;
 
+static float
+whitenoise();
+
 static void
 biquad_init(biquad *bq);
 

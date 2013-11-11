@@ -2,6 +2,20 @@
 #include <math.h>
 #include <stdint.h>
 
+/* via http://www.rgba.org/articles/sfrand/sfrand.htm */
+static unsigned int mirand = 1;
+
+static float
+whitenoise() {
+    union either {
+        float f;
+        unsigned int i;
+    } white;
+    mirand *= 16807;
+    white.i = (mirand & 0x007FFFFF) | 0x40000000;
+    return white.f - 3;
+}
+
 /* used to resemble https://github.com/swh/ladspa/blob/master/util/biquad.h */
 
 static void
