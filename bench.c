@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <time.h>
 
@@ -10,13 +11,14 @@ enum {
 	BLOCK_SIZE=2048
 };
 
-float inputs[BLOCK_SIZE];
-float outputs[BLOCK_SIZE];
 void *plug = NULL;
+static float *audio_buffer;
+static int audio_count = 0;
 
 static void
 cleanup() {
 	dlclose(plug);
+	if (audio_count) free(audio_buffer);
 }
 
 static const LADSPA_Descriptor*
@@ -43,12 +45,21 @@ main(int argc, char **argv) {
 	LADSPA_Handle h = d->instantiate(d, 44100);
 	assert(h);
 
-	d->connect_port(h, 0, inputs);
-	d->connect_port(h, 1, outputs);
+	// we're lazy so we don't distinguish inputs and outputs
+	for (int i = 0; i < d->PortCount; i++)
+		if (LADSPA_IS_PORT_AUDIO(d->PortDescriptors[i]))
+			audio_count++;
+
+	audio_buffer = calloc(audio_count*BLOCK_SIZE, sizeof(float));
+
+	int a = 0;
+	for (int i = 0; i < d->PortCount; i++)
+		if (LADSPA_IS_PORT_AUDIO(d->PortDescriptors[i]))
+			d->connect_port(h, i, audio_buffer + a++*BLOCK_SIZE);
 
 	mirand = time(NULL);
-	for (int i = 0; i < BLOCK_SIZE; i++)
-		inputs[i] = whitenoise();
+	for (int i = 0; i < audio_count*BLOCK_SIZE; i++)
+		audio_buffer[i] = whitenoise();
 
 	if (d->activate) d->activate(h);
 	for (int i = 0; i < 64*64*8; i++)

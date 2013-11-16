@@ -2,6 +2,12 @@
 bench="$1"
 against="$2"
 
+cleanup() {
+    echo -e "\e[0;"
+    exit 0
+}
+trap cleanup INT
+
 TIMEFORMAT='%3R'
 for i in {1..8}; do
     time "$bench" "$against"

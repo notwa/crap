@@ -21,7 +21,7 @@ white noise generator. loud, full-range, 0dBFS. don't say i didn't warn you.
 
 ## build notes
 
-`make` it. optional `bench` benchmarking target, doesn't build on Windows.
+`make` it. optional `benchmark` target which doesn't build on Windows.
 
 if you're using gcc, try `CFLAGS='-O3 -ffast-math'`.
 `-march=native` actually seems to degrade performance slightly, but YMMV.

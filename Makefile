@@ -30,6 +30,9 @@ all: options ${ALL}
 bench: all ${BENCH}
 	@echo LD ${BENCH} ${MID} -o $@
 	@${CC} ${ALL_CFLAGS} ${BENCH} -o $@ ${ALL_LDFLAGS} -rdynamic -ldl
+
+.PHONY: benchmark
+benchmark: bench
 	./benchtime ./bench ${AGAINST}
 
 .PHONY: options
