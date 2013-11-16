@@ -56,9 +56,11 @@ install: all
 	install -d ${LADSPADEST}
 	install -m 644 ${SHOBJ} ${LADSPADEST}
 
+.PHONY: clean
 clean:
 	-rm -f ${ALL} bench ${BENCH}
 
+.PHONY: dist
 dist:
 	-rm -f ${FULLNAME}.tar.gz
 	mkdir -p ${FULLNAME}

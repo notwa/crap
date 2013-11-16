@@ -1,19 +1,10 @@
-#!/bin/zsh
-local bench="$1"
-local against="$2"
-local i x n=0 t m=9999
-finish() {
-    [ $n -gt 0 ] && printf "\nmin %.3f  avg %.3f  total %.3f\n" $m $((x/n)) $x
-    exit 0
-}
-trap finish INT
-echo -n "…"
-for ((i=0; i<8; i++)); do
-    sleep 0.5
-    t="$(TIMEFMT='%*E'$'\n'; (time "$bench" "$against") 2>&1)"
-    echo -n " ${t}"
-    let 'x += t'
-    let 'n += 1'
-    [[ $t < $m ]] && m=$t
-done
-finish
+#!/bin/bash
+bench="$1"
+against="$2"
+
+TIMEFORMAT='%3R'
+for i in {1..8}; do
+    time "$bench" "$against"
+done 2>&1 >/dev/null | awk 'BEGIN{m=999;printf " …\033[90m"}
+{a+=$1;n++;m=$1<m?$1:m;printf " %6.3f",$1}
+END{printf "\033[0m\nmin %6.3f  —  avg %6.3f  —  total %7.3f\n",m,a/n,a}'
