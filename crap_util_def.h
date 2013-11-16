@@ -64,13 +64,13 @@ biquad_gen(int type, double fc, double gain, double bw, double fs) {
 
 	double a0r = 1/bqi.a0;
 
-	return (biquad) {
-		.b0 = a0r * bqi.b0,
-		.b1 = a0r * bqi.b1,
-		.b2 = a0r * bqi.b2,
-		.a1 = -a0r * bqi.a1,
-		.a2 = -a0r * bqi.a2
-	};
+	biquad out;
+	out.b0 =  a0r*bqi.b0;
+	out.b1 =  a0r*bqi.b1;
+	out.b2 =  a0r*bqi.b2;
+	out.a1 = -a0r*bqi.a1;
+	out.a2 = -a0r*bqi.a2;
+	return out;
 }
 
 static bq_t
