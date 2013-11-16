@@ -30,7 +30,7 @@ all: options ${ALL}
 bench: all ${BENCH}
 	@echo LD ${BENCH} ${MID} -o $@
 	@${CC} ${ALL_CFLAGS} ${BENCH} -o $@ ${ALL_LDFLAGS} -rdynamic -ldl
-	./bench.sh ./bench ${AGAINST}
+	./benchtime ./bench ${AGAINST}
 
 .PHONY: options
 options:
