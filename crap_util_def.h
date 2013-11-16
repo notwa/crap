@@ -7,13 +7,13 @@ static unsigned int mirand = 1;
 
 static float
 whitenoise() {
-    union either {
-        float f;
-        unsigned int i;
-    } white;
-    mirand *= 16807;
-    white.i = (mirand & 0x007FFFFF) | 0x40000000;
-    return white.f - 3;
+	union either {
+		float f;
+		unsigned int i;
+	} white;
+	mirand *= 16807;
+	white.i = (mirand & 0x007FFFFF) | 0x40000000;
+	return white.f - 3;
 }
 
 /* used to resemble https://github.com/swh/ladspa/blob/master/util/biquad.h */
@@ -77,8 +77,8 @@ static bq_t
 biquad_run(biquad *bq, bq_t x) {
 	bq_t y;
 
-	y = bq->b0 * x + bq->b1 * bq->x1 + bq->b2 * bq->x2
-	               + bq->a1 * bq->y1 + bq->a2 * bq->y2;
+	y = bq->b0*x + bq->b1*bq->x1 + bq->b2*bq->x2
+	             + bq->a1*bq->y1 + bq->a2*bq->y2;
 	bq->x2 = bq->x1;
 	bq->x1 = x;
 	bq->y2 = bq->y1;
