@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+. common.sh
+
+(cat template-vst.cpp | while read -r; do
+    case "$REPLY" in
+
+    '//#INCLUDE') echo "$pp_include" ;;
+
+    # unimplemented
+    '//#VST_PARAMS') :;;
+
+    *) echo -E "$REPLY" ;;
+    esac
+done) > "$out"

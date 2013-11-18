@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+. common.sh
+
+(cat template-ladspa.c | while read -r; do
+    case "$REPLY" in
+
+    '//#INCLUDE') echo "$pp_include" ;;
+
+    # unimplemented
+    '//#PORT_DESCRIPTIONS') :;;
+    '//#PORT_HINTS') :;;
+    '//#PORT_NAMES') :;;
+    '//#PORT_DATA') :;;
+    '//#PORT_CONNECT') :;;
+
+    *) echo -E "$REPLY" ;;
+    esac
+done) > "$out"
