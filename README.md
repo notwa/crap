@@ -19,7 +19,7 @@ __crap\_eq\_const (0x0DEFACED)__
 simpler code with a static response.
 edit code as needed.
 
-### crap noises generator
+### crap noise generator
 
 __crap\_noise (0xEC57A71C)__
 
@@ -33,7 +33,9 @@ a `benchmark` target is included, however it doesn't build on Windows.
 
 try `CFLAGS="-O3 -ffast-math -march=core2"`
 
-remember to export VST\_SDK\_DIR to the path of your vstsdk2.4/
+on linux, you'll need `CFLAGS+=" -fpic" CXXFLAGS+=" -fpic -D__cdecl="`
+
+remember to export `VST\_SDK\_DIR` to the path of your `vstsdk2.4/`
 
 ## TODO
 
