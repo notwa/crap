@@ -25,6 +25,12 @@ __crap\_noise (0xEC57A71C)__
 
 white noise generator. loud, full-range, 0dBFS. don't say i didn't warn you.
 
+### crap delay test
+
+__crap\_delay\_test (0xDEDEDEDE)__
+
+experimentation with delay compensation and EQ oversampling, not for use.
+
 ## build notes
 
 `make` it.

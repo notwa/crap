@@ -7,7 +7,7 @@ FULLNAME = ${DISTNAME}-${VERSION}
 
 BOTH = crap_eq_const
 LADSPA_ONLY = crap_eq crap_noise
-VST_ONLY =
+VST_ONLY = crap_delay_test
 LADSPA = ${BOTH:=-ladspa} ${LADSPA_ONLY:=-ladspa}
 VST = ${BOTH:=-vst} ${VST_ONLY:=-vst}
 PLUGINS = ${LADSPA} ${VST}

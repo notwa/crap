@@ -104,6 +104,9 @@ void
 plugin::setSampleRate(float fs) {
 	AudioEffectX::setSampleRate(fs);
 	::adjust(&data, (unsigned long) fs);
+	#ifdef DELAY
+	setInitialDelay(global_delay);
+	#endif
 }
 
 bool
