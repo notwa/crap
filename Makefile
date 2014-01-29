@@ -66,7 +66,7 @@ ladspa: ${LADSPA:=.so}
 vst: ${VST:=.so}
 
 bench: ${AGAINST} ${BENCH}
-	@echo CC ${BENCH} -o $@
+	@echo '    CC  '$@
 	@${CC} ${ALL_CFLAGS} ${BENCH} -o $@ ${ALL_LDFLAGS} -rdynamic -ldl
 
 .PHONY: benchmark
@@ -74,26 +74,26 @@ benchmark: bench
 	./benchtime ./bench ${AGAINST}
 
 vstsdk.o: ${VST_SRC}
-	@echo CXX -c $^
+	@echo '    CXX '$@
 	@${CXX} -c ${ALL_CXXFLAGS} ${CPPFLAGS} $^
-	@echo LD -r ${VST_OBJ} -o $@
+	@echo '    LD  '$@
 	@${LD} -r ${VST_OBJ} -o $@
 	rm ${VST_OBJ}
 
 %-ladspa.so: %-ladspa.o
-	@echo CC $^ -o $@
+	@echo '    CC  '$@
 	@${CC} ${ALL_CFLAGS} -shared $^ -o $@ ${ALL_LDFLAGS}
 
 %-vst.so: %-vst.o vstsdk.o
-	@echo CXX $^ -o $@
+	@echo '    CXX '$@
 	@${CXX} ${ALL_CXXFLAGS} -shared $^ -o $@ ${ALL_LDFLAGS}
 
 %-ladspa.o: %-ladspa.c ${HEADERS} ladspa.h
-	@echo CC -c $< -o $@
+	@echo '    CC  '$@
 	@${CC} -c ${ALL_CFLAGS} ${CPPFLAGS} $< -o $@
 
 %-vst.o: %-vst.cpp ${HEADERS}
-	@echo CXX -c $< -o $@
+	@echo '    CXX '$@
 	@${CXX} -c ${ALL_CXXFLAGS} ${CPPFLAGS} $< -o $@
 
 %-ladspa.c: %.h template-ladspa.c generate-ladspa common.sh
@@ -105,11 +105,11 @@ vstsdk.o: ${VST_SRC}
 .SUFFIXES:
 
 %: %.o
-	@echo CC $< -o $@
+	@echo '    CC  '$@
 	@${CC} ${ALL_CFLAGS} $< -o $@ ${ALL_LDFLAGS}
 
 %.o: %.c
-	@echo CC -c $< -o $@
+	@echo '    CC  '$@
 	@${CC} -c ${ALL_CFLAGS} ${CPPFLAGS} $< -o $@
 
 install: all
