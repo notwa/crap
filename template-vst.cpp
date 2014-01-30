@@ -1,7 +1,11 @@
+#include <stdio.h>
 #include "public.sdk/source/vst2.x/audioeffectx.h"
-//#include "vstparam.h"
 
 //#INCLUDE
+
+// VST 2.4 by standard only holds 8 (+ 1 null) length strings,
+// but this is never the case in practice. I've seen up to 24.
+#define MAX_PARAM_LEN 24
 
 class plugin : public AudioEffectX
 {
@@ -16,23 +20,23 @@ public:
 
 	bool setProcessPrecision(VstInt32 precision);
 
-	/*
-	void setParameter(VstInt32, float);
-	float getParameter(VstInt32);
-	void getParameterLabel(VstInt32, char *);
-	void getParameterDisplay(VstInt32, char *);
-	void getParameterName(VstInt32, char *);
-	*/
-
 	void setSampleRate(float);
 	bool getEffectName(char *);
 	bool getVendorString(char *);
 	bool getProductString(char *);
 	//VstInt32 getVendorVersion();
 
+	#if (PARAMETERS > 0)
+	void setParameter(VstInt32, float);
+	float getParameter(VstInt32);
+	void getParameterName(VstInt32, char *); // eg. Gain
+	void getParameterDisplay(VstInt32, char *); // eg. -3.3
+	void getParameterLabel(VstInt32, char *); // eg. dB
+	#endif
+
 private:
 	#if (PARAMETERS > 0)
-	VstParam *m_params[PARAMETERS];
+	param params[PARAMETERS];
 	#endif
 
 	personal data;
@@ -46,20 +50,20 @@ createEffectInstance(audioMasterCallback audioMaster) {
 plugin::plugin(audioMasterCallback audioMaster)
 : AudioEffectX(audioMaster, 1, PARAMETERS)
 {
-//#VST_PARAMS
-	//m_params[n] = new VstParam("Input", "dB", -12.0, 12.0, 0.0, NULL, NULL, 1, NULL);
 	setNumInputs(2);
 	setNumOutputs(2);
 	setUniqueID(ID);
 	canProcessReplacing();
+	#if (PARAMETERS > 0)
+	::construct(&data, params);
+	#else
 	::construct(&data);
+	#endif
 }
 
 plugin::~plugin()
 {
 	::destruct(&data);
-	//for (int i = 0; i < PARAMETERS; i++)
-	//    delete m_params[i];
 }
 
 void
@@ -92,18 +96,17 @@ plugin::processDoubleReplacing(double **inputs, double **outputs, VstInt32 count
 
 bool
 plugin::setProcessPrecision(VstInt32 precision) {
-    return true;
+	return true;
 }
-
-/*
-parameter funcs go here
-    if (index >= PARAMETERS) return;
-*/
 
 void
 plugin::setSampleRate(float fs) {
 	AudioEffectX::setSampleRate(fs);
+	#if (PARAMETERS > 0)
+	::adjust(&data, params, (unsigned long) fs);
+	#else
 	::adjust(&data, (unsigned long) fs);
+	#endif
 	#ifdef DELAY
 	setInitialDelay(global_delay);
 	#endif
@@ -111,20 +114,97 @@ plugin::setSampleRate(float fs) {
 
 bool
 plugin::getEffectName(char *name) {
-    vst_strncpy(name, LABEL, kVstMaxEffectNameLen);
-    return true;
+	vst_strncpy(name, LABEL, kVstMaxEffectNameLen);
+	return true;
 }
 
 bool
 plugin::getProductString(char *text)
 {
-    vst_strncpy(text, NAME, kVstMaxProductStrLen);
-    return true;
+	vst_strncpy(text, NAME, kVstMaxProductStrLen);
+	return true;
 }
 
 bool
 plugin::getVendorString(char *text)
 {
-    vst_strncpy(text, AUTHOR, kVstMaxVendorStrLen);
-    return true;
+	vst_strncpy(text, AUTHOR, kVstMaxVendorStrLen);
+	return true;
 }
+
+#if (PARAMETERS > 0)
+void
+plugin::setParameter(VstInt32 index, float value)
+{
+	if (index >= PARAMETERS) return;
+	param_set(&params[index], value);
+	::adjust_one(&data, params, index);
+}
+
+float
+plugin::getParameter(VstInt32 index)
+{
+	if (index >= PARAMETERS) return 0;
+	return param_get(&params[index]);
+}
+
+void
+plugin::getParameterName(VstInt32 index, char *text)
+{
+	if (index >= PARAMETERS) return;
+	vst_strncpy(text, params[index].name, MAX_PARAM_LEN);
+}
+
+void
+plugin::getParameterDisplay(VstInt32 index, char *text)
+{
+	if (index >= PARAMETERS) return;
+
+	param *p = &params[index];
+	char display[MAX_PARAM_LEN];
+
+	switch (p->scale) {
+	case SCALE_FLOAT:
+	case SCALE_LOG:
+	case SCALE_HZ:
+	case SCALE_DB:
+		sprintf(display, "%0.2f", p->value);
+		break;
+	case SCALE_INT:
+		sprintf(display, "%i", (int) p->value);
+		break;
+	case SCALE_TOGGLE:
+		sprintf(display, (param_get(p) < 0.5) ? "off" : "on");
+		break;
+	default:
+		sprintf(display, "error");
+	}
+
+	vst_strncpy(text, display, MAX_PARAM_LEN);
+}
+
+void
+plugin::getParameterLabel(VstInt32 index, char *text)
+{
+	if (index >= PARAMETERS) return;
+
+	param *p = &params[index];
+	char display[MAX_PARAM_LEN];
+
+	switch (p->scale) {
+	case SCALE_HZ:
+		sprintf(display, "Hz");
+		break;
+	case SCALE_DB:
+		sprintf(display, "dB");
+		break;
+	case SCALE_FLOAT:
+	case SCALE_INT:
+	case SCALE_TOGGLE:
+	case SCALE_LOG:
+		display[0] = 0;
+	}
+
+	vst_strncpy(text, display, MAX_PARAM_LEN);
+}
+#endif
