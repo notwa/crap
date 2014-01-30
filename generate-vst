@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-. common.sh
+set -e
+set -u
+
+pp_include="#include \"$1\""
+out="$2"
 
 (cat template-vst.cpp | while read -r; do
     case "$REPLY" in
 
     '//#INCLUDE') echo "$pp_include" ;;
-
-    # unimplemented
-    '//#VST_PARAMS') :;;
 
     *) echo -E "$REPLY" ;;
     esac

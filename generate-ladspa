@@ -1,17 +1,14 @@
 #!/usr/bin/env bash
-. common.sh
+set -e
+set -u
+
+pp_include="#include \"$1\""
+out="$2"
 
 (cat template-ladspa.c | while read -r; do
     case "$REPLY" in
 
     '//#INCLUDE') echo "$pp_include" ;;
-
-    # unimplemented
-    '//#PORT_DESCRIPTIONS') :;;
-    '//#PORT_HINTS') :;;
-    '//#PORT_NAMES') :;;
-    '//#PORT_DATA') :;;
-    '//#PORT_CONNECT') :;;
 
     *) echo -E "$REPLY" ;;
     esac

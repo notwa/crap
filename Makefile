@@ -45,7 +45,7 @@ ALL = ${SHOBJ} ${OBJ} ${EXE}
 MISC_CLEAN = bench ${BENCH}
 MISC_DIST = LICENSE README.md Makefile
 MISC_DIST += benchtime ${BENCH:.o=.c}
-MISC_DIST += generate-ladspa generate-vst common.sh
+MISC_DIST += generate-ladspa generate-vst
 MISC_DIST += template-vst.cpp template-ladspa.c ladspa.h
 
 all: options ladspa vst ${EXE}
@@ -96,10 +96,10 @@ vstsdk.o: ${VST_SRC}
 	@echo '    CXX '$@
 	@${CXX} -c ${ALL_CXXFLAGS} ${CPPFLAGS} $< -o $@
 
-%-ladspa.c: %.h template-ladspa.c generate-ladspa common.sh
+%-ladspa.c: %.h template-ladspa.c generate-ladspa
 	./generate-ladspa $< $@
 
-%-vst.cpp: %.h template-vst.cpp generate-vst common.sh
+%-vst.cpp: %.h template-vst.cpp generate-vst
 	./generate-vst $< $@
 
 .SUFFIXES:
