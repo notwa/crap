@@ -55,10 +55,9 @@ plugin::plugin(audioMasterCallback audioMaster)
 	setUniqueID(ID);
 	canProcessReplacing();
 	#if (PARAMETERS > 0)
-	::construct(&data, params);
-	#else
-	::construct(&data);
+	::construct_params(params);
 	#endif
+	::construct(&data);
 }
 
 plugin::~plugin()

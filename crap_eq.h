@@ -67,7 +67,7 @@ pause(personal *data) {
 }
 
 static void
-construct(personal *data, param *params) {
+construct_params(param *params) {
 	for (int i = 0; i < BANDS; i++) {
 		sprintf(params[0].name, "Band %i Frequency", i + 1);
 		params[0].min = 20;
@@ -92,6 +92,10 @@ construct(personal *data, param *params) {
 
 		params += 3;
 	}
+}
+
+static void
+construct(personal *data) {
 }
 
 static void

@@ -45,10 +45,12 @@ remember to export `VST\_SDK\_DIR` to the path of your `vstsdk2.4/`
 
 ## TODO
 
-* finish VST/LADSPA parameter/port support in templates
-* convert crap\_eq and crap\_noise to the template format
+* convert crap\_noise to the template format
 * rename plugins (fix capitalization consistency and such)
 * remove crap\_ prefixes?
 * move to subdirs?
 * make crap faster (hand-written SSE2? compiler directives?)
 * reduce input/output buffers on biquads (shared)
+* ease up on the preprocessor ifs
+* polish parameter support
+
