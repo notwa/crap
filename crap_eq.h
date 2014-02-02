@@ -1,14 +1,9 @@
-#include <stdlib.h>
-#include <math.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #define BIQUAD_DOUBLE
 #include "crap_util.h"
 #include "param.h"
-
-typedef unsigned long ulong;
 
 #define BANDS 4
 

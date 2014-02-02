@@ -116,7 +116,7 @@ static const LADSPA_Descriptor plug_desc = {
 	.PortCount = PCOUNT,
 	.PortDescriptors = p_descs,
 	.PortRangeHints = p_hints,
-	.PortNames = p_names,
+	.PortNames = (const char * const *) p_names,
 
 	.instantiate = plug_construct,
 	.cleanup = plug_destruct,

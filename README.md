@@ -2,7 +2,7 @@
 
 connor's rancid audio plugins. LADSPA and VST.
 
-alternatively, configuration realizes any personality
+alternatively, configuration realizes any personality.
 
 ## plugs
 
@@ -39,13 +39,14 @@ a `benchmark` target is included, however it doesn't build on Windows.
 
 try `CFLAGS="-O3 -ffast-math -march=core2"`
 
-on linux, you'll need `CFLAGS+=" -fpic" CXXFLAGS+=" -fpic -D__cdecl="`
+on Linux, you'll need `CFLAGS+=" -fpic" CXXFLAGS+=" -fpic -D__cdecl="`
 
-remember to export `VST\_SDK\_DIR` to the path of your `vstsdk2.4/`
+remember to export `VST_SDK_DIR` to the path of your `vstsdk2.4/`
 
 ## TODO
 
 * convert crap\_noise to the template format
+* get presets, no pardon me, Banks And Patches working in vst
 * rename plugins (fix capitalization consistency and such)
 * remove crap\_ prefixes?
 * move to subdirs?
