@@ -46,8 +46,8 @@ remember to export `VST_SDK_DIR` to the path of your `vstsdk2.4/`
 ## TODO
 
 * convert crap\_noise to the template format
-* get presets, no pardon me, Banks And Patches working in vst
 * rename plugins (fix capitalization consistency and such)
+* make style consistent
 * remove crap\_ prefixes?
 * move to subdirs?
 * make crap faster (hand-written SSE2? compiler directives?)

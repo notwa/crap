@@ -21,6 +21,9 @@ public:
 	bool setProcessPrecision(VstInt32 precision);
 
 	void setSampleRate(float);
+	void setProgramName(char *);
+	void getProgramName(char *);
+	bool getProgramNameIndexed(VstInt32, VstInt32, char *);
 	bool getEffectName(char *);
 	bool getVendorString(char *);
 	bool getProductString(char *);
@@ -35,6 +38,8 @@ public:
 	#endif
 
 private:
+	char programName[kVstMaxProgNameLen];
+
 	#if (PARAMETERS > 0)
 	param params[PARAMETERS];
 	#endif
@@ -54,6 +59,8 @@ plugin::plugin(audioMasterCallback audioMaster)
 	setNumOutputs(2);
 	setUniqueID(ID);
 	canProcessReplacing();
+	canDoubleReplacing();
+	vst_strncpy(programName, "Init", kVstMaxProgNameLen);
 	#if (PARAMETERS > 0)
 	::construct_params(params);
 	#endif
@@ -128,6 +135,26 @@ bool
 plugin::getVendorString(char *text)
 {
 	vst_strncpy(text, AUTHOR, kVstMaxVendorStrLen);
+	return true;
+}
+
+void
+plugin::setProgramName (char *text)
+{
+	vst_strncpy(programName, text, kVstMaxProgNameLen);
+}
+
+void
+plugin::getProgramName (char *text)
+{
+	vst_strncpy(text, programName, kVstMaxProgNameLen);
+}
+
+bool
+plugin::getProgramNameIndexed(VstInt32 category, VstInt32 index, char *text)
+{
+	if (index != 0) return false;
+	vst_strncpy(text, programName, kVstMaxProgNameLen);
 	return true;
 }
 
