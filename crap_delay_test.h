@@ -126,7 +126,7 @@ adjust(personal *data, ulong fs) {
 			c->up[i] = 0;
 		for (int i = 0; i < DOWN; i++)
 			c->down[i] = 0;
-		c->filter = biquad_gen(0, 16630, 10, 1, fs*oversample);
+		c->filter = biquad_gen(FILT_PEAKING, 16630, 10, 1, fs*oversample);
 		biquad_init(&c->filter);
 	}
 }

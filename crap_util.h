@@ -29,20 +29,21 @@ whitenoise();
 static void
 biquad_init(biquad *bq);
 
-/* types: TODO: enum
- 0: peaking
- 1: lowshelf
- 2: highshelf
- 3: lowpass
- 4: highpass
- 5: allpass
- 6: bandpass 1
- 7: bandpass 2
- 8: notch
- 9: gain
-*/
+typedef enum {
+	FILT_PEAKING,
+	FILT_LOWSHELF,
+	FILT_HIGHSHELF,
+	FILT_LOWPASS,
+	FILT_HIGHPASS,
+	FILT_ALLPASS,
+	FILT_BANDPASS,
+	FILT_BANDPASS_2,
+	FILT_NOTCH,
+	FILT_GAIN
+} filter_t;
+
 static biquad
-biquad_gen(int type, double fc, double gain, double bw, double fs);
+biquad_gen(filter_t type, double fc, double gain, double bw, double fs);
 
 /* s-plane to z-plane */
 static biquad_interim

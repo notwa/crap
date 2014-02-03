@@ -69,8 +69,8 @@ pause(personal *data) {
 static void
 adjust(personal *data, unsigned long fs) {
 	biquad *filters = data->filters[0];
-	filters[0] = biquad_gen(0, 34.34, +4.6, 1.21, fs);
-	filters[1] = biquad_gen(0, 85.74, -1.2, 1.31, fs);
-	filters[2] = biquad_gen(2, 862.2, -5.5, 1.00, fs);
-	filters[3] = biquad_gen(0, 7496., +3.3, 1.10, fs);
+	filters[0] = biquad_gen(FILT_PEAKING,   34.34, +4.6, 1.21, fs);
+	filters[1] = biquad_gen(FILT_PEAKING,   85.74, -1.2, 1.31, fs);
+	filters[2] = biquad_gen(FILT_HIGHSHELF, 862.2, -5.5, 1.00, fs);
+	filters[3] = biquad_gen(FILT_PEAKING,   7496., +3.3, 1.10, fs);
 }

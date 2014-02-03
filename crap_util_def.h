@@ -38,29 +38,32 @@ design(double cw, double sw,
 }
 
 static biquad
-biquad_gen(int type, double fc, double gain, double bw, double fs) {
+biquad_gen(filter_t type, double fc, double gain, double bw, double fs) {
 	double w0, cw, sw, A, As, Q;
 	w0 = ANGULAR_LIM(fc, fs);
 	cw = cos(w0);
 	sw = sin(w0);
 	A = DB2LIN(gain/2);
 	As = sqrt(A);
-	Q = 1/(4*sinh(M_LN2/2*bw*w0/sw));
-	//Q = M_SQRT1_2*(1 - SQR(w0/M_PI))/bw;
+	Q = M_SQRT1_2*(1 - (w0/M_PI)*(w0/M_PI))/bw;
 	/* skip = (fabs(A - 1) <= TINY); */
 
-	/* TODO: use enum for type instead of just int */
 	biquad_interim bqi;
-	if (type == 0) bqi = design(cw,sw, 1,  A/Q, 1,   1,  1/A/Q,   1);
-	if (type == 1) bqi = design(cw,sw, 1, As/Q, A,   1, 1/As/Q, 1/A);
-	if (type == 2) bqi = design(cw,sw, A, As/Q, 1, 1/A, 1/As/Q,   1);
-	if (type == 3) bqi = design(cw,sw, 0,    0, 1,   1,    1/Q,   1);
-	if (type == 4) bqi = design(cw,sw, 1,    0, 0,   1,    1/Q,   1);
-	if (type == 5) bqi = design(cw,sw, 1, -1/Q, 1,   1,    1/Q,   1);
-	if (type == 6) bqi = design(cw,sw, 0,    1, 0,   1,    1/Q,   1);
-	if (type == 7) bqi = design(cw,sw, 0,  1/Q, 0,   1,    1/Q,   1);
-	if (type == 8) bqi = design(cw,sw, 1,    0, 1,   1,    1/Q,   1);
-	if (type == 9) bqi = design(cw,sw, A,    A, A, 1/A,    1/A, 1/A);
+
+	#define d(n0,n1,n2,d0,d1,d2) bqi = design(cw,sw,n0,n1,n2,d0,d1,d2)
+	switch (type) {
+	case FILT_PEAKING:    d(1,  A/Q, 1,   1,  1/A/Q,   1); break;
+	case FILT_LOWSHELF:   d(1, As/Q, A,   1, 1/As/Q, 1/A); break;
+	case FILT_HIGHSHELF:  d(A, As/Q, 1, 1/A, 1/As/Q,   1); break;
+	case FILT_LOWPASS:    d(0,    0, 1,   1,    1/Q,   1); break;
+	case FILT_HIGHPASS:   d(1,    0, 0,   1,    1/Q,   1); break;
+	case FILT_ALLPASS:    d(1, -1/Q, 1,   1,    1/Q,   1); break;
+	case FILT_BANDPASS:   d(0,    1, 0,   1,    1/Q,   1); break;
+	case FILT_BANDPASS_2: d(0,  1/Q, 0,   1,    1/Q,   1); break;
+	case FILT_NOTCH:      d(1,    0, 1,   1,    1/Q,   1); break;
+	case FILT_GAIN:       d(A,    A, A, 1/A,    1/A, 1/A); break;
+	}
+	#undef d
 
 	double a0r = 1/bqi.a0;
 

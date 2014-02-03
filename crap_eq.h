@@ -79,8 +79,8 @@ construct_params(param *params) {
 		param_reset(&params[1]);
 
 		sprintf(params[2].name, "Band %i Bandwidth", i + 1);
-		params[2].min = 0.0625;
-		params[2].max = 8;
+		params[2].min = 0.0625; // 2^-4 could probably be 2^-3
+		params[2].max = 8;      // 2^3  could probably be 2^2
 		params[2].scale = SCALE_FLOAT;
 		params[2].def = DEFAULT_1;
 		param_reset(&params[2]);
@@ -102,7 +102,7 @@ adjust(personal *data, param *params, unsigned long fs) {
 	data->fs = fs;
 	biquad *filters = data->filters[0];
 	for (int i = 0; i < BANDS; i++) {
-		filters[i] = biquad_gen(0,
+		filters[i] = biquad_gen(FILT_PEAKING,
 		    params[0].value, params[1].value, params[2].value, fs);
 		params += 3;
 	}
@@ -113,7 +113,7 @@ static void
 adjust_one(personal *data, param *params, unsigned int index) {
 	float fs = data->fs;
 	params += index/3*3;
-	data->filters[0][index/3] = biquad_gen(0,
+	data->filters[0][index/3] = biquad_gen(FILT_PEAKING,
 	    params[0].value, params[1].value, params[2].value, fs);
 	resume(data);
 }
