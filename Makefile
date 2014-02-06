@@ -5,11 +5,11 @@ DISTNAME = crap
 VERSION = git
 FULLNAME = ${DISTNAME}-${VERSION}
 
-BIN=./bin
-CRAP=./crap
-INCLUDE=./include
-TEMPLATE=./template
-UTIL=./util
+BIN = ./bin
+CRAP = ./crap
+INCLUDE = ./include
+TEMPLATE = ./template
+UTIL = ./util
 
 BOTH = eq eq_const noise tube
 LADSPA_ONLY = 
@@ -29,8 +29,8 @@ SRC = ${BOTH:%=$(CRAP)/%.h}
 SRC += ${LADSPA_ONLY:%=$(CRAP)/%.h} ${VST_ONLY:%=$(CRAP)/%.h}
 SRC += ${EXE:%=$(UTIL)/%.c}
 
-BENCH = bench.o
-AGAINST = ./crap_eq_const-ladspa.so
+BENCH = $(BIN)/bench.o
+AGAINST = $(BIN)/crap_eq_const-ladspa.so
 
 VST_SDK_DIR ?= .
 VST_CPP = audioeffect.cpp audioeffectx.cpp vstplugmain.cpp
@@ -82,7 +82,7 @@ $(BIN)/bench: ${BENCH}
 
 .PHONY: benchmark
 benchmark: $(BIN)/bench ${AGAINST}
-	./benchtime ./bench ${AGAINST}
+	$(UTIL)/benchtime $(BIN)/bench ${AGAINST}
 
 $(VST_OBJ): ${VST_SRC}
 	@echo '    CXX '$@
