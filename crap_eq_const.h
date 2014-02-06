@@ -28,6 +28,7 @@ process(personal *data,
     float *out_L, float *out_R,
     unsigned long count)
 {
+	disable_denormals();
 	for (unsigned long pos = 0; pos < count; pos++) {
 		out_L[pos] = process_one(data->filters[0], in_L[pos]);
 		out_R[pos] = process_one(data->filters[1], in_R[pos]);
@@ -40,6 +41,7 @@ process_double(personal *data,
     double *out_L, double *out_R,
     unsigned long count)
 {
+	disable_denormals();
 	for (unsigned long pos = 0; pos < count; pos++) {
 		out_L[pos] = process_one(data->filters[0], in_L[pos]);
 		out_R[pos] = process_one(data->filters[1], in_R[pos]);

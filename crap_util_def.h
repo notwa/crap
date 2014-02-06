@@ -2,6 +2,14 @@
 #include <math.h>
 #include <stdint.h>
 
+static void
+disable_denormals()
+{
+	#if __SSE2__
+        _mm_setcsr(_mm_getcsr() | 0x8040);
+	#endif
+}
+
 /* via http://www.rgba.org/articles/sfrand/sfrand.htm */
 static unsigned int mirand = 1;
 
