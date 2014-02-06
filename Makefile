@@ -13,12 +13,12 @@ VST = ${BOTH:=-vst} ${VST_ONLY:=-vst}
 PLUGINS = ${LADSPA} ${VST}
 
 EXE = design
-HEADERS = crap_util.h crap_util_def.h
+HEADERS = crap_util.h crap_util_def.h param.h
 SHOBJ = ${PLUGINS:=.so}
 OBJ = ${PLUGINS:=.o} vstsdk.o
 
 # only for dist target right now
-SRC = ${BOTH:=.h} ${LADSPA_ONLY:=-ladspa.c} ${VST_ONLY:=-vst.cpp} ${EXE:=.c}
+SRC = ${BOTH:=.h} ${LADSPA_ONLY:=.h} ${VST_ONLY:=.h} ${EXE:=.c}
 
 BENCH = bench.o
 AGAINST = ./crap_eq_const-ladspa.so
@@ -42,7 +42,7 @@ LADSPADIR ?= ${LIBDIR}/ladspa
 LADSPADEST = ${DESTDIR}${LADSPADIR}
 
 ALL = ${SHOBJ} ${OBJ} ${EXE}
-MISC_CLEAN = bench ${BENCH}
+MISC_CLEAN = bench ${BENCH} ${VST_OBJ}
 MISC_DIST = LICENSE README.md Makefile
 MISC_DIST += benchtime ${BENCH:.o=.c}
 MISC_DIST += generate-ladspa generate-vst
@@ -129,4 +129,3 @@ dist:
 	tar -cf ${FULLNAME}.tar ${FULLNAME}
 	gzip ${FULLNAME}.tar
 	rm -r ${FULLNAME}
-
