@@ -16,9 +16,12 @@
 #define COPYRIGHT "MIT"
 #define PARAMETERS 0
 
+#define HIST_SIZE   36
+#define HIST_SIZE_2 18
+
 typedef struct {
-	double history_L[64];
-	double history_R[64];
+	double history_L[HIST_SIZE];
+	double history_R[HIST_SIZE];
 } personal;
 
 static void
@@ -35,19 +38,20 @@ distort(double x)
 	return (27*x + 9) / (9*x*x + 6*x + 19) - 9/19.;
 }
 
+#define BQSHIFT(i) \
+	h[i*2 + 1] = h[i*2 + 0]; \
+	h[i*2 + 0] = x;
+
 // b2 is always b0 with lowpasses
 // a0 is already factored into the rest of the coefficients
 #define LOWPASS(i, b0, b1, a1, a2) \
-	y = b0*x + b1*xn[i*2] + b0*xn[i*2 + 1] \
-		 - a1*yn[i*2] - a2*yn[i*2 + 1]; \
-	xn[i*2 + 1] = xn[i*2]; \
-	xn[i*2] = x; \
-	yn[i*2 + 1] = yn[i*2]; \
-	yn[i*2] = y; \
+	y = b0*x + b1*h[i*2 + 0] + b0*h[i*2 + 1] \
+		 - a1*h[i*2 + 2] - a2*h[i*2 + 3]; \
+	BQSHIFT(i); \
 	x = y;
 
 static double
-upsample(double xn[16], double yn[16], double x)
+upsample(double h[HIST_SIZE_2], double x)
 {
 	double y;
 	LOWPASS(0, +0.71327159,+0.00688573,-0.45391337,+0.88734229);
@@ -58,11 +62,12 @@ upsample(double xn[16], double yn[16], double x)
 	LOWPASS(5, +0.37268890,+0.47433865,+0.08224090,+0.13747554);
 	LOWPASS(6, +0.33241251,+0.56148939,+0.16727062,+0.05904378);
 	LOWPASS(7, +0.31079382,+0.60975767,+0.21392163,+0.01742368);
+	BQSHIFT(8);
 	return y;
 }
 
 static double
-downsample(double xn[16], double yn[16], double x)
+downsample(double h[HIST_SIZE_2], double x)
 {
 	double y;
 	LOWPASS(0, +0.62136966,-0.87573986,-1.56336581,+0.93036527);
@@ -73,17 +78,18 @@ downsample(double xn[16], double yn[16], double x)
 	LOWPASS(5, +0.24269774,-0.06242297,-0.85492245,+0.27789496);
 	LOWPASS(6, +0.16673206,+0.11379847,-0.72421195,+0.17147454);
 	LOWPASS(7, +0.12199271,+0.21811002,-0.64769184,+0.10978728);
+	BQSHIFT(8);
 	return y;
 }
 
 static double
-process_one(double h[64], double x)
+process_one(double h[HIST_SIZE], double x)
 {
 	double y;
-	y = downsample(h+32, h+48, distort(4*upsample(h, h+16, x)));
-	    downsample(h+32, h+48, distort(4*upsample(h, h+16, 0)));
-	    downsample(h+32, h+48, distort(4*upsample(h, h+16, 0)));
-	    downsample(h+32, h+48, distort(4*upsample(h, h+16, 0)));
+	y = downsample(h + HIST_SIZE_2, distort(4*upsample(h, x)));
+	    downsample(h + HIST_SIZE_2, distort(4*upsample(h, 0)));
+	    downsample(h + HIST_SIZE_2, distort(4*upsample(h, 0)));
+	    downsample(h + HIST_SIZE_2, distort(4*upsample(h, 0)));
 	return y*0.71;
 }
 
@@ -113,8 +119,8 @@ process_double(personal *data,
 
 static void
 resume(personal *data) {
-	memset(data->history_L, 0, 64);
-	memset(data->history_R, 0, 64);
+	memset(data->history_L, 0, HIST_SIZE*sizeof(double));
+	memset(data->history_R, 0, HIST_SIZE*sizeof(double));
 }
 
 static void
