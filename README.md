@@ -54,7 +54,6 @@ remember to export `VST_SDK_DIR` to the path of your `vstsdk2.4/`
 
 ## TODO
 
-* convert crap\_noise to the template format
 * rename plugins (fix capitalization consistency and such)
 * make code style consistent
 * remove crap\_ prefixes?

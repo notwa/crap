@@ -5,8 +5,8 @@ DISTNAME = crap
 VERSION = git
 FULLNAME = ${DISTNAME}-${VERSION}
 
-BOTH = crap_eq crap_eq_const crap_tube
-LADSPA_ONLY = crap_noise
+BOTH = crap_eq crap_eq_const crap_noise crap_tube
+LADSPA_ONLY = 
 VST_ONLY = crap_delay_test
 LADSPA = ${BOTH:=-ladspa} ${LADSPA_ONLY:=-ladspa}
 VST = ${BOTH:=-vst} ${VST_ONLY:=-vst}
