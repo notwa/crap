@@ -7,16 +7,8 @@
 #define ANGULAR(fc, fs)     (2 * M_PI / (fs) * (fc))
 #define ANGULAR_LIM(fc, fs) (2 * M_PI / (fs) * LIMIT((fc), 1, (fs)/2))
 
-/* this is pretty gross;
- * it's too easy to define BIQUAD_DOUBLE in one file and not another */
-#ifdef BIQUAD_DOUBLE
-typedef double bq_t;
-#else
-typedef float bq_t;
-#endif
-
 typedef struct {
-	bq_t a1, a2, b0, b1, b2, x1, x2, y1, y2;
+	double a1, a2, b0, b1, b2, x1, x2, y1, y2;
 } biquad;
 
 typedef struct {
@@ -51,7 +43,7 @@ design(double cw, double sw,
     double num0, double num1, double num2,
     double den0, double den1, double den2);
 
-static bq_t
-biquad_run(biquad *bq, bq_t x);
+static double
+biquad_run(biquad *bq, double x);
 
 #include "crap_util_def.h"

@@ -76,9 +76,9 @@ biquad_gen(filter_t type, double fc, double gain, double bw, double fs) {
 	return out;
 }
 
-static bq_t
-biquad_run(biquad *bq, bq_t x) {
-	bq_t y;
+static double
+biquad_run(biquad *bq, double x) {
+	double y;
 
 	y = bq->b0*x + bq->b1*bq->x1 + bq->b2*bq->x2
 	             + bq->a1*bq->y1 + bq->a2*bq->y2;

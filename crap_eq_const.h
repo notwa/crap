@@ -1,6 +1,5 @@
 #include <string.h>
 
-#define BIQUAD_DOUBLE
 #include "crap_util.h"
 
 #define ID 0x0DEFACED
@@ -15,8 +14,8 @@ typedef struct {
 	biquad filters[2][BANDS];
 } personal;
 
-static bq_t
-process_one(biquad *filters, bq_t samp)
+static double
+process_one(biquad *filters, double samp)
 {
 	for (int i = 0; i < BANDS; i++)
 		samp = biquad_run(&filters[i], samp);

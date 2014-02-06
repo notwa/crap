@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BIQUAD_DOUBLE
 #include "crap_util.h"
 #include "param.h"
 
@@ -19,8 +18,8 @@ typedef struct {
 	float fs;
 } personal;
 
-static bq_t
-process_one(biquad *filters, bq_t samp)
+static double
+process_one(biquad *filters, double samp)
 {
 	for (int i = 0; i < BANDS; i++)
 		samp = biquad_run(&filters[i], samp);
