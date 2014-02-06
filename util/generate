@@ -4,8 +4,9 @@ set -u
 
 pp_include="#include \"$1\""
 out="$2"
+template="$3"
 
-(cat template-vst.cpp | while read -r; do
+(cat "$template" | while read -r; do
     case "$REPLY" in
 
     '//#INCLUDE') echo "$pp_include" ;;

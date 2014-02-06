@@ -5,7 +5,7 @@
 
 #include "dlfcn.h"
 #include "ladspa.h"
-#include "crap_util.h"
+#include "util.h"
 
 enum {
 	BLOCK_SIZE=2048

@@ -1,5 +1,4 @@
-#define BIQUAD_DOUBLE
-#include "crap_util.h"
+#include "util.h"
 
 typedef unsigned long ulong;
 

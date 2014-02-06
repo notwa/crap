@@ -5,33 +5,44 @@ DISTNAME = crap
 VERSION = git
 FULLNAME = ${DISTNAME}-${VERSION}
 
-BOTH = crap_eq crap_eq_const crap_noise crap_tube
+BIN=./bin
+CRAP=./crap
+INCLUDE=./include
+TEMPLATE=./template
+UTIL=./util
+
+BOTH = eq eq_const noise tube
 LADSPA_ONLY = 
-VST_ONLY = crap_delay_test
+VST_ONLY = delay_test
 LADSPA = ${BOTH:=-ladspa} ${LADSPA_ONLY:=-ladspa}
 VST = ${BOTH:=-vst} ${VST_ONLY:=-vst}
 PLUGINS = ${LADSPA} ${VST}
 
 EXE = design
-HEADERS = crap_util.h crap_util_def.h param.h
-SHOBJ = ${PLUGINS:=.so}
-OBJ = ${PLUGINS:=.o} vstsdk.o
+_ = util util_def param
+HEADERS = ${_:%=$(INCLUDE)/%.h}
+SHOBJ = ${PLUGINS:%=$(BIN)/$(DISTNAME)_%.so}
+OBJ = ${PLUGINS:%=$(BIN)/$(DISTNAME)_%.o} $(BIN)/vstsdk.o
 
 # only for dist target right now
-SRC = ${BOTH:=.h} ${LADSPA_ONLY:=.h} ${VST_ONLY:=.h} ${EXE:=.c}
+SRC = ${BOTH:%=$(CRAP)/%.h}
+SRC += ${LADSPA_ONLY:%=$(CRAP)/%.h} ${VST_ONLY:%=$(CRAP)/%.h}
+SRC += ${EXE:%=$(UTIL)/%.c}
 
 BENCH = bench.o
 AGAINST = ./crap_eq_const-ladspa.so
 
 VST_SDK_DIR ?= .
 VST_CPP = audioeffect.cpp audioeffectx.cpp vstplugmain.cpp
-VST_SRC = ${VST_CPP:%=${VST_SDK_DIR}/public.sdk/source/vst2.x/%}
+VST_SUB_DIR = public.sdk/source/vst2.x
+VST_SRC = ${VST_CPP:%=${VST_SDK_DIR}/${VST_SUB_DIR}/%}
 # temp objects before combining to vstsdk.o
-VST_OBJ = ${VST_CPP:.cpp=.o}
+VST_OBJ = ${VST_CPP:%.cpp=$(BIN)/%.o}
 VST_DEF = ${VST_SDK_DIR}/public.sdk/samples/vst2.x/win/vstplug.def
 
-ALL_CFLAGS = -Wall -Wno-unused-function ${CFLAGS} -std=gnu99
-ALL_CXXFLAGS = -Wno-write-strings ${CXXFLAGS} -I ${VST_SDK_DIR} -DBUILDING_DLL=1
+ALL_CFLAGS = -Wall -Wno-unused-function ${CFLAGS} -std=gnu99 -I $(INCLUDE)
+ALL_CXXFLAGS = -Wno-write-strings ${CXXFLAGS} -I ${VST_SDK_DIR}
+ALL_CXXFLAGS += -I $(INCLUDE) -DBUILDING_DLL=1
 ALL_LDFLAGS = -lm ${LDFLAGS}
 
 PREFIX ?= /usr/local
@@ -41,14 +52,14 @@ LADSPADIR ?= ${LIBDIR}/ladspa
 
 LADSPADEST = ${DESTDIR}${LADSPADIR}
 
-ALL = ${SHOBJ} ${OBJ} ${EXE}
+ALL = ${SHOBJ} ${OBJ} ${EXE:%=$(BIN)/%}
 MISC_CLEAN = bench ${BENCH} ${VST_OBJ}
 MISC_DIST = LICENSE README.md Makefile
-MISC_DIST += benchtime ${BENCH:.o=.c}
-MISC_DIST += generate-ladspa generate-vst
-MISC_DIST += template-vst.cpp template-ladspa.c ladspa.h
+MISC_DIST += $(UTIL)/benchtime $(UTIL)/${BENCH:.o=.c}
+MISC_DIST += $(UTIL)/generate
+MISC_DIST += $(TEMPLATE)/vst.cpp $(TEMPLATE)/ladspa.c $(INCLUDE)/ladspa.h
 
-all: options ladspa vst ${EXE}
+all: ladspa vst ${EXE:%=$(BIN)/%}
 
 .PHONY: options
 options:
@@ -61,61 +72,63 @@ options:
 	@echo "LD             = ${LD}"
 	@echo
 
-ladspa: ${LADSPA:=.so}
+ladspa: ${LADSPA:%=$(BIN)/$(DISTNAME)_%.so}
 
-vst: ${VST:=.so}
+vst: ${VST:%=$(BIN)/$(DISTNAME)_%.so}
 
-bench: ${AGAINST} ${BENCH}
+$(BIN)/bench: ${BENCH}
 	@echo '    CC  '$@
 	@${CC} ${ALL_CFLAGS} ${BENCH} -o $@ ${ALL_LDFLAGS} -rdynamic -ldl
 
 .PHONY: benchmark
-benchmark: bench
+benchmark: $(BIN)/bench ${AGAINST}
 	./benchtime ./bench ${AGAINST}
 
-vstsdk.o: ${VST_SRC}
+$(VST_OBJ): ${VST_SRC}
 	@echo '    CXX '$@
-	@${CXX} -c ${ALL_CXXFLAGS} ${CPPFLAGS} $^
+	@${CXX} -c ${ALL_CXXFLAGS} ${CPPFLAGS} ${VST_SDK_DIR}/${VST_SUB_DIR}/$(notdir ${@:.o=.cpp}) -o $@
+
+$(BIN)/vstsdk.o: ${VST_OBJ}
 	@echo '    LD  '$@
 	@${LD} -r ${VST_OBJ} -o $@
-	rm ${VST_OBJ}
 
-%-ladspa.so: %-ladspa.o
-	@echo '    CC  '$@
+$(BIN)/%-ladspa.so: $(BIN)/%-ladspa.o
+	@echo '    LD  '$@
 	@${CC} ${ALL_CFLAGS} -shared $^ -o $@ ${ALL_LDFLAGS}
 
-%-vst.so: %-vst.o vstsdk.o
-	@echo '    CXX '$@
+$(BIN)/%-vst.so: $(BIN)/%-vst.o $(BIN)/vstsdk.o
+	@echo '    LD  '$@
 	@${CXX} ${ALL_CXXFLAGS} -shared $^ -o $@ ${ALL_LDFLAGS}
 
-%-ladspa.o: %-ladspa.c ${HEADERS} ladspa.h
+$(BIN)/$(DISTNAME)_%-ladspa.o: $(CRAP)/%-ladspa.c ${HEADERS} $(INCLUDE)/ladspa.h
 	@echo '    CC  '$@
 	@${CC} -c ${ALL_CFLAGS} ${CPPFLAGS} $< -o $@
 
-%-vst.o: %-vst.cpp ${HEADERS}
+$(BIN)/$(DISTNAME)_%-vst.o: $(CRAP)/%-vst.cpp ${HEADERS}
 	@echo '    CXX '$@
 	@${CXX} -c ${ALL_CXXFLAGS} ${CPPFLAGS} $< -o $@
 
-%-ladspa.c: %.h template-ladspa.c generate-ladspa
-	./generate-ladspa $< $@
+$(CRAP)/%-ladspa.c: $(CRAP)/%.h $(TEMPLATE)/ladspa.c $(UTIL)/generate
+	@echo '    gen '$@
+	@$(UTIL)/generate $(notdir $<) $@ $(TEMPLATE)/ladspa.c
 
-%-vst.cpp: %.h template-vst.cpp generate-vst
-	./generate-vst $< $@
+$(CRAP)/%-vst.cpp: $(CRAP)/%.h $(TEMPLATE)/vst.cpp $(UTIL)/generate
+	@$(UTIL)/generate $(notdir $<) $@ $(TEMPLATE)/vst.cpp
 
 .SUFFIXES:
 
-%: %.o
+$(BIN)/%: $(BIN)/%.o
 	@echo '    CC  '$@
 	@${CC} ${ALL_CFLAGS} $< -o $@ ${ALL_LDFLAGS}
 
-%.o: %.c
+$(BIN)/%.o: $(UTIL)/%.c
 	@echo '    CC  '$@
 	@${CC} -c ${ALL_CFLAGS} ${CPPFLAGS} $< -o $@
 
 install: all
 	mkdir -p ${LADSPADEST}
 	install -d ${LADSPADEST}
-	install -m 644 ${LADSPA:=.so} ${LADSPADEST}
+	install -m 644 $(BIN)/${LADSPA:=.so} ${LADSPADEST}
 
 .PHONY: clean
 clean:
@@ -123,9 +136,13 @@ clean:
 
 .PHONY: dist
 dist:
+	@echo "    dist target is broken for now, sorry"
+	@false
 	-rm -f ${FULLNAME}.tar.gz
 	mkdir ${FULLNAME}
-	cp ${MISC_DIST} ${HEADERS} ${SRC} ${FULLNAME}
+	cp ${MISC_DIST} ${FULLNAME}
+	cp ${HEADERS} ${FULLNAME}
+	cp ${SRC} ${FULLNAME}
 	tar -cf ${FULLNAME}.tar ${FULLNAME}
 	gzip ${FULLNAME}.tar
 	rm -r ${FULLNAME}

@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "crap_util.h"
+#include "util.h"
 
 #define ID 0x50F7BA11
 #define LABEL "crap_tube"

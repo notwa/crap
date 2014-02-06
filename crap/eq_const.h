@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "crap_util.h"
+#include "util.h"
 
 #define ID 0x0DEFACED
 #define LABEL "crap_eq_const"

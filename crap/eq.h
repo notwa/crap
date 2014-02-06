@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "crap_util.h"
+#include "util.h"
 #include "param.h"
 
 #define BANDS 4
