@@ -84,7 +84,8 @@ static void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
-    ulong count) {
+    ulong count)
+{
 	for (ulong pos = 0; pos < count; pos++) {
 		out_L[pos] = process_one(&data->c[0], in_L[pos]);
 		out_R[pos] = process_one(&data->c[1], in_R[pos]);
@@ -95,7 +96,8 @@ static void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
-    ulong count) {
+    ulong count)
+{
 	for (ulong pos = 0; pos < count; pos++) {
 		out_L[pos] = process_one(&data->c[0], in_L[pos]);
 		out_R[pos] = process_one(&data->c[1], in_R[pos]);
@@ -103,30 +105,32 @@ process_double(personal *data,
 }
 
 static void
-construct(personal *data) {
-}
+construct(personal *data)
+{}
 
 static void
-destruct(personal *data) {
-}
+destruct(personal *data)
+{}
 
 static void
-resume(personal *data) {
-}
+resume(personal *data)
+{}
 
 static void
-pause(personal *data) {
-}
+pause(personal *data)
+{}
 
 static void
-adjust(personal *data, ulong fs) {
+adjust(personal *data, ulong fs)
+{
 	for (int k = 0; k < 2; k++) {
 		channel *c = &data->c[k];
 		for (int i = 0; i < UP; i++)
 			c->up[i] = 0;
 		for (int i = 0; i < DOWN; i++)
 			c->down[i] = 0;
-		c->filter = biquad_gen(FILT_PEAKING, 16630, 10, 1, fs*oversample);
+		c->filter = biquad_gen(FILT_PEAKING,
+		    16630, 10, 1, fs*oversample);
 		biquad_init(&c->filter);
 	}
 }

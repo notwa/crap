@@ -48,7 +48,8 @@ private:
 };
 
 AudioEffect *
-createEffectInstance(audioMasterCallback audioMaster) {
+createEffectInstance(audioMasterCallback audioMaster)
+{
 	return new plugin(audioMaster);
 }
 
@@ -73,19 +74,23 @@ plugin::~plugin()
 }
 
 void
-plugin::resume() {
+plugin::resume()
+{
 	::resume(&data);
 	AudioEffectX::resume();
 }
 
 void
-plugin::suspend() {
+plugin::suspend()
+{
 	AudioEffectX::suspend();
 	::pause(&data);
 }
 
 void
-plugin::processReplacing(float **inputs, float **outputs, VstInt32 count) {
+plugin::processReplacing(
+    float **inputs, float **outputs, VstInt32 count)
+{
 	::process(&data,
 	    inputs[0], inputs[1],
 	    outputs[0], outputs[1],
@@ -93,7 +98,9 @@ plugin::processReplacing(float **inputs, float **outputs, VstInt32 count) {
 }
 
 void
-plugin::processDoubleReplacing(double **inputs, double **outputs, VstInt32 count) {
+plugin::processDoubleReplacing(
+    double **inputs, double **outputs, VstInt32 count)
+{
 	::process_double(&data,
 	    inputs[0], inputs[1],
 	    outputs[0], outputs[1],
@@ -101,12 +108,14 @@ plugin::processDoubleReplacing(double **inputs, double **outputs, VstInt32 count
 }
 
 bool
-plugin::setProcessPrecision(VstInt32 precision) {
+plugin::setProcessPrecision(VstInt32 precision)
+{
 	return true;
 }
 
 void
-plugin::setSampleRate(float fs) {
+plugin::setSampleRate(float fs)
+{
 	AudioEffectX::setSampleRate(fs);
 	#if (PARAMETERS > 0)
 	::adjust(&data, params, (unsigned long) fs);
@@ -119,7 +128,8 @@ plugin::setSampleRate(float fs) {
 }
 
 bool
-plugin::getEffectName(char *name) {
+plugin::getEffectName(char *name)
+{
 	vst_strncpy(name, LABEL, kVstMaxEffectNameLen);
 	return true;
 }

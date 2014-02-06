@@ -6,7 +6,8 @@
 static unsigned int mirand = 1;
 
 static float
-whitenoise() {
+whitenoise()
+{
 	union either {
 		float f;
 		unsigned int i;
@@ -19,14 +20,16 @@ whitenoise() {
 /* used to resemble https://github.com/swh/ladspa/blob/master/util/biquad.h */
 
 static void
-biquad_init(biquad *bq) {
+biquad_init(biquad *bq)
+{
 	bq->x1 = bq->x2 = bq->y1 = bq->y2 = 0;
 }
 
 static biquad_interim
 design(double cw, double sw,
     double num0, double num1, double num2,
-    double den0, double den1, double den2) {
+    double den0, double den1, double den2)
+{
 	return (biquad_interim) {
 		.b0 = num0*   (1 + cw) + num1*sw + num2*  (1 - cw),
 		.b1 = num0*-2*(1 + cw)           + num2*2*(1 - cw),
@@ -38,7 +41,8 @@ design(double cw, double sw,
 }
 
 static biquad
-biquad_gen(filter_t type, double fc, double gain, double bw, double fs) {
+biquad_gen(filter_t type, double fc, double gain, double bw, double fs)
+{
 	double w0, cw, sw, A, As, Q;
 	w0 = ANGULAR_LIM(fc, fs);
 	cw = cos(w0);
@@ -77,7 +81,8 @@ biquad_gen(filter_t type, double fc, double gain, double bw, double fs) {
 }
 
 static double
-biquad_run(biquad *bq, double x) {
+biquad_run(biquad *bq, double x)
+{
 	double y;
 
 	y = bq->b0*x + bq->b1*bq->x1 + bq->b2*bq->x2

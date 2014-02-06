@@ -14,7 +14,8 @@ static void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
-    unsigned long count) {
+    unsigned long count)
+{
 	// TODO: separate and preserve mirand for each channel
 	for (unsigned long pos = 0; pos < count; pos++)
 		out_L[pos] = whitenoise();
@@ -26,7 +27,8 @@ static void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
-    unsigned long count) {
+    unsigned long count)
+{
 	for (unsigned long pos = 0; pos < count; pos++)
 		out_L[pos] = whitenoise();
 	for (unsigned long pos = 0; pos < count; pos++)
@@ -34,22 +36,21 @@ process_double(personal *data,
 }
 
 static void
-construct(personal *data) {
-}
+construct(personal *data)
+{}
 
 static void
-destruct(personal *data) {
-}
+destruct(personal *data)
+{}
 
 static void
-resume(personal *data) {
-}
+resume(personal *data)
+{}
 
 static void
-pause(personal *data) {
-}
+pause(personal *data)
+{}
 
 static void
-adjust(personal *data, unsigned long fs) {
-}
-
+adjust(personal *data, unsigned long fs)
+{}

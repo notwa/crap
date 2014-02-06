@@ -30,7 +30,8 @@ static void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
-    unsigned long count) {
+    unsigned long count)
+{
 	for (unsigned long pos = 0; pos < count; pos++) {
 		out_L[pos] = process_one(data->filters[0], in_L[pos]);
 		out_R[pos] = process_one(data->filters[1], in_R[pos]);
@@ -41,7 +42,8 @@ static void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
-    unsigned long count) {
+    unsigned long count)
+{
 	for (unsigned long pos = 0; pos < count; pos++) {
 		out_L[pos] = process_one(data->filters[0], in_L[pos]);
 		out_R[pos] = process_one(data->filters[1], in_R[pos]);
@@ -49,7 +51,8 @@ process_double(personal *data,
 }
 
 static void
-resume(personal *data) {
+resume(personal *data)
+{
 	biquad *filters = data->filters[0];
 	for (int i = 0; i < BANDS; i++)
 		biquad_init(&filters[i]);
@@ -57,11 +60,12 @@ resume(personal *data) {
 }
 
 static void
-pause(personal *data) {
-}
+pause(personal *data)
+{}
 
 static void
-construct_params(param *params) {
+construct_params(param *params)
+{
 	for (int i = 0; i < BANDS; i++) {
 		sprintf(params[0].name, "Band %i Frequency", i + 1);
 		params[0].min = 20;
@@ -89,15 +93,16 @@ construct_params(param *params) {
 }
 
 static void
-construct(personal *data) {
-}
+construct(personal *data)
+{}
 
 static void
-destruct(personal *data) {
-}
+destruct(personal *data)
+{}
 
 static void
-adjust(personal *data, param *params, unsigned long fs) {
+adjust(personal *data, param *params, unsigned long fs)
+{
 	data->fs = fs;
 	biquad *filters = data->filters[0];
 	for (int i = 0; i < BANDS; i++) {
@@ -109,7 +114,8 @@ adjust(personal *data, param *params, unsigned long fs) {
 }
 
 static void
-adjust_one(personal *data, param *params, unsigned int index) {
+adjust_one(personal *data, param *params, unsigned int index)
+{
 	float fs = data->fs;
 	params += index/3*3;
 	data->filters[0][index/3] = biquad_gen(FILT_PEAKING,

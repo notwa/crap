@@ -55,10 +55,9 @@ remember to export `VST_SDK_DIR` to the path of your `vstsdk2.4/`
 ## TODO
 
 * rename plugins (fix capitalization consistency and such)
-* make code style consistent
 * remove crap\_ prefixes?
 * move to subdirs?
 * reduce input/output buffers on biquads (shared)
 * ease up on the preprocessor ifs
 * polish parameter support
-
+* make code style consistent

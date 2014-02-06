@@ -26,7 +26,8 @@ static void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
-    unsigned long count) {
+    unsigned long count)
+{
 	for (unsigned long pos = 0; pos < count; pos++) {
 		out_L[pos] = process_one(data->filters[0], in_L[pos]);
 		out_R[pos] = process_one(data->filters[1], in_R[pos]);
@@ -37,8 +38,8 @@ static void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
-    unsigned long count) {
-	// TODO: test which hosts use this
+    unsigned long count)
+{
 	for (unsigned long pos = 0; pos < count; pos++) {
 		out_L[pos] = process_one(data->filters[0], in_L[pos]);
 		out_R[pos] = process_one(data->filters[1], in_R[pos]);
@@ -46,15 +47,16 @@ process_double(personal *data,
 }
 
 static void
-construct(personal *data) {
-}
+construct(personal *data)
+{}
 
 static void
-destruct(personal *data) {
-}
+destruct(personal *data)
+{}
 
 static void
-resume(personal *data) {
+resume(personal *data)
+{
 	biquad *filters = data->filters[0];
 	for (int i = 0; i < BANDS; i++)
 		biquad_init(&filters[i]);
@@ -62,11 +64,12 @@ resume(personal *data) {
 }
 
 static void
-pause(personal *data) {
-}
+pause(personal *data)
+{}
 
 static void
-adjust(personal *data, unsigned long fs) {
+adjust(personal *data, unsigned long fs)
+{
 	biquad *filters = data->filters[0];
 	filters[0] = biquad_gen(FILT_PEAKING,   34.34, +4.6, 1.21, fs);
 	filters[1] = biquad_gen(FILT_PEAKING,   85.74, -1.2, 1.31, fs);

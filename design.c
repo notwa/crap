@@ -6,13 +6,15 @@
 #include "crap_util.h"
 
 void
-usage() {
+usage()
+{
 	fputs("usage: design SAMPLERATE TYPE CENTERFREQ GAIN BANDWIDTH\n", stderr);
 	exit(1);
 }
 
 int
-main(int argc, char **argv) {
+main(int argc, char **argv)
+{
 	if (argc != 6) usage();
 	double tv[5];
 	for (int i = 1; i <= 5; i++) {

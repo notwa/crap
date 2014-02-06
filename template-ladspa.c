@@ -41,7 +41,8 @@ typedef struct {
 } plug_t;
 
 static void
-plug_connect(LADSPA_Handle instance, unsigned long port, LADSPA_Data *data) {
+plug_connect(LADSPA_Handle instance, unsigned long port, LADSPA_Data *data)
+{
 	plug_t *plug = (plug_t *)instance;
 	if (port == PLUG_INPUT_L)
 		plug->input_L = data;
@@ -58,19 +59,22 @@ plug_connect(LADSPA_Handle instance, unsigned long port, LADSPA_Data *data) {
 }
 
 static void
-plug_resume(LADSPA_Handle instance) {
+plug_resume(LADSPA_Handle instance)
+{
 	plug_t *plug = (plug_t *)instance;
 	resume(&plug->data);
 }
 
 static void
-plug_pause(LADSPA_Handle instance) {
+plug_pause(LADSPA_Handle instance)
+{
 	plug_t *plug = (plug_t *)instance;
 	pause(&plug->data);
 }
 
 static LADSPA_Handle
-plug_construct(const LADSPA_Descriptor *descriptor, unsigned long fs) {
+plug_construct(const LADSPA_Descriptor *descriptor, unsigned long fs)
+{
 	plug_t *plug = (plug_t *) calloc(1, sizeof(plug_t));
 	construct(&plug->data);
 	#if (PARAMETERS > 0)
@@ -83,14 +87,16 @@ plug_construct(const LADSPA_Descriptor *descriptor, unsigned long fs) {
 }
 
 static void
-plug_destruct(LADSPA_Handle instance) {
+plug_destruct(LADSPA_Handle instance)
+{
 	plug_t *plug = (plug_t *)instance;
 	destruct(&plug->data);
 	free(plug);
 }
 
 static void
-plug_process(LADSPA_Handle instance, unsigned long count) {
+plug_process(LADSPA_Handle instance, unsigned long count)
+{
 	plug_t *plug = (plug_t *)instance;
 	#if (PARAMETERS > 0)
 	for (int i = 0; i < PARAMETERS; i++) {
@@ -129,14 +135,16 @@ static const LADSPA_Descriptor plug_desc = {
 };
 
 const LADSPA_Descriptor *
-ladspa_descriptor(unsigned long index) {
+ladspa_descriptor(unsigned long index)
+{
 	if (index != 0)
 		return NULL;
 	return &plug_desc;
 }
 
 static void
-plug_init() {
+plug_init()
+{
 	for (int i = 0; i < 4; i++) {
 		p_names[i] = p_default_strings[i];
 		p_descs[i] = LADSPA_PORT_AUDIO;

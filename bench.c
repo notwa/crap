@@ -16,13 +16,15 @@ static float *audio_buffer;
 static int audio_count = 0;
 
 static void
-cleanup() {
+cleanup()
+{
 	dlclose(plug);
 	if (audio_count) free(audio_buffer);
 }
 
 static const LADSPA_Descriptor*
-load_ladspa(char *path) {
+load_ladspa(char *path)
+{
 	plug = dlopen(path, RTLD_NOW);
 	assert(plug);
 	atexit(cleanup);
@@ -37,7 +39,8 @@ load_ladspa(char *path) {
 }
 
 int
-main(int argc, char **argv) {
+main(int argc, char **argv)
+{
 	assert(argc > 1);
 
 	const LADSPA_Descriptor *d = load_ladspa(argv[1]);
