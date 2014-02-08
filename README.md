@@ -4,6 +4,13 @@ connor's rancid audio plugins. LADSPA and VST.
 
 alternatively, configuration realizes any personality.
 
+this is a set of hacked-together hacks to be hacked on
+in the personal interest of learning and experimenting.
+you should look elsewhere if you need an *enterprize-quality*
+cross-platform library to build *lean & agile socially-networked* audio apps.
+
+MIT-licensed; go wild.
+
 ## plugs
 
 ### crap Parametric Equalizer
@@ -29,7 +36,7 @@ white noise generator. loud, full-range, 0dBFS. don't say i didn't warn you.
 
 __crap\_tube (0x50F7BA11)__
 
-static waveshaper with 4x oversampling, sounds kinda like a tube I guess?
+static waveshaper with 4x oversampling, sounds kinda like a tube i guess?
 be aware that the oversampling is a bit naive and attenuates the signal
 past 17kHz, assuming a 44.1kHz sample rate.
 
@@ -41,16 +48,15 @@ experimentation with delay compensation and EQ oversampling, not for use.
 
 ## build notes
 
-`make` it.
-
-a `benchmark` target is included, however it doesn't build on Windows.
-
-for speed, try `CFLAGS="-O3 -ffast-math -march=core2 -mfpmath=sse"`
-and the same for CXXFLAGS.
-
-on Linux, you'll need `CFLAGS+=" -fpic" CXXFLAGS+=" -fpic -D__cdecl="`
+`make linux` or `make windows` (works well with [mxe])
+[mxe]: //mxe.cc
 
 remember to export `VST_SDK_DIR` to the path of your `vstsdk2.4/`
+
+other targets:
+* all: no hand-holding.
+* design: simple CLI to the biquad coefficient calculator.
+* benchmark: does what it says on the tin. no Windows support.
 
 ## TODO
 
@@ -59,3 +65,4 @@ remember to export `VST_SDK_DIR` to the path of your `vstsdk2.4/`
 * ease up on the preprocessor ifs
 * polish parameter support
 * make code style consistent
+* perhaps LV2 or AU support
