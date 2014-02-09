@@ -11,8 +11,8 @@
 #define COPYRIGHT "MIT"
 #define PARAMETERS 2
 
-#define HIST_SIZE   36
-#define HIST_SIZE_2 18
+#define HIST_SIZE_2 (2 + 2*10)
+#define HIST_SIZE   (HIST_SIZE_2*2)
 
 typedef struct {
 	double desired, actual, speed;
@@ -59,43 +59,29 @@ distort(double x)
 // a0 is already factored into the rest of the coefficients
 #define LOWPASS(i, b0, b1, a1, a2) \
 	y = b0*x + b1*h[i*2 + 0] + b0*h[i*2 + 1] \
-		 - a1*h[i*2 + 2] - a2*h[i*2 + 3]; \
+	         - a1*h[i*2 + 2] - a2*h[i*2 + 3]; \
 	BQSHIFT(i); \
 	x = y;
 
 static double
-upsample(double h[HIST_SIZE_2], double x)
+oversample(double h[HIST_SIZE_2], double x)
 {
+	/* designed with <https://coewww.rutgers.edu/~orfanidi/hpeq/>
+	fs = 44100; OS = 4; Gs = -120; f2 = 18248/fs/OS; f2s = 22050/fs/OS;
+	N = hpeqord(-Inf,0,Gs,-6,2*pi*f2s,2*pi*f2,2) % 20.9971490662433
+	*/
 	double y;
-	// -3 at 18600/44100/2, -96 stopband
-	// designed with <https://coewww.rutgers.edu/~orfanidi/hpeq/>
-	LOWPASS(0, +0.71327159,+0.00688573,-0.45391337,+0.88734229);
-	LOWPASS(1, +0.63347126,+0.05572752,-0.36946634,+0.69213639);
-	LOWPASS(2, +0.55963645,+0.13990391,-0.26487901,+0.52405582);
-	LOWPASS(3, +0.49037095,+0.24706928,-0.14763065,+0.37544183);
-	LOWPASS(4, +0.42692239,+0.36379839,-0.02763286,+0.24527604);
-	LOWPASS(5, +0.37268890,+0.47433865,+0.08224090,+0.13747554);
-	LOWPASS(6, +0.33241251,+0.56148939,+0.16727062,+0.05904378);
-	LOWPASS(7, +0.31079382,+0.60975767,+0.21392163,+0.01742368);
-	BQSHIFT(8);
-	return y;
-}
-
-static double
-downsample(double h[HIST_SIZE_2], double x)
-{
-	double y;
-	// -3 at 17544/44100/4, -96 stopband
-	// same idea as upsample()
-	LOWPASS(0, +0.62136966,-0.87573986,-1.56336581,+0.93036527);
-	LOWPASS(1, +0.56540370,-0.77393348,-1.44258778,+0.79946170);
-	LOWPASS(2, +0.49824084,-0.63630306,-1.31114921,+0.67132784);
-	LOWPASS(3, +0.41949184,-0.46466704,-1.16600279,+0.54031944);
-	LOWPASS(4, +0.33172375,-0.26684785,-1.00993399,+0.40653364);
-	LOWPASS(5, +0.24269774,-0.06242297,-0.85492245,+0.27789496);
-	LOWPASS(6, +0.16673206,+0.11379847,-0.72421195,+0.17147454);
-	LOWPASS(7, +0.12199271,+0.21811002,-0.64769184,+0.10978728);
-	BQSHIFT(8);
+	LOWPASS(0, +0.65855672,-0.92949215,-1.56012668,+0.94774797);
+	LOWPASS(1, +0.61716958,-0.85685555,-1.47099672,+0.84848033);
+	LOWPASS(2, +0.56959704,-0.76263107,-1.37527450,+0.75183750);
+	LOWPASS(3, +0.51503506,-0.64652564,-1.27052746,+0.65407194);
+	LOWPASS(4, +0.45328074,-0.50918096,-1.15569311,+0.55307363);
+	LOWPASS(5, +0.38524858,-0.35361043,-1.03185791,+0.44874463);
+	LOWPASS(6, +0.31367929,-0.18703461,-0.90341296,+0.34373693);
+	LOWPASS(7, +0.24382090,-0.02260789,-0.77918770,+0.24422161);
+	LOWPASS(8, +0.18353302,+0.12028336,-0.67260228,+0.15995168);
+	LOWPASS(9, +0.14205849,+0.21898074,-0.59952639,+0.10262410);
+	BQSHIFT(10);
 	return y;
 }
 
@@ -106,14 +92,14 @@ process_one(double x, double drive, double wet)
 }
 
 static double
-oversample(personal *data, double x, int right)
+process_os(personal *data, double x, int right)
 {
 	double *h0 = (!right) ? data->history_L : data->history_R;
 	double *h1 = h0 + HIST_SIZE_2;
 	double y;
 
 	#define doit(SAMP) \
-	downsample(h1, process_one(4*upsample(h0, SAMP), \
+	oversample(h1, process_one(4*oversample(h0, SAMP), \
 	    smooth(&data->drive), smooth(&data->wet)))
 	y = doit(x);
 	    doit(0);
@@ -132,8 +118,8 @@ process(personal *data,
 {
 	disable_denormals();
 	for (unsigned long pos = 0; pos < count; pos++) {
-		out_L[pos] = oversample(data, in_L[pos], 0);
-		out_R[pos] = oversample(data, in_R[pos], 1);
+		out_L[pos] = process_os(data, in_L[pos], 0);
+		out_R[pos] = process_os(data, in_R[pos], 1);
 	}
 }
 
@@ -145,8 +131,8 @@ process_double(personal *data,
 {
 	disable_denormals();
 	for (unsigned long pos = 0; pos < count; pos++) {
-		out_L[pos] = oversample(data, in_L[pos], 0);
-		out_R[pos] = oversample(data, in_R[pos], 1);
+		out_L[pos] = process_os(data, in_L[pos], 0);
+		out_R[pos] = process_os(data, in_R[pos], 1);
 	}
 }
 

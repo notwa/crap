@@ -37,8 +37,8 @@ white noise generator. loud, full-range, 0dBFS. don't say i didn't warn you.
 __crap\_tube (0x50F7BA11)__
 
 static waveshaper with 4x oversampling, sounds kinda like a tube i guess?
-be aware that the oversampling is a bit naive and attenuates the signal
-past 17kHz, assuming a 44.1kHz sample rate.
+be aware that its oversampling currently boosts top-most frequencies by
+~2dB before attenuating.
 
 ### crap delay test
 
