@@ -36,7 +36,7 @@ white noise generator. loud, full-range, 0dBFS. don't say i didn't warn you.
 
 __crap\_tube (0x50F7BA11)__
 
-static waveshaper with 4x oversampling, sounds kinda like a tube i guess?
+static waveshaper with 6x oversampling, sounds kinda like a tube i guess?
 
 ### crap delay test
 
@@ -58,6 +58,7 @@ other targets:
 
 ## TODO
 
+* ARM support
 * spaces-in-paths support in Makefile
 * rename plugins (fix capitalization consistency and such)
 * reduce input/output buffers on biquads (shared)
