@@ -49,6 +49,8 @@ experimentation with delay compensation and EQ oversampling, not for use.
 `make linux` or `make windows` (works well with [mxe])
 [mxe]: //mxe.cc
 
+`make linux-arm` requires a CPU with a NEON unit
+
 remember to export `VST_SDK_DIR` to the path of your `vstsdk2.4/`
 
 other targets:
@@ -58,7 +60,6 @@ other targets:
 
 ## TODO
 
-* ARM support
 * spaces-in-paths support in Makefile
 * rename plugins (fix capitalization consistency and such)
 * reduce input/output buffers on biquads (shared)

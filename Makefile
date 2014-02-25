@@ -71,6 +71,11 @@ linux: ALL_CXXFLAGS += $(OPT_FLAGS) -fpic
 linux: VST_FLAGS += -D__cdecl=
 linux: all
 
+linux-arm: ALL_CFLAGS += -Ofast -mfpu=neon -fpic
+linux-arm: ALL_CXXFLAGS += -Ofast -mfpu=neon -fpic
+linux-arm: VST_FLAGS += -D__cdecl=
+linux-arm: all
+
 options:
 	@echo "CPPFLAGS       = $(CPPFLAGS)"
 	@echo "ALL_CFLAGS     = $(ALL_CFLAGS)"
@@ -85,7 +90,7 @@ ladspa: $(LADSPA_SHOBJ)
 
 vst: $(VST_SHOBJ)
 
-pretest: util/sse_test.h
+pretest: util/denorm_test.h
 	@$(CC) -E $(ALL_CFLAGS) $^ -o /dev/null
 
 benchmark: $(BIN)/bench $(AGAINST)
