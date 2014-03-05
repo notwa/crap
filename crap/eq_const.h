@@ -9,7 +9,7 @@
 #define COPYRIGHT "MIT"
 #define PARAMETERS 0
 
-#define BANDS 4
+#define BANDS 6
 typedef struct {
 	biquad filters[2][BANDS];
 } personal;
@@ -19,7 +19,7 @@ process_one(biquad *filters, double samp)
 {
 	for (int i = 0; i < BANDS; i++)
 		samp = biquad_run(&filters[i], samp);
-	return samp*1.2023;
+	return samp;
 }
 
 static void
@@ -73,8 +73,10 @@ static void
 adjust(personal *data, unsigned long fs)
 {
 	biquad *filters = data->filters[0];
-	filters[0] = biquad_gen(FILT_PEAKING,   34.34, +4.6, 1.21, fs);
-	filters[1] = biquad_gen(FILT_PEAKING,   85.74, -1.2, 1.31, fs);
-	filters[2] = biquad_gen(FILT_HIGHSHELF, 862.2, -5.5, 1.00, fs);
-	filters[3] = biquad_gen(FILT_PEAKING,   7496., +3.3, 1.10, fs);
+	filters[0] = biquad_gen(FILT_PEAKING,   37.01, +3.3, 1.94, fs);
+	filters[1] = biquad_gen(FILT_PEAKING,   2208., -4.0, 0.56, fs);
+	filters[2] = biquad_gen(FILT_PEAKING,   5236., +2.3, 0.81, fs);
+	filters[3] = biquad_gen(FILT_PEAKING,   8092., -3.5, 0.43, fs);
+	filters[4] = biquad_gen(FILT_PEAKING,   90.88, -1.0, 0.87, fs);
+	filters[5] = biquad_gen(FILT_HIGHPASS,  16.00,    0, 1.00, fs);
 }
