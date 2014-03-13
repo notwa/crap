@@ -45,8 +45,6 @@ VST_FLAGS += -I $(VST_SDK_DIR) -DBUILDING_DLL=1
 
 OPT_FLAGS = -Ofast -march=core2 -mfpmath=sse
 
-OBJCOPY ?= objcopy
-
 # any possibly produced files besides intermediates
 ALL = $(SHOBJ) $(PROGRAM) $(BIN)/vstsdk.o $(EXE) $(DLL)
 
@@ -99,52 +97,52 @@ benchmark: $(BIN)/bench $(AGAINST)
 $(UTILS): %: $(BIN)/%
 
 $(BIN)/%.exe: $(BIN)/%
-	@echo 'OBJCOPY '$@
+	@echo '  OBJCOPY '$@
 	@$(OBJCOPY) -S $< $@
 
 $(BIN)/%.dll: $(BIN)/%.so
-	@echo 'OBJCOPY '$@
+	@echo '  OBJCOPY '$@
 	@$(OBJCOPY) -S $< $@
 
 $(BIN)/%-ladspa.so: $(BIN)/%-ladspa.o
-	@echo '    LD  '$@
+	@echo '  CCLD    '$@
 	@$(CC) $(ALL_CFLAGS) $(LADSPA_FLAGS) -shared $^ -o $@ $(ALL_LDFLAGS)
 
 $(BIN)/%-vst.so: $(BIN)/%-vst.o $(BIN)/vstsdk.o
-	@echo '    LD  '$@
+	@echo '  CXXLD   '$@
 	@$(CXX) $(ALL_CXXFLAGS) $(VST_FLAGS) -shared $^ -o $@ $(ALL_LDFLAGS)
 
 $(BIN)/$(DISTNAME)_%-ladspa.o: crap/%-ladspa.c $(HEADERS) include/ladspa.h
-	@echo '    CC  '$@
+	@echo '  CC      '$@
 	@$(CC) -c $(ALL_CFLAGS) $(LADSPA_FLAG) $(CPPFLAGS) $< -o $@
 
 $(BIN)/$(DISTNAME)_%-vst.o: crap/%-vst.cpp $(HEADERS)
-	@echo '    CXX '$@
+	@echo '  CXX     '$@
 	@$(CXX) -c $(ALL_CXXFLAGS) $(VST_FLAGS) $(CPPFLAGS) $< -o $@
 
 crap/%-ladspa.c: crap/%.h template/ladspa.c util/generate
-	@echo '    gen '$@
+	@echo '  GEN     '$@
 	@util/generate $(notdir $<) $@ template/ladspa.c
 
 crap/%-vst.cpp: crap/%.h template/vst.cpp util/generate
-	@echo '    gen '$@
+	@echo '  GEN     '$@
 	@util/generate $(notdir $<) $@ template/vst.cpp
 
 $(BIN)/vstsdk.o: $(VST_OBJ)
-	@echo '    LD  '$@
+	@echo '  LD      '$@
 	@$(LD) -r $^ -o $@
 
 .INTERMEDIATE: $(VST_OBJ)
 $(VST_OBJ): $(BIN)/%.o: $(VST_CPP_DIR)/%.cpp
-	@echo '    CXX '$@
+	@echo '  CXX     '$@
 	@$(CXX) -c $(ALL_CXXFLAGS) $(VST_FLAGS) $(CPPFLAGS) $< -o $@
 
 $(BIN)/bench: util/bench.c
-	@echo '    CC  '$@
+	@echo '  CCLD    '$@
 	@$(CC) $(ALL_CFLAGS) $(LADSPA_FLAGS) $< -o $@ $(ALL_LDFLAGS) -rdynamic -ldl
 
 $(BIN)/design: util/design.c
-	@echo '    CC  '$@
+	@echo '  CCLD    '$@
 	@$(CC) $(ALL_CFLAGS) $< -o $@ $(ALL_LDFLAGS)
 
 clean:
