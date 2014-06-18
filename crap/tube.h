@@ -3,7 +3,7 @@
 
 #include "util.h"
 #include "param.h"
-#include "os6iir.h"
+#include "os2piir.h"
 
 #define ID 0x50F7BA11
 #define LABEL "crap_tube"
@@ -12,9 +12,7 @@
 #define COPYRIGHT "MIT"
 #define PARAMETERS 2
 
-#define OVERSAMPLING 6
-#define HIST_SIZE_2 (2 + 2*8)
-#define HIST_SIZE   (HIST_SIZE_2*2)
+#define OVERSAMPLING 2
 
 typedef struct {
 	double desired, actual, speed;
@@ -22,8 +20,7 @@ typedef struct {
 } smoothval;
 
 typedef struct {
-	double history_L[HIST_SIZE];
-	double history_R[HIST_SIZE];
+	halfband_t hbu_L, hbu_R, hbd_L, hbd_R;
 	smoothval drive, wet;
 } personal;
 
@@ -62,19 +59,15 @@ process_one(double x, double drive, double wet)
 static double
 process_os(personal *data, double x, int right)
 {
-	double *h0 = (!right) ? data->history_L : data->history_R;
-	double *h1 = h0 + HIST_SIZE_2;
+	halfband_t *hbu = (!right) ? &data->hbu_L : &data->hbu_R;
+	halfband_t *hbd = (!right) ? &data->hbd_L : &data->hbd_R;
 	double y;
 
 	#define doit(SAMP) \
-	oversample(h1, process_one(OVERSAMPLING*oversample(h0, SAMP), \
+	decimate(hbd, process_one(interpolate(hbu, SAMP), \
 	    smooth(&data->drive), smooth(&data->wet)))
 	    doit(x);
-	    doit(0);
-	    doit(0);
-	    doit(0);
-	    doit(0);
-	y = doit(0);
+	y = doit(x);
 	#undef doit
 
 	return y;
@@ -109,8 +102,10 @@ process_double(personal *data,
 static void
 resume(personal *data)
 {
-	memset(data->history_L, 0, HIST_SIZE*sizeof(double));
-	memset(data->history_R, 0, HIST_SIZE*sizeof(double));
+	memset(&data->hbu_L, 0, sizeof(halfband_t));
+	memset(&data->hbu_R, 0, sizeof(halfband_t));
+	memset(&data->hbd_L, 0, sizeof(halfband_t));
+	memset(&data->hbd_R, 0, sizeof(halfband_t));
 }
 
 static void
