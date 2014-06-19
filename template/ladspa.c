@@ -35,7 +35,7 @@ typedef struct {
 
 	personal data;
 	#if (PARAMETERS > 0)
-	float *values[PARAMETERS];
+	LADSPA_Data *values[PARAMETERS];
 	param params[PARAMETERS];
 	#endif
 } plug_t;
@@ -100,6 +100,8 @@ plug_process(LADSPA_Handle instance, unsigned long count)
 	plug_t *plug = (plug_t *)instance;
 	#if (PARAMETERS > 0)
 	for (int i = 0; i < PARAMETERS; i++) {
+		if (!plug->values[i])
+			continue;
 		if (*plug->values[i] != plug->params[i].value) {
 			plug->params[i].value = *plug->values[i];
 			adjust_one(&plug->data, plug->params, i);
