@@ -1,3 +1,4 @@
+#include <alloca.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -56,9 +57,15 @@ main(int argc, char **argv)
 	audio_buffer = calloc(audio_count*BLOCK_SIZE, sizeof(float));
 
 	int a = 0;
-	for (int i = 0; i < d->PortCount; i++)
-		if (LADSPA_IS_PORT_AUDIO(d->PortDescriptors[i]))
+	for (int i = 0; i < d->PortCount; i++) {
+		if (LADSPA_IS_PORT_AUDIO(d->PortDescriptors[i])) {
 			d->connect_port(h, i, audio_buffer + a++*BLOCK_SIZE);
+		} else {
+			float *x = alloca(sizeof(float));
+			*x = 0;
+			d->connect_port(h, i, x);
+		}
+	}
 
 	mirand = time(NULL);
 	for (int i = 0; i < audio_count*BLOCK_SIZE; i++)
