@@ -16,7 +16,7 @@ typedef struct {
 	int i;
 } halfband_t;
 
-static void
+INNER void
 halfband_a(double a[8], double ao[8], double x0, double x2)
 {
 	a[0] = x2    + (x0   - ao[0])*0.006185967461045014;
@@ -29,7 +29,7 @@ halfband_a(double a[8], double ao[8], double x0, double x2)
 	a[7] = ao[6] + (a[6] - ao[7])*0.862917812650502936;
 }
 
-static void
+INNER void
 halfband_b(double b[8], double bo[8], double x1, double x3)
 {
 	b[0] = x3    + (x1   - bo[0])*0.024499027624721819;
@@ -42,7 +42,7 @@ halfband_b(double b[8], double bo[8], double x1, double x3)
 	b[7] = bo[6] + (b[6] - bo[7])*0.952428157718303137;
 }
 
-static double
+INNER double
 halfband(halfband_t *h, double x0)
 {
 	double a[8], b[8];
@@ -58,7 +58,7 @@ halfband(halfband_t *h, double x0)
 	return (a[7] + b[7])*0.5;
 }
 
-static double
+INNER double
 decimate(halfband_t *h, double x0)
 {
 	double c[8];
@@ -78,7 +78,7 @@ decimate(halfband_t *h, double x0)
 }
 
 // note: do not zero-stuff! send the input each time.
-static double
+INNER double
 interpolate(halfband_t *h, double x0)
 {
 	double c[8];

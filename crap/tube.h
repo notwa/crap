@@ -1,3 +1,4 @@
+#include <alloca.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -13,6 +14,10 @@
 #define PARAMETERS 2
 
 #define OVERSAMPLING 2
+#define BLOCK_SIZE 256
+#define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
+
+typedef unsigned long ulong;
 
 typedef struct {
 	double desired, actual, speed;
@@ -24,7 +29,7 @@ typedef struct {
 	smoothval drive, wet;
 } personal;
 
-static double
+INNER double
 smooth(smoothval *val)
 {
 	double a = val->actual;
@@ -44,62 +49,116 @@ smooth(smoothval *val)
 	return a;
 }
 
-static double
+INNER double
 distort(double x)
 {
 	return (27*x + 9) / (9*x*x + 6*x + 19) - 9/19.;
 }
 
-static double
+INNER double
 process_one(double x, double drive, double wet)
 {
 	return (distort(x*drive)/drive*0.79 - x)*wet + x;
 }
 
-static double
-process_os(personal *data, double x, int right)
-{
-	halfband_t *hbu = (!right) ? &data->hbu_L : &data->hbu_R;
-	halfband_t *hbd = (!right) ? &data->hbd_L : &data->hbd_R;
-	double y;
-
-	#define doit(SAMP) \
-	decimate(hbd, process_one(interpolate(hbu, SAMP), \
-	    smooth(&data->drive), smooth(&data->wet)))
-	    doit(x);
-	y = doit(x);
-	#undef doit
-
-	return y;
-}
-
-static void
-process(personal *data,
-    float *in_L, float *in_R,
-    float *out_L, float *out_R,
-    unsigned long count)
-{
-	disable_denormals();
-	for (unsigned long pos = 0; pos < count; pos++) {
-		out_L[pos] = process_os(data, in_L[pos], 0);
-		out_R[pos] = process_os(data, in_R[pos], 1);
-	}
-}
-
-static void
+INNER void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
-    unsigned long count)
+    ulong count)
 {
 	disable_denormals();
-	for (unsigned long pos = 0; pos < count; pos++) {
-		out_L[pos] = process_os(data, in_L[pos], 0);
-		out_R[pos] = process_os(data, in_R[pos], 1);
+
+	double drives[FULL_SIZE], wets[FULL_SIZE];
+	double in_os[FULL_SIZE], out_os[FULL_SIZE];
+
+	for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
+		ulong rem = BLOCK_SIZE;
+		if (pos + BLOCK_SIZE > count)
+			rem = count - pos;
+
+		for (ulong i = 0; i < rem*OVERSAMPLING; i++)
+			drives[i] = smooth(&data->drive);
+		for (ulong i = 0; i < rem*OVERSAMPLING; i++)
+			wets[i] = smooth(&data->wet);
+
+		halfband_t *hb;
+
+		// left channel
+		hb = &data->hbu_L;
+		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
+			in_os[i+0] = interpolate(hb, in_L[j]);
+			in_os[i+1] = interpolate(hb, in_L[j]);
+		}
+
+		for (ulong i = 0; i < rem*OVERSAMPLING; i++) {
+			out_os[i] = process_one(in_os[i], drives[i], wets[i]);
+		}
+
+		hb = &data->hbd_L;
+		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
+			decimate(hb, out_os[i+0]);
+			out_L[j] = decimate(hb, out_os[i+1]);
+		}
+
+		// right channel
+		hb = &data->hbu_R;
+		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
+			in_os[i+0] = interpolate(hb, in_R[j]);
+			in_os[i+1] = interpolate(hb, in_R[j]);
+		}
+
+		for (ulong i = 0; i < rem*OVERSAMPLING; i++) {
+			out_os[i] = process_one(in_os[i], drives[i], wets[i]);
+		}
+
+		hb = &data->hbd_R;
+		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
+			decimate(hb, out_os[i+0]);
+			out_R[j] = decimate(hb, out_os[i+1]);
+		}
+
+		in_L += BLOCK_SIZE;
+		in_R += BLOCK_SIZE;
+		out_L += BLOCK_SIZE;
+		out_R += BLOCK_SIZE;
 	}
 }
 
-static void
+INNER void
+process(personal *data,
+    float *in_L, float *in_R,
+    float *out_L, float *out_R,
+    ulong count)
+{
+	double  in_L2[BLOCK_SIZE],  in_R2[BLOCK_SIZE];
+	double out_L2[BLOCK_SIZE], out_R2[BLOCK_SIZE];
+
+	for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
+		ulong rem = BLOCK_SIZE;
+		if (pos + BLOCK_SIZE > count)
+			rem = count - pos;
+
+		for (ulong i = 0; i < rem; i++)
+			in_L2[i] = in_L[i];
+		for (ulong i = 0; i < rem; i++)
+			in_R2[i] = in_R[i];
+
+		process_double(data, in_L2, in_R2, out_L2, out_R2, rem);
+
+		for (ulong i = 0; i < rem; i++)
+			out_L[i] = out_L2[i];
+		for (ulong i = 0; i < rem; i++)
+			out_R[i] = out_R2[i];
+
+		in_L += BLOCK_SIZE;
+		in_R += BLOCK_SIZE;
+		out_L += BLOCK_SIZE;
+		out_R += BLOCK_SIZE;
+	}
+}
+
+INNER void
 resume(personal *data)
 {
 	memset(&data->hbu_L, 0, sizeof(halfband_t));
@@ -108,17 +167,17 @@ resume(personal *data)
 	memset(&data->hbd_R, 0, sizeof(halfband_t));
 }
 
-static void
+INNER void
 pause(personal *data)
 {}
 
-static void
+INNER void
 construct(personal *data)
 {
 	memset(data, 0, sizeof(personal));
 }
 
-static void
+INNER void
 construct_params(param *params)
 {
 	sprintf(params[0].name, "Drive");
@@ -137,12 +196,12 @@ construct_params(param *params)
 	param_reset(&params[1]);
 }
 
-static void
+INNER void
 destruct(personal *data)
 {}
 
-static void
-adjust(personal *data, param *params, unsigned long fs_long)
+INNER void
+adjust(personal *data, param *params, ulong fs_long)
 {
 	resume(data);
 	double fs = fs_long;
@@ -156,7 +215,7 @@ adjust(personal *data, param *params, unsigned long fs_long)
 	data->wet.log = 0;
 }
 
-static void
+INNER void
 adjust_one(personal *data, param *params, unsigned int index)
 {
 	data->drive.desired = DB2LIN(params[0].value);

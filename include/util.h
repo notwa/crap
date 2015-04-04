@@ -4,7 +4,9 @@
 #include <xmmintrin.h>
 #endif
 
-static void
+#define INNER static inline
+
+INNER void
 disable_denormals();
 
 #define LIMIT(v,l,u) ((v)<(l)?(l):((v)>(u)?(u):(v)))
@@ -22,10 +24,10 @@ typedef struct {
 	double b0, b1, b2, a0, a1, a2;
 } biquad_interim;
 
-static float
+INNER float
 whitenoise();
 
-static void
+INNER void
 biquad_init(biquad *bq);
 
 typedef enum {
@@ -41,16 +43,16 @@ typedef enum {
 	FILT_GAIN
 } filter_t;
 
-static biquad
+INNER biquad
 biquad_gen(filter_t type, double fc, double gain, double bw, double fs);
 
 /* s-plane to z-plane */
-static biquad_interim
+INNER biquad_interim
 design(double cw, double sw,
     double num0, double num1, double num2,
     double den0, double den1, double den2);
 
-static double
+INNER double
 biquad_run(biquad *bq, double x);
 
 #include "util_def.h"

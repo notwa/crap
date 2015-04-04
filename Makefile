@@ -34,8 +34,9 @@ VST_SRC = ${VST_CPP:%=$(VST_CPP_DIR)/%}
 VST_OBJ = ${VST_CPP:%.cpp=$(BIN)/%.o}
 VST_DEF = $(VST_SDK_DIR)/public.sdk/samples/vst2.x/win/vstplug.def
 
-GENERAL_FLAGS = -Wall -Wno-unused-function -I include
-ALL_CFLAGS = $(GENERAL_FLAGS) -std=gnu99 $(CFLAGS)
+INLINE_FLAGS = -Winline -finline-limit=1000
+GENERAL_FLAGS = -Wall -Wno-unused-function -I include $(INLINE_FLAGS)
+ALL_CFLAGS = $(GENERAL_FLAGS) -std=gnu11 $(CFLAGS)
 ALL_CXXFLAGS = $(GENERAL_FLAGS) $(CXXFLAGS)
 ALL_LDFLAGS = -lm $(LDFLAGS)
 
@@ -43,6 +44,8 @@ LADSPA_FLAGS =
 VST_FLAGS = -Wno-write-strings -Wno-narrowing
 VST_FLAGS += -I $(VST_SDK_DIR) -DBUILDING_DLL=1
 
+# specifying core2 as the target architecture
+# seems significantly faster, even on newer processors. ymmv.
 OPT_FLAGS = -Ofast -march=core2 -mfpmath=sse
 
 # any possibly produced files besides intermediates
