@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <time.h>
+#include <math.h>
 
 #include "dlfcn.h"
 #include "ladspa.h"
@@ -39,6 +40,52 @@ load_ladspa(char *path)
 	return d;
 }
 
+static float
+between(float percent, float min, float max, int logscale)
+{
+	if (logscale)
+		return log(min/percent)/log(min/max);
+	else
+		return (min - percent)/(min - max);
+}
+
+static float
+get_default(LADSPA_PortRangeHint hint)
+{
+	float x = 0;
+	int hd = hint.HintDescriptor;
+	float min = hint.LowerBound;
+	float max = hint.UpperBound;
+	float logscale = LADSPA_IS_HINT_LOGARITHMIC(hd);
+	if (LADSPA_IS_HINT_DEFAULT_0(hd))
+		x = 0;
+	if (LADSPA_IS_HINT_DEFAULT_1(hd))
+		x = 1;
+	if (LADSPA_IS_HINT_DEFAULT_100(hd))
+		x = 100;
+	if (LADSPA_IS_HINT_DEFAULT_440(hd))
+		x = 440;
+	if (LADSPA_IS_HINT_DEFAULT_MINIMUM(hd))
+		x = min;
+	if (LADSPA_IS_HINT_DEFAULT_LOW(hd))
+		x = between(0.25, min, max, logscale);
+	if (LADSPA_IS_HINT_DEFAULT_MIDDLE(hd))
+		x = between(0.50, min, max, logscale);
+	if (LADSPA_IS_HINT_DEFAULT_HIGH(hd))
+		x = between(0.75, min, max, logscale);
+	if (LADSPA_IS_HINT_DEFAULT_MAXIMUM(hd))
+		x = max;
+	if (LADSPA_IS_HINT_INTEGER(hd))
+		x = round(x);
+	if (LADSPA_IS_HINT_TOGGLED(hd)) {
+		float mid = between(0.50, min, max, logscale);
+		x = x >= mid ? max : min;
+	}
+	if (x < min) x = min;
+	if (x > max) x = max;
+	return x;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -62,7 +109,7 @@ main(int argc, char **argv)
 			d->connect_port(h, i, audio_buffer + a++*BLOCK_SIZE);
 		} else {
 			float *x = alloca(sizeof(float));
-			*x = 0;
+			*x = get_default(d->PortRangeHints[i]);
 			d->connect_port(h, i, x);
 		}
 	}
