@@ -18,7 +18,7 @@ typedef struct {
 	float fs;
 } personal;
 
-static double
+INNER double
 process_one(biquad *filters, double samp)
 {
 	for (int i = 0; i < BANDS; i++)
@@ -26,7 +26,7 @@ process_one(biquad *filters, double samp)
 	return samp;
 }
 
-static void
+INNER void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
@@ -39,7 +39,7 @@ process(personal *data,
 	}
 }
 
-static void
+INNER void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
@@ -52,7 +52,7 @@ process_double(personal *data,
 	}
 }
 
-static void
+INNER void
 resume(personal *data)
 {
 	biquad *filters = data->filters[0];
@@ -61,11 +61,11 @@ resume(personal *data)
 	memcpy(data->filters[1], filters, BANDS*sizeof(biquad));
 }
 
-static void
+INNER void
 pause(personal *data)
 {}
 
-static void
+INNER void
 construct_params(param *params)
 {
 	for (int i = 0; i < BANDS; i++) {
@@ -94,15 +94,15 @@ construct_params(param *params)
 	}
 }
 
-static void
+INNER void
 construct(personal *data)
 {}
 
-static void
+INNER void
 destruct(personal *data)
 {}
 
-static void
+INNER void
 adjust(personal *data, param *params, unsigned long fs)
 {
 	data->fs = fs;
@@ -115,7 +115,7 @@ adjust(personal *data, param *params, unsigned long fs)
 	resume(data);
 }
 
-static void
+INNER void
 adjust_one(personal *data, param *params, unsigned int index)
 {
 	float fs = data->fs;

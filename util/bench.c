@@ -9,22 +9,20 @@
 #include "ladspa.h"
 #include "util.h"
 
-enum {
-	BLOCK_SIZE=2048
-};
+#define BLOCK_SIZE 2048
 
 void *plug = NULL;
 static float *audio_buffer;
 static int audio_count = 0;
 
-static void
+INNER void
 cleanup()
 {
 	dlclose(plug);
 	if (audio_count) free(audio_buffer);
 }
 
-static const LADSPA_Descriptor*
+INNER const LADSPA_Descriptor*
 load_ladspa(char *path)
 {
 	plug = dlopen(path, RTLD_NOW);
@@ -40,7 +38,7 @@ load_ladspa(char *path)
 	return d;
 }
 
-static float
+INNER float
 between(float percent, float min, float max, int logscale)
 {
 	if (logscale)
@@ -49,7 +47,7 @@ between(float percent, float min, float max, int logscale)
 		return (min - percent)/(min - max);
 }
 
-static float
+INNER float
 get_default(LADSPA_PortRangeHint hint)
 {
 	float x = 0;

@@ -27,7 +27,7 @@ typedef struct {
 	channel c[2];
 } personal;
 
-static double
+INNER double
 fir_up(double *x, double s)
 {
 	x[0] = s;
@@ -55,7 +55,7 @@ fir_up(double *x, double s)
 	return s;
 }
 
-static double
+INNER double
 fir_down(double *x, double s)
 {
 	x[0] = s;
@@ -69,7 +69,7 @@ fir_down(double *x, double s)
 	return s;
 }
 
-static double
+INNER double
 process_one(channel *c, double s)
 {
 	s =    fir_down(c->down, biquad_run(&c->filter, fir_up(c->up, s)));
@@ -79,7 +79,7 @@ process_one(channel *c, double s)
 	return s;
 }
 
-static void
+INNER void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
@@ -91,7 +91,7 @@ process(personal *data,
 	}
 }
 
-static void
+INNER void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
@@ -103,23 +103,23 @@ process_double(personal *data,
 	}
 }
 
-static void
+INNER void
 construct(personal *data)
 {}
 
-static void
+INNER void
 destruct(personal *data)
 {}
 
-static void
+INNER void
 resume(personal *data)
 {}
 
-static void
+INNER void
 pause(personal *data)
 {}
 
-static void
+INNER void
 adjust(personal *data, ulong fs)
 {
 	for (int k = 0; k < 2; k++) {

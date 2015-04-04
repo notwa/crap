@@ -10,7 +10,7 @@
 typedef struct {
 } personal;
 
-static void
+INNER void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
@@ -23,7 +23,7 @@ process(personal *data,
 		out_R[pos] = whitenoise();
 }
 
-static void
+INNER void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
@@ -35,22 +35,22 @@ process_double(personal *data,
 		out_R[pos] = whitenoise();
 }
 
-static void
+INNER void
 construct(personal *data)
 {}
 
-static void
+INNER void
 destruct(personal *data)
 {}
 
-static void
+INNER void
 resume(personal *data)
 {}
 
-static void
+INNER void
 pause(personal *data)
 {}
 
-static void
+INNER void
 adjust(personal *data, unsigned long fs)
 {}

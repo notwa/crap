@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdint.h>
 
-static void
+INNER void
 disable_denormals()
 {
 	#if __SSE2__
@@ -13,7 +13,7 @@ disable_denormals()
 /* via http://www.rgba.org/articles/sfrand/sfrand.htm */
 static unsigned int mirand = 1;
 
-static float
+INNER float
 whitenoise()
 {
 	union either {
@@ -27,13 +27,13 @@ whitenoise()
 
 /* used to resemble https://github.com/swh/ladspa/blob/master/util/biquad.h */
 
-static void
+INNER void
 biquad_init(biquad *bq)
 {
 	bq->x1 = bq->x2 = bq->y1 = bq->y2 = 0;
 }
 
-static biquad_interim
+INNER biquad_interim
 design(double cw, double sw,
     double num0, double num1, double num2,
     double den0, double den1, double den2)
@@ -48,7 +48,7 @@ design(double cw, double sw,
 	};
 }
 
-static biquad
+INNER biquad
 biquad_gen(filter_t type, double fc, double gain, double bw, double fs)
 {
 	double w0, cw, sw, A, As, Q;
@@ -88,7 +88,7 @@ biquad_gen(filter_t type, double fc, double gain, double bw, double fs)
 	return out;
 }
 
-static double
+INNER double
 biquad_run(biquad *bq, double x)
 {
 	double y;

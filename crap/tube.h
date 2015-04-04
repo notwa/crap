@@ -17,8 +17,6 @@
 #define BLOCK_SIZE 256
 #define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
 
-#define INNER static inline
-
 typedef unsigned long ulong;
 
 typedef struct {
@@ -79,43 +77,43 @@ process_double(personal *data,
 		if (pos + BLOCK_SIZE > count)
 			rem = count - pos;
 
-		for (int i = 0; i < rem*OVERSAMPLING; i++)
+		for (ulong i = 0; i < rem*OVERSAMPLING; i++)
 			drives[i] = smooth(&data->drive);
-		for (int i = 0; i < rem*OVERSAMPLING; i++)
+		for (ulong i = 0; i < rem*OVERSAMPLING; i++)
 			wets[i] = smooth(&data->wet);
 
 		halfband_t *hb;
 
 		// left channel
 		hb = &data->hbu_L;
-		for (int i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
+		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
 			in_os[i+0] = interpolate(hb, in_L[j]);
 			in_os[i+1] = interpolate(hb, in_L[j]);
 		}
 
-		for (int i = 0; i < rem*OVERSAMPLING; i++) {
+		for (ulong i = 0; i < rem*OVERSAMPLING; i++) {
 			out_os[i] = process_one(in_os[i], drives[i], wets[i]);
 		}
 
 		hb = &data->hbd_L;
-		for (int i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
+		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
 			decimate(hb, out_os[i+0]);
 			out_L[j] = decimate(hb, out_os[i+1]);
 		}
 
 		// right channel
 		hb = &data->hbu_R;
-		for (int i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
+		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
 			in_os[i+0] = interpolate(hb, in_R[j]);
 			in_os[i+1] = interpolate(hb, in_R[j]);
 		}
 
-		for (int i = 0; i < rem*OVERSAMPLING; i++) {
+		for (ulong i = 0; i < rem*OVERSAMPLING; i++) {
 			out_os[i] = process_one(in_os[i], drives[i], wets[i]);
 		}
 
 		hb = &data->hbd_R;
-		for (int i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
+		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
 			decimate(hb, out_os[i+0]);
 			out_R[j] = decimate(hb, out_os[i+1]);
 		}
@@ -141,16 +139,16 @@ process(personal *data,
 		if (pos + BLOCK_SIZE > count)
 			rem = count - pos;
 
-		for (int i = 0; i < rem; i++)
+		for (ulong i = 0; i < rem; i++)
 			in_L2[i] = in_L[i];
-		for (int i = 0; i < rem; i++)
+		for (ulong i = 0; i < rem; i++)
 			in_R2[i] = in_R[i];
 
 		process_double(data, in_L2, in_R2, out_L2, out_R2, rem);
 
-		for (int i = 0; i < rem; i++)
+		for (ulong i = 0; i < rem; i++)
 			out_L[i] = out_L2[i];
-		for (int i = 0; i < rem; i++)
+		for (ulong i = 0; i < rem; i++)
 			out_R[i] = out_R2[i];
 
 		in_L += BLOCK_SIZE;
