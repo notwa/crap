@@ -9,7 +9,7 @@
 #define COPYRIGHT "MIT"
 #define PARAMETERS 0
 
-#define BANDS 6
+#define BANDS 12
 typedef struct {
 	biquad filters[2][BANDS];
 } personal;
@@ -73,10 +73,16 @@ INNER void
 adjust(personal *data, unsigned long fs)
 {
 	biquad *filters = data->filters[0];
-	filters[0] = biquad_gen(FILT_PEAKING,   37.01, +3.3, 1.94, fs);
-	filters[1] = biquad_gen(FILT_PEAKING,   2208., -4.0, 0.56, fs);
-	filters[2] = biquad_gen(FILT_PEAKING,   5236., +2.3, 0.81, fs);
-	filters[3] = biquad_gen(FILT_PEAKING,   8092., -3.5, 0.43, fs);
-	filters[4] = biquad_gen(FILT_PEAKING,   90.88, -1.0, 0.87, fs);
-	filters[5] = biquad_gen(FILT_HIGHPASS,  16.00,    0, 1.00, fs);
+	filters[ 0] = biquad_gen(FILT_PEAKING,  62.0,  5.3, 0.55, fs);
+	filters[ 1] = biquad_gen(FILT_PEAKING,  72.0, -1.7, 1.92, fs);
+	filters[ 2] = biquad_gen(FILT_PEAKING,  2070, -3.1, 0.10, fs);
+	filters[ 3] = biquad_gen(FILT_PEAKING,  2324,  1.9, 0.96, fs);
+	filters[ 4] = biquad_gen(FILT_PEAKING,  2340, -3.9, 0.12, fs);
+	filters[ 5] = biquad_gen(FILT_PEAKING,  3346,  1.4, 0.25, fs);
+	filters[ 6] = biquad_gen(FILT_PEAKING,  4800, -3.4, 0.24, fs);
+	filters[ 7] = biquad_gen(FILT_PEAKING,  5734,  1.7, 0.13, fs);
+	filters[ 8] = biquad_gen(FILT_PEAKING,  6046,  1.0, 0.11, fs);
+	filters[ 9] = biquad_gen(FILT_PEAKING,  6300, -6.4, 1.00, fs);
+	filters[10] = biquad_gen(FILT_PEAKING,  8390,  1.5, 0.15, fs);
+	filters[11] = biquad_gen(FILT_PEAKING, 13333,  3.1, 0.19, fs);
 }

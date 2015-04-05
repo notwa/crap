@@ -57,7 +57,7 @@ ALL = $(SHOBJ) $(PROGRAM) $(BIN)/vstsdk.o $(EXE) $(DLL)
 
 .PHONY: all options clean dist pretest ladspa vst $(UTILS)
 .PHONY: benchmark windows linux
-all: pretest ladspa vst
+all: pretest ladspa
 
 exe: $(EXE)
 
