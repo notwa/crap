@@ -1,7 +1,5 @@
 #include <string.h>
 
-#include "util.h"
-
 #define ID 0x0DEFACED
 #define LABEL "crap_eq_const"
 #define NAME "crap Constant Equalizer"
@@ -9,44 +7,58 @@
 #define COPYRIGHT "MIT"
 #define PARAMETERS 0
 
+#define BLOCK_SIZE 256
+
+#include "util.h"
+
 #define BANDS 12
 typedef struct {
 	biquad filters[2][BANDS];
 } personal;
 
-INNER double
-process_one(biquad *filters, double samp)
-{
-	for (int i = 0; i < BANDS; i++)
-		samp = biquad_run(&filters[i], samp);
-	return samp;
-}
-
-INNER void
-process(personal *data,
-    float *in_L, float *in_R,
-    float *out_L, float *out_R,
-    unsigned long count)
-{
-	disable_denormals();
-	for (unsigned long pos = 0; pos < count; pos++) {
-		out_L[pos] = process_one(data->filters[0], in_L[pos]);
-		out_R[pos] = process_one(data->filters[1], in_R[pos]);
-	}
-}
-
-INNER void
+static void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
-    unsigned long count)
+    ulong count)
 {
 	disable_denormals();
-	for (unsigned long pos = 0; pos < count; pos++) {
-		out_L[pos] = process_one(data->filters[0], in_L[pos]);
-		out_R[pos] = process_one(data->filters[1], in_R[pos]);
+
+	double buf[2*BLOCK_SIZE];
+
+	biquad *f0, *f1;
+
+	for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
+		ulong rem = BLOCK_SIZE;
+		if (pos + BLOCK_SIZE > count)
+			rem = count - pos;
+
+		for (ulong i = 0; i < rem; i++) {
+			buf[i*2+0] = in_L[i];
+			buf[i*2+1] = in_R[i];
+		}
+
+		f0 = data->filters[0];
+		f1 = data->filters[1];
+		for (ulong i = 0; i < BANDS; i++) {
+			biquad_run_block_stereo(f0, f1, buf, rem);
+			f0++;
+			f1++;
+		}
+
+		for (ulong i = 0; i < rem; i++) {
+			out_L[i] = buf[i*2+0];
+			out_R[i] = buf[i*2+1];
+		}
+
+		in_L += BLOCK_SIZE;
+		in_R += BLOCK_SIZE;
+		out_L += BLOCK_SIZE;
+		out_R += BLOCK_SIZE;
 	}
 }
+
+#include "process.h"
 
 INNER void
 construct(personal *data)
@@ -70,7 +82,7 @@ pause(personal *data)
 {}
 
 INNER void
-adjust(personal *data, unsigned long fs)
+adjust(personal *data, ulong fs)
 {
 	biquad *filters = data->filters[0];
 	filters[ 0] = biquad_gen(FILT_PEAKING,  62.0,  5.3, 0.55, fs);

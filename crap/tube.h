@@ -2,10 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "util.h"
-#include "param.h"
-#include "os2piir.h"
-
 #define ID 0x50F7BA11
 #define LABEL "crap_tube"
 #define NAME "crap Tube Distortion"
@@ -17,7 +13,9 @@
 #define BLOCK_SIZE 256
 #define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
 
-typedef unsigned long ulong;
+#include "util.h"
+#include "param.h"
+#include "os2piir.h"
 
 typedef struct {
 	double desired, actual, speed;
@@ -61,7 +59,7 @@ process_one(double x, double drive, double wet)
 	return (distort(x*drive)/drive*0.79 - x)*wet + x;
 }
 
-INNER void
+static void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,

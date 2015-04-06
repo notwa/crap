@@ -48,7 +48,7 @@ design(double cw, double sw,
 	};
 }
 
-INNER biquad
+static biquad
 biquad_gen(filter_t type, double fc, double gain, double bw, double fs)
 {
 	double w0, cw, sw, A, As, Q;
@@ -102,3 +102,54 @@ biquad_run(biquad *bq, double x)
 
 	return y;
 }
+
+INNER void
+biquad_run_block_stereo(biquad *bq_L, biquad *bq_R,
+    double *buf, ulong count)
+#ifdef __SSE2__
+{
+	__m128d b0, b1, b2, a1, a2, x1, x2, y1, y2;
+
+	b0 = _mm_set1_pd(bq_L->b0);
+	b1 = _mm_set1_pd(bq_L->b1);
+	b2 = _mm_set1_pd(bq_L->b2);
+	a1 = _mm_set1_pd(bq_L->a1);
+	a2 = _mm_set1_pd(bq_L->a2);
+
+	x1 = _mm_setr_pd(bq_L->x1, bq_R->x1);
+	x2 = _mm_setr_pd(bq_L->x2, bq_R->x2);
+	y1 = _mm_setr_pd(bq_L->y1, bq_R->y1);
+	y2 = _mm_setr_pd(bq_L->y2, bq_R->y2);
+
+	for (int i = 0; i < 2*count; i += 2) {
+		__m128d x = _mm_load_pd(buf + i);
+		__m128d y = b0*x + b1*x1 + b2*x2 + a1*y1 + a2*y2;
+		x2 = x1;
+		y2 = y1;
+		x1 = x;
+		y1 = y;
+		_mm_store_pd(buf + i, y);
+	}
+
+	double temp[8];
+	_mm_store_pd(temp+0, x1);
+	_mm_store_pd(temp+2, x2);
+	_mm_store_pd(temp+4, y1);
+	_mm_store_pd(temp+6, y2);
+	bq_L->x1 = temp[0];
+	bq_R->x1 = temp[1];
+	bq_L->x2 = temp[2];
+	bq_R->x2 = temp[3];
+	bq_L->y1 = temp[4];
+	bq_R->y1 = temp[5];
+	bq_L->y2 = temp[6];
+	bq_R->y2 = temp[7];
+}
+#else
+{
+	for (ulong i = 0; i < 2*count; i += 2) {
+		buf[i+0] = biquad_run(bq_L, buf[i+0]);
+		buf[i+1] = biquad_run(bq_R, buf[i+1]);
+	}
+}
+#endif

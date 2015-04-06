@@ -5,6 +5,7 @@
 #endif
 
 #define INNER static inline
+typedef unsigned long ulong;
 
 INNER void
 disable_denormals();
