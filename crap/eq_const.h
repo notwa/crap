@@ -24,7 +24,7 @@ process_double(personal *data,
 {
 	disable_denormals();
 
-	double buf[2*BLOCK_SIZE];
+	v2df buf[BLOCK_SIZE];
 
 	biquad *f0, *f1;
 
@@ -34,8 +34,8 @@ process_double(personal *data,
 			rem = count - pos;
 
 		for (ulong i = 0; i < rem; i++) {
-			buf[i*2+0] = in_L[i];
-			buf[i*2+1] = in_R[i];
+			buf[i][0] = in_L[i];
+			buf[i][1] = in_R[i];
 		}
 
 		f0 = data->filters[0];
@@ -47,8 +47,8 @@ process_double(personal *data,
 		}
 
 		for (ulong i = 0; i < rem; i++) {
-			out_L[i] = buf[i*2+0];
-			out_R[i] = buf[i*2+1];
+			out_L[i] = buf[i][0];
+			out_R[i] = buf[i][1];
 		}
 
 		in_L += BLOCK_SIZE;

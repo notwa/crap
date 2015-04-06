@@ -5,6 +5,7 @@
 #endif
 
 #define INNER static inline
+typedef double v2df __attribute__((vector_size(16), aligned(16)));
 typedef unsigned long ulong;
 
 INNER void
@@ -48,7 +49,7 @@ INNER biquad
 biquad_gen(filter_t type, double fc, double gain, double bw, double fs);
 
 /* s-plane to z-plane */
-INNER biquad_interim
+static biquad_interim
 design(double cw, double sw,
     double num0, double num1, double num2,
     double den0, double den1, double den2);

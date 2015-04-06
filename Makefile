@@ -34,8 +34,8 @@ VST_SRC = ${VST_CPP:%=$(VST_CPP_DIR)/%}
 VST_OBJ = ${VST_CPP:%.cpp=$(BIN)/%.o}
 VST_DEF = $(VST_SDK_DIR)/public.sdk/samples/vst2.x/win/vstplug.def
 
-INLINE_FLAGS = -Winline -finline-limit=1000
-GENERAL_FLAGS = -Wall -Wno-unused-function -I include $(INLINE_FLAGS)
+INLINE_FLAGS = -Winline
+GENERAL_FLAGS = -Wall -Wno-unused-function -Wno-sign-compare -I include $(INLINE_FLAGS)
 ALL_CFLAGS = $(GENERAL_FLAGS) -std=gnu11 $(CFLAGS)
 ALL_CXXFLAGS = $(GENERAL_FLAGS) $(CXXFLAGS)
 ALL_LDFLAGS = -lm $(LDFLAGS)
@@ -44,9 +44,7 @@ LADSPA_FLAGS =
 VST_FLAGS = -Wno-write-strings -Wno-narrowing
 VST_FLAGS += -I $(VST_SDK_DIR) -DBUILDING_DLL=1
 
-# specifying core2 as the target architecture
-# seems significantly faster, even on newer processors. ymmv.
-OPT_FLAGS = -Ofast -march=core2 -mfpmath=sse
+OPT_FLAGS = -Ofast -march=native -mfpmath=sse
 
 # any possibly produced files besides intermediates
 ALL = $(SHOBJ) $(PROGRAM) $(BIN)/vstsdk.o $(EXE) $(DLL)
@@ -57,7 +55,7 @@ ALL = $(SHOBJ) $(PROGRAM) $(BIN)/vstsdk.o $(EXE) $(DLL)
 
 .PHONY: all options clean dist pretest ladspa vst $(UTILS)
 .PHONY: benchmark windows linux
-all: pretest ladspa
+all: pretest ladspa vst
 
 exe: $(EXE)
 

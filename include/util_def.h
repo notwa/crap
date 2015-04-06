@@ -33,7 +33,7 @@ biquad_init(biquad *bq)
 	bq->x1 = bq->x2 = bq->y1 = bq->y2 = 0;
 }
 
-INNER biquad_interim
+static biquad_interim
 design(double cw, double sw,
     double num0, double num1, double num2,
     double den0, double den1, double den2)
@@ -105,51 +105,37 @@ biquad_run(biquad *bq, double x)
 
 INNER void
 biquad_run_block_stereo(biquad *bq_L, biquad *bq_R,
-    double *buf, ulong count)
-#ifdef __SSE2__
+    v2df *buf, ulong count)
 {
-	__m128d b0, b1, b2, a1, a2, x1, x2, y1, y2;
+	v2df b0, b1, b2, a1, a2, x1, x2, y1, y2;
 
-	b0 = _mm_set1_pd(bq_L->b0);
-	b1 = _mm_set1_pd(bq_L->b1);
-	b2 = _mm_set1_pd(bq_L->b2);
-	a1 = _mm_set1_pd(bq_L->a1);
-	a2 = _mm_set1_pd(bq_L->a2);
+	b0 = (v2df){bq_L->b0, bq_L->b0};
+	b1 = (v2df){bq_L->b1, bq_L->b1};
+	b2 = (v2df){bq_L->b2, bq_L->b2};
+	a1 = (v2df){bq_L->a1, bq_L->a1};
+	a2 = (v2df){bq_L->a2, bq_L->a2};
 
-	x1 = _mm_setr_pd(bq_L->x1, bq_R->x1);
-	x2 = _mm_setr_pd(bq_L->x2, bq_R->x2);
-	y1 = _mm_setr_pd(bq_L->y1, bq_R->y1);
-	y2 = _mm_setr_pd(bq_L->y2, bq_R->y2);
+	x1 = (v2df){bq_L->x1, bq_R->x1};
+	x2 = (v2df){bq_L->x2, bq_R->x2};
+	y1 = (v2df){bq_L->y1, bq_R->y1};
+	y2 = (v2df){bq_L->y2, bq_R->y2};
 
-	for (int i = 0; i < 2*count; i += 2) {
-		__m128d x = _mm_load_pd(buf + i);
-		__m128d y = b0*x + b1*x1 + b2*x2 + a1*y1 + a2*y2;
+	for (ulong i = 0; i < count; i++) {
+		v2df x = buf[i];
+		v2df y = b0*x + b1*x1 + b2*x2 + a1*y1 + a2*y2;
 		x2 = x1;
 		y2 = y1;
 		x1 = x;
 		y1 = y;
-		_mm_store_pd(buf + i, y);
+		buf[i] = y;
 	}
 
-	double temp[8];
-	_mm_store_pd(temp+0, x1);
-	_mm_store_pd(temp+2, x2);
-	_mm_store_pd(temp+4, y1);
-	_mm_store_pd(temp+6, y2);
-	bq_L->x1 = temp[0];
-	bq_R->x1 = temp[1];
-	bq_L->x2 = temp[2];
-	bq_R->x2 = temp[3];
-	bq_L->y1 = temp[4];
-	bq_R->y1 = temp[5];
-	bq_L->y2 = temp[6];
-	bq_R->y2 = temp[7];
+	bq_L->x1 = x1[0];
+	bq_R->x1 = x1[1];
+	bq_L->x2 = x2[0];
+	bq_R->x2 = x2[1];
+	bq_L->y1 = y1[0];
+	bq_R->y1 = y1[1];
+	bq_L->y2 = y2[0];
+	bq_R->y2 = y2[1];
 }
-#else
-{
-	for (ulong i = 0; i < 2*count; i += 2) {
-		buf[i+0] = biquad_run(bq_L, buf[i+0]);
-		buf[i+1] = biquad_run(bq_R, buf[i+1]);
-	}
-}
-#endif
