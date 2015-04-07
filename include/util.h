@@ -1,12 +1,17 @@
 #include "math.h"
 
 #ifdef __SSE2__
-#include <xmmintrin.h>
+#include <emmintrin.h>
 #endif
 
 #define INNER static inline
+#define PURE __attribute__((pure))
+#define CONST __attribute__((const))
 typedef double v2df __attribute__((vector_size(16), aligned(16)));
-typedef unsigned long ulong;
+typedef float v4sf __attribute__((vector_size(16), aligned(16)));
+typedef unsigned long ulong; // __attribute((aligned(16)));
+
+#define V(x) (v2df){(x), (x)}
 
 INNER void
 disable_denormals();

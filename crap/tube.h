@@ -15,7 +15,7 @@
 
 #include "util.h"
 #include "param.h"
-#include "os2piir.h"
+#include "os2piir_stereo.h"
 
 typedef struct {
 	double desired, actual, speed;
@@ -23,7 +23,7 @@ typedef struct {
 } smoothval;
 
 typedef struct {
-	halfband_t hbu_L, hbu_R, hbd_L, hbd_R;
+	halfband_t hb_up, hb_down;
 	smoothval drive, wet;
 } personal;
 
@@ -47,16 +47,16 @@ smooth(smoothval *val)
 	return a;
 }
 
-INNER double
-distort(double x)
+INNER CONST v2df
+distort(v2df x)
 {
-	return (27*x + 9) / (9*x*x + 6*x + 19) - 9/19.;
+	return (V(27.)*x + V(9.)) / (V(9.)*x*x + V(6.)*x + V(19.)) - V(9./19.);
 }
 
-INNER double
-process_one(double x, double drive, double wet)
+INNER CONST v2df
+process_one(v2df x, v2df drive, v2df wet)
 {
-	return (distort(x*drive)/drive*0.79 - x)*wet + x;
+	return (distort(x*drive)/drive*V(0.79) - x)*wet + x;
 }
 
 static void
@@ -64,74 +64,20 @@ process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
     ulong count)
-{
-	disable_denormals();
+#include "process_nonlinear.h"
 
-	double drives[FULL_SIZE], wets[FULL_SIZE];
-	double in_os[FULL_SIZE], out_os[FULL_SIZE];
-
-	for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
-		ulong rem = BLOCK_SIZE;
-		if (pos + BLOCK_SIZE > count)
-			rem = count - pos;
-
-		for (ulong i = 0; i < rem*OVERSAMPLING; i++)
-			drives[i] = smooth(&data->drive);
-		for (ulong i = 0; i < rem*OVERSAMPLING; i++)
-			wets[i] = smooth(&data->wet);
-
-		halfband_t *hb;
-
-		// left channel
-		hb = &data->hbu_L;
-		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
-			in_os[i+0] = interpolate(hb, in_L[j]);
-			in_os[i+1] = interpolate(hb, in_L[j]);
-		}
-
-		for (ulong i = 0; i < rem*OVERSAMPLING; i++) {
-			out_os[i] = process_one(in_os[i], drives[i], wets[i]);
-		}
-
-		hb = &data->hbd_L;
-		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
-			decimate(hb, out_os[i+0]);
-			out_L[j] = decimate(hb, out_os[i+1]);
-		}
-
-		// right channel
-		hb = &data->hbu_R;
-		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
-			in_os[i+0] = interpolate(hb, in_R[j]);
-			in_os[i+1] = interpolate(hb, in_R[j]);
-		}
-
-		for (ulong i = 0; i < rem*OVERSAMPLING; i++) {
-			out_os[i] = process_one(in_os[i], drives[i], wets[i]);
-		}
-
-		hb = &data->hbd_R;
-		for (ulong i = 0, j = 0; j < rem; i += OVERSAMPLING, j++) {
-			decimate(hb, out_os[i+0]);
-			out_R[j] = decimate(hb, out_os[i+1]);
-		}
-
-		in_L += BLOCK_SIZE;
-		in_R += BLOCK_SIZE;
-		out_L += BLOCK_SIZE;
-		out_R += BLOCK_SIZE;
-	}
-}
-
-#include "process.h"
+static void
+process(personal *data,
+    float *in_L, float *in_R,
+    float *out_L, float *out_R,
+    ulong count)
+#include "process_nonlinear.h"
 
 INNER void
 resume(personal *data)
 {
-	memset(&data->hbu_L, 0, sizeof(halfband_t));
-	memset(&data->hbu_R, 0, sizeof(halfband_t));
-	memset(&data->hbd_L, 0, sizeof(halfband_t));
-	memset(&data->hbd_R, 0, sizeof(halfband_t));
+	memset(&data->hb_up,   0, sizeof(halfband_t));
+	memset(&data->hb_down, 0, sizeof(halfband_t));
 }
 
 INNER void
