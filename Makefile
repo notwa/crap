@@ -70,8 +70,8 @@ linux: ALL_CXXFLAGS += $(OPT_FLAGS) -fpic
 linux: VST_FLAGS += -D__cdecl=
 linux: all
 
-linux-arm: ALL_CFLAGS += -Ofast -mfpu=neon -fpic
-linux-arm: ALL_CXXFLAGS += -Ofast -mfpu=neon -fpic
+linux-arm: ALL_CFLAGS += -Ofast -march=native -DFORCE_SINGLE -fpic
+linux-arm: ALL_CXXFLAGS += -Ofast -march=native -DFORCE_SINGLE -fpic
 linux-arm: VST_FLAGS += -D__cdecl=
 linux-arm: all
 

@@ -7,7 +7,13 @@
 #define INNER static inline
 #define PURE __attribute__((pure))
 #define CONST __attribute__((const))
+
+#ifndef FORCE_SINGLE
 typedef double v2df __attribute__((vector_size(16), aligned(16)));
+#else
+typedef float v2df __attribute__((vector_size(8), aligned(8)));
+#endif
+
 typedef float v4sf __attribute__((vector_size(16), aligned(16)));
 typedef unsigned long ulong; // __attribute((aligned(16)));
 
