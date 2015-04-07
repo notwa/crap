@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "util.h"
-#include "param.h"
-
 #define BANDS 4
 
 #define ID 0x000CAFED
@@ -13,44 +10,29 @@
 #define COPYRIGHT "MIT"
 #define PARAMETERS (BANDS*3)
 
+#define BLOCK_SIZE 256
+
+#include "util.h"
+#include "param.h"
+
 typedef struct {
 	biquad filters[2][BANDS];
 	float fs;
 } personal;
 
-INNER double
-process_one(biquad *filters, double samp)
-{
-	for (int i = 0; i < BANDS; i++)
-		samp = biquad_run(&filters[i], samp);
-	return samp;
-}
-
-INNER void
-process(personal *data,
-    float *in_L, float *in_R,
-    float *out_L, float *out_R,
-    unsigned long count)
-{
-	disable_denormals();
-	for (unsigned long pos = 0; pos < count; pos++) {
-		out_L[pos] = process_one(data->filters[0], in_L[pos]);
-		out_R[pos] = process_one(data->filters[1], in_R[pos]);
-	}
-}
-
-INNER void
+static void
 process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
     unsigned long count)
-{
-	disable_denormals();
-	for (unsigned long pos = 0; pos < count; pos++) {
-		out_L[pos] = process_one(data->filters[0], in_L[pos]);
-		out_R[pos] = process_one(data->filters[1], in_R[pos]);
-	}
-}
+#include "process_biquads.h"
+
+static void
+process(personal *data,
+    float *in_L, float *in_R,
+    float *out_L, float *out_R,
+    ulong count)
+#include "process_biquads.h"
 
 INNER void
 resume(personal *data)
