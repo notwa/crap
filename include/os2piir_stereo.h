@@ -14,7 +14,6 @@ typedef struct {
 	v2df ao[8], bo[8];
 	v2df at[8], bt[8];
 	v2df x1, x2, x3;
-	int i;
 } halfband_t;
 
 INNER void
@@ -60,39 +59,46 @@ halfband(halfband_t *h, v2df x0)
 }
 
 INNER v2df
-decimate(halfband_t *h, v2df x0)
+decimate_a(halfband_t *h, v2df x0)
 {
 	v2df c[8];
-	if ((h->i = !h->i)) {
-		halfband_b(c, h->bo, x0, h->x2);
-		copy(h->bo, c);
-		h->x2 = h->x1;
-		h->x1 = x0;
-		return V(0);
-	} else {
-		halfband_a(c, h->ao, x0, h->x2);
-		copy(h->ao, c);
-		h->x2 = h->x1;
-		h->x1 = x0;
-		return (c[7] + h->bo[7])*V(0.5);
-	}
+	halfband_b(c, h->bo, x0, h->x2);
+	copy(h->bo, c);
+	h->x2 = h->x1;
+	h->x1 = x0;
+	return V(0);
+}
+
+INNER v2df
+decimate_b(halfband_t *h, v2df x0)
+{
+	v2df c[8];
+	halfband_a(c, h->ao, x0, h->x2);
+	copy(h->ao, c);
+	h->x2 = h->x1;
+	h->x1 = x0;
+	return (c[7] + h->bo[7])*V(0.5);
 }
 
 // note: do not zero-stuff! send the input each time.
 INNER v2df
-interpolate(halfband_t *h, v2df x0)
+interpolate_a(halfband_t *h, v2df x0)
 {
 	v2df c[8];
-	if ((h->i = !h->i)) {
-		halfband_a(c, h->ao, x0, h->x1);
-		copy(h->ao, c);
-		return c[7];
-	} else {
-		halfband_b(c, h->bo, x0, h->x1);
-		copy(h->bo, c);
-		h->x1 = x0;
-		return c[7];
-	}
+	halfband_a(c, h->ao, x0, h->x1);
+	copy(h->ao, c);
+	return c[7];
+}
+
+// note: do not zero-stuff! send the input each time.
+INNER v2df
+interpolate_b(halfband_t *h, v2df x0)
+{
+	v2df c[8];
+	halfband_b(c, h->bo, x0, h->x1);
+	copy(h->bo, c);
+	h->x1 = x0;
+	return c[7];
 }
 
 #undef copy

@@ -30,9 +30,8 @@
 		}
 
 		for (ulong i = 0; i < rem; i++) {
-			hb_up->i = 0; // so compiler can optimize
-			over[i*2+0] = interpolate(hb_up, buf[i]);
-			over[i*2+1] = interpolate(hb_up, buf[i]);
+			over[i*2+0] = interpolate_a(hb_up, buf[i]);
+			over[i*2+1] = interpolate_b(hb_up, buf[i]);
 		}
 
 		for (ulong i = 0; i < rem2; i++) {
@@ -40,9 +39,8 @@
 		}
 
 		for (ulong i = 0; i < rem; i++) {
-			hb_down->i = 0; // so compiler can optimize
-			         decimate(hb_down, over[i*2+0]);
-			buf[i] = decimate(hb_down, over[i*2+1]);
+			         decimate_a(hb_down, over[i*2+0]);
+			buf[i] = decimate_b(hb_down, over[i*2+1]);
 		}
 
 		for (ulong i = 0; i < rem; i++) {
