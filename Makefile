@@ -5,7 +5,7 @@ FULLNAME = $(DISTNAME)-$(VERSION)
 BIN ?= ./bin
 VST_SDK_DIR ?= .
 
-BOTH = eq eq_const noise tube
+BOTH = eq eq_const eq_const_T420 noise tube
 LADSPA = $(BOTH)
 VST = $(BOTH) delay_test
 
