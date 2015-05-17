@@ -1,4 +1,3 @@
-#include <alloca.h>
 #include <string.h>
 #include <stdio.h>
 
