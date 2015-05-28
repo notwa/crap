@@ -1,31 +1,25 @@
-#include <stdlib.h>
-#include <math.h>
-#include <stdint.h>
-
-INNER void
-disable_denormals()
-{
-	#if __SSE2__
-        _mm_setcsr(_mm_getcsr() | 0x8040);
-	#endif
-}
-
-/* via http://www.rgba.org/articles/sfrand/sfrand.htm */
-static unsigned int mirand = 1;
-
-INNER float
-whitenoise()
-{
-	union either {
-		float f;
-		unsigned int i;
-	} white;
-	mirand *= 16807;
-	white.i = (mirand & 0x007FFFFF) | 0x40000000;
-	return white.f - 3;
-}
-
 /* used to resemble https://github.com/swh/ladspa/blob/master/util/biquad.h */
+
+typedef enum {
+	FILT_PEAKING,
+	FILT_LOWSHELF,
+	FILT_HIGHSHELF,
+	FILT_LOWPASS,
+	FILT_HIGHPASS,
+	FILT_ALLPASS,
+	FILT_BANDPASS,
+	FILT_BANDPASS_2,
+	FILT_NOTCH,
+	FILT_GAIN
+} filter_t;
+
+typedef struct {
+	double a1, a2, b0, b1, b2, x1, x2, y1, y2;
+} biquad;
+
+typedef struct {
+	double b0, b1, b2, a0, a1, a2;
+} biquad_interim;
 
 INNER void
 biquad_init(biquad *bq)

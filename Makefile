@@ -10,7 +10,7 @@ LADSPA = $(BOTH)
 VST = $(BOTH) delay_test
 
 UTILS = design bench
-INCLUDES = util util_def param os6iir os2piir
+INCLUDES = util biquad param os6iir os2piir
 
 BENCH_AGAINST = eq_const
 
