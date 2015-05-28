@@ -1,18 +1,5 @@
 /* used to resemble https://github.com/swh/ladspa/blob/master/util/biquad.h */
 
-typedef enum {
-	FILT_PEAKING,
-	FILT_LOWSHELF,
-	FILT_HIGHSHELF,
-	FILT_LOWPASS,
-	FILT_HIGHPASS,
-	FILT_ALLPASS,
-	FILT_BANDPASS,
-	FILT_BANDPASS_2,
-	FILT_NOTCH,
-	FILT_GAIN
-} filter_t;
-
 typedef struct {
 	double a1, a2, b0, b1, b2, x1, x2, y1, y2;
 } biquad;
@@ -42,6 +29,7 @@ design(double cw, double sw,
 	};
 }
 
+// TODO: rename to biquad_gen_raw, fix up parameters like you did with svf
 static biquad
 biquad_gen(filter_t type, double fc, double gain, double bw, double fs)
 {
@@ -52,7 +40,6 @@ biquad_gen(filter_t type, double fc, double gain, double bw, double fs)
 	A = DB2LIN(gain/2);
 	As = sqrt(A);
 	Q = M_SQRT1_2*(1 - (w0/M_PI)*(w0/M_PI))/bw;
-	/* skip = (fabs(A - 1) <= TINY); */
 
 	biquad_interim bqi;
 

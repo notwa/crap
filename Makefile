@@ -5,12 +5,12 @@ FULLNAME = $(DISTNAME)-$(VERSION)
 BIN ?= ./bin
 VST_SDK_DIR ?= .
 
-BOTH = eq eq_const eq_const_T420 noise tube
+BOTH = eq eq_const eq_const_T420 eq_const_T420_svf noise tube
 LADSPA = $(BOTH)
 VST = $(BOTH) delay_test
 
 UTILS = design bench
-INCLUDES = util biquad param os6iir os2piir
+INCLUDES = util biquad svf param os6iir os2piir
 
 BENCH_AGAINST = eq_const
 

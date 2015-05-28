@@ -10,10 +10,12 @@
 #define PURE __attribute__((pure))
 #define CONST __attribute__((const))
 
-#ifndef FORCE_SINGLE
 typedef double v2df __attribute__((vector_size(16), aligned(16)));
-#else
-typedef float v2df __attribute__((vector_size(8), aligned(8)));
+typedef float v2sf __attribute__((vector_size(8), aligned(8)));
+typedef float v4sf __attribute__((vector_size(16), aligned(16)));
+
+#ifndef FORCE_SINGLE
+#define v2df v2sf
 #endif
 
 typedef float v4sf __attribute__((vector_size(16), aligned(16)));
@@ -51,4 +53,18 @@ whitenoise()
 	return white.f - 3;
 }
 
+typedef enum {
+	FILT_PEAKING,
+	FILT_LOWSHELF,
+	FILT_HIGHSHELF,
+	FILT_LOWPASS,
+	FILT_HIGHPASS,
+	FILT_ALLPASS,
+	FILT_BANDPASS,
+	FILT_BANDPASS_2,
+	FILT_NOTCH,
+	FILT_GAIN
+} filter_t;
+
 #include "biquad.h"
+#include "svf.h"
