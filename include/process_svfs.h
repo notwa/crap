@@ -1,35 +1,41 @@
 {
 	disable_denormals();
 
-	float buf_L[BLOCK_SIZE];
-	float buf_R[BLOCK_SIZE];
+	assert(count % 2 == 0);
 
-	svf *f0, *f1;
+	v4sf buf_L[BLOCK_SIZE/2];
+	v4sf buf_R[BLOCK_SIZE/2];
+
+	svf_matrix *f0, *f1;
 
 	for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
 		ulong rem = BLOCK_SIZE;
 		if (pos + BLOCK_SIZE > count)
 			rem = count - pos;
 
-		for (ulong i = 0; i < rem; i++) {
-			buf_L[i] = in_L[i];
-			buf_R[i] = in_R[i];
+		for (ulong i = 0, j = 0; i < rem; i += 2, j++) {
+			buf_L[j][0] = in_L[i+0];
+			buf_L[j][1] = in_L[i+1];
+			buf_R[j][0] = in_R[i+0];
+			buf_R[j][1] = in_R[i+1];
 		}
 
 		f0 = data->filters[0];
+		for (ulong i = 0; i < BANDS; i++) {
+			svf_run_block_mat(f0, buf_L, rem);
+			f0++;
+		}
 		f1 = data->filters[1];
 		for (ulong i = 0; i < BANDS; i++) {
-			for (ulong j = 0; j < rem; j++)
-				buf_L[j] = svf_run(f0, buf_L[j]);
-			for (ulong j = 0; j < rem; j++)
-				buf_R[j] = svf_run(f1, buf_R[j]);
-			f0++;
+			svf_run_block_mat(f1, buf_R, rem);
 			f1++;
 		}
 
-		for (ulong i = 0; i < rem; i++) {
-			out_L[i] = buf_L[i];
-			out_R[i] = buf_R[i];
+		for (ulong i = 0, j = 0; i < rem; i += 2, j++) {
+			out_L[i+0] = buf_L[j][0];
+			out_L[i+1] = buf_L[j][1];
+			out_R[i+0] = buf_R[j][0];
+			out_R[i+1] = buf_R[j][1];
 		}
 
 		in_L += BLOCK_SIZE;

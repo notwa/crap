@@ -95,17 +95,6 @@ svf_run(svf *s, float x)
 static svf_matrix
 svf_gen_matrix(svf s)
 {
-	// note: does not copy memory
-	/*
-	AA = dot(A, A);
-	AB = dot(A, B);
-	CA = dot(C[1:], A);
-	cb = dot(C[1:], B);
-	return [[ C[0],    0,     C[1],     C[2]],
-	        [   cb, C[0],    CA[0],    CA[1]],
-	        [AB[0], B[0], AA[0][0], AA[0][1]],
-	        [AB[1], B[1], AA[1][0], AA[1][1]]];
-	*/
 	float AA0[2], AA1[2], AB[2], CA[2], cb;
 	AA0[0] = s.A0[0]*s.A0[0] + s.A0[1]*s.A1[0];
 	AA1[0] = s.A1[0]*s.A0[0] + s.A1[1]*s.A1[0];
@@ -113,15 +102,43 @@ svf_gen_matrix(svf s)
 	AA1[1] = s.A1[0]*s.A0[1] + s.A1[1]*s.A1[1];
 	AB[0] = s.A0[0]*s.B[0] + s.A0[1]*s.B[1];
 	AB[1] = s.A1[0]*s.B[0] + s.A1[1]*s.B[1];
-	CA[0] = s.A0[0]*s.C[1] + s.A0[1]*s.C[2];
-	CA[1] = s.A1[0]*s.C[1] + s.A1[1]*s.C[2];
+	CA[0] = s.A0[0]*s.C[1] + s.A1[0]*s.C[2];
+	CA[1] = s.A0[1]*s.C[1] + s.A1[1]*s.C[2];
+
 	cb = s.C[1]*s.B[0] + s.C[2]*s.B[1];
 
 	svf_matrix mat;
 	mat.memory = (v4sf){0, 0, 0, 0};
-	mat.a = (v4sf){s.C[0],       0, s.C[1], s.C[2]};
-	mat.b = (v4sf){     cb, s.C[0],   CA[0],   CA[1]};
-	mat.c = (v4sf){  AB[0], s.B[0],  AA0[0],  AA0[1]};
-	mat.d = (v4sf){  AB[1], s.B[1],  AA1[0],  AA1[1]};
+	mat.a = (v4sf){s.C[0],      0, s.C[1], s.C[2]};
+	mat.b = (v4sf){    cb, s.C[0],  CA[0],  CA[1]};
+	mat.c = (v4sf){ AB[0], s.B[0], AA0[0], AA0[1]};
+	mat.d = (v4sf){ AB[1], s.B[1], AA1[0], AA1[1]};
 	return mat;
+}
+
+INNER void
+svf_run_block_mat(svf_matrix *restrict mat, v4sf *restrict buf, ulong count)
+{
+	v4sf t1, t2, t3, t4;
+	v4sf a, b, c, d; // const?
+	a = mat->a;
+	b = mat->b;
+	c = mat->c;
+	d = mat->d;
+	v4sf memory = mat->memory;
+	for (ulong i = 0; i < count/2; i++) {
+		memory[0] = buf[i][0];
+		memory[1] = buf[i][1];
+		t1 = mat->a*memory;
+		t2 = mat->b*memory;
+		t3 = mat->c*memory;
+		t4 = mat->d*memory;
+		memory[0] = t1[0] + t1[1] + t1[2] + t1[3];
+		memory[1] = t2[0] + t2[1] + t2[2] + t2[3];
+		memory[2] = t3[0] + t3[1] + t3[2] + t3[3];
+		memory[3] = t4[0] + t4[1] + t4[2] + t4[3];
+		buf[i][0] = memory[0];
+		buf[i][1] = memory[1];
+	}
+	mat->memory = memory;
 }
