@@ -120,11 +120,6 @@ INNER void
 svf_run_block_mat(svf_matrix *restrict mat, v4sf *restrict buf, ulong count)
 {
 	v4sf t1, t2, t3, t4;
-	v4sf a, b, c, d; // const?
-	a = mat->a;
-	b = mat->b;
-	c = mat->c;
-	d = mat->d;
 	v4sf memory = mat->memory;
 	for (ulong i = 0; i < count/2; i++) {
 		memory[0] = buf[i][0];
