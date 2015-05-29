@@ -9,6 +9,7 @@
 #define INNER static inline
 #define PURE __attribute__((pure))
 #define CONST __attribute__((const))
+#define RESTRICT __restrict__
 
 typedef double v2df __attribute__((vector_size(16), aligned(16)));
 typedef float v2sf __attribute__((vector_size(8), aligned(8)));

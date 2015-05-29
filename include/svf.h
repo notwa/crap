@@ -117,7 +117,7 @@ svf_gen_matrix(svf s)
 }
 
 INNER void
-svf_run_block_mat(svf_matrix *restrict mat, v4sf *restrict buf, ulong count)
+svf_run_block_mat(svf_matrix *RESTRICT mat, v4sf *RESTRICT buf, ulong count)
 {
 	v4sf t1, t2, t3, t4;
 	v4sf memory = mat->memory;
