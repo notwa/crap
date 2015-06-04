@@ -2,47 +2,24 @@
 
 connor's rancid audio plugins. LADSPA and VST.
 
-alternatively, configuration realizes any personality.
-
 this is a set of hacked-together hacks to be hacked on
 in the personal interest of learning and experimenting.
-you should look elsewhere if you need an *enterprize-quality*
-cross-platform library to build *lean & agile socially-networked* audio apps.
 
 MIT-licensed; go wild.
 
 ## plugs
 
-### crap Parametric Equalizer
+Name | Label | ID | Description
+--- | --- | --- | ---
+crap Parametric Equalizer  | crap\_eq | `0x000CAFED` | multiband parametric EQ. try redefining BANDS. #define BANDS to desired number of equalizer bands; default 4.
+crap sample delay test | crap\_delay\_test | `0xDEDEDEDE` | why did i commit this?
+crap Constant Equalizer | crap\_eq\_const | `0x0DEFACED` | simpler code than crap_eq for a static response. edit code as needed.
+crap T420 Speaker Compensation | crap\_eq\_const\_T420 | `0x0DEFAE91` | lenovo tests
+crap T420 Speaker Compensation (SVF) | crap\_eq\_const\_T420_svf | `0x0DEFB3CA` | trying out State Variable Filters (SVFs)
+crap mugi4 (moog-like) | crap\_mugi4 | `0xD8D0D8D0` | nonlinear moog filter implementation: [see reference][moog]
+crap Tube Distortion | crap\_tube | `0x50F7BA11` | static waveshaper with 6x oversampling and parameter smoothing. doesn't actually emulate a tube. not actually for crapping in.
 
-__crap\_eq (0x000CAFED)__
-
-multiband parametric EQ. try redefining BANDS.
-
-### crap const Equalizer
-
-__crap\_eq\_const (0x0DEFACED)__
-
-simpler code with a static response.
-edit code as needed.
-
-### crap noise generator
-
-__crap\_noise (0xEC57A71C)__
-
-white noise generator. loud, full-range, 0dBFS. don't say i didn't warn you.
-
-### crap Tube Distortion
-
-__crap\_tube (0x50F7BA11)__
-
-static waveshaper with 6x oversampling, sounds kinda like a tube i guess?
-
-### crap delay test
-
-__crap\_delay\_test (0xDEDEDEDE)__
-
-experimentation with delay compensation and EQ oversampling, not for use.
+[moog]: https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
 
 ## build notes
 
@@ -60,10 +37,9 @@ other targets:
 
 ## TODO
 
-* spaces-in-paths support in Makefile
+* LV2 support
+* automatically generate markdown table based on crap contents
 * rename plugins (fix capitalization consistency and such)
-* reduce input/output buffers on biquads (shared)
-* ease up on the preprocessor ifs
-* polish parameter support
-* make code style consistent
-* perhaps LV2 or AU support
+* don't suffix -ladspa and -vst on built libraries; it's annoying
+* scrap overly-complex makefile for a shell script
+* maybe switch to sepples in interest of templated process functions
