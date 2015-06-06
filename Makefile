@@ -99,7 +99,7 @@ $(BIN)/%.dll: $(BIN)/%.so
 	@$(OBJCOPY) -S $< $@
 
 $(BIN)/%-ladspa.so: $(BIN)/%-ladspa.o
-	@echo '  CXXLD    '$@
+	@echo '  CXXLD   '$@
 	@$(CXX) $(ALL_CXXFLAGS) $(LADSPA_FLAGS) -shared $^ -o $@ $(ALL_LDFLAGS)
 
 $(BIN)/%-vst.so: $(BIN)/%-vst.o $(BIN)/vstsdk.o
@@ -107,7 +107,7 @@ $(BIN)/%-vst.so: $(BIN)/%-vst.o $(BIN)/vstsdk.o
 	@$(CXX) $(ALL_CXXFLAGS) $(VST_FLAGS) -shared $^ -o $@ $(ALL_LDFLAGS)
 
 $(BIN)/$(DISTNAME)_%-ladspa.o: crap/%-ladspa.cpp $(HEADERS) include/ladspa.hpp
-	@echo '  CXX      '$@
+	@echo '  CXX     '$@
 	@$(CXX) -c $(ALL_CXXFLAGS) $(LADSPA_FLAG) $(CPPFLAGS) $< -o $@
 
 $(BIN)/$(DISTNAME)_%-vst.o: crap/%-vst.cpp $(HEADERS)
@@ -132,11 +132,11 @@ $(VST_OBJ): $(BIN)/%.o: $(VST_CPP_DIR)/%.cpp
 	@$(CXX) -c $(ALL_CXXFLAGS) $(VST_FLAGS) $(CPPFLAGS) $< -o $@
 
 $(BIN)/bench: util/bench.cpp
-	@echo '  CXXLD    '$@
+	@echo '  CXXLD   '$@
 	@$(CXX) $(ALL_CXXFLAGS) $(LADSPA_FLAGS) $< -o $@ $(ALL_LDFLAGS) -rdynamic -ldl
 
 $(BIN)/design: util/design.cpp
-	@echo '  CXXLD    '$@
+	@echo '  CXXLD   '$@
 	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ $(ALL_LDFLAGS)
 
 clean:
