@@ -10,25 +10,14 @@
 typedef struct {
 } personal;
 
+template<typename T>
 INNER void
 process(personal *data,
-    float *in_L, float *in_R,
-    float *out_L, float *out_R,
+    T *in_L, T *in_R,
+    T *out_L, T *out_R,
     unsigned long count)
 {
 	// TODO: separate and preserve mirand for each channel
-	for (unsigned long pos = 0; pos < count; pos++)
-		out_L[pos] = whitenoise();
-	for (unsigned long pos = 0; pos < count; pos++)
-		out_R[pos] = whitenoise();
-}
-
-INNER void
-process_double(personal *data,
-    double *in_L, double *in_R,
-    double *out_L, double *out_R,
-    unsigned long count)
-{
 	for (unsigned long pos = 0; pos < count; pos++)
 		out_L[pos] = whitenoise();
 	for (unsigned long pos = 0; pos < count; pos++)

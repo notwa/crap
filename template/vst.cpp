@@ -101,7 +101,7 @@ void
 plugin::processDoubleReplacing(
     double **inputs, double **outputs, VstInt32 count)
 {
-	::process_double(&data,
+	::process(&data,
 	    inputs[0], inputs[1],
 	    outputs[0], outputs[1],
 	    count);

@@ -79,22 +79,11 @@ process_one(channel *c, double s)
 	return s;
 }
 
+template<typename T>
 INNER void
 process(personal *data,
-    float *in_L, float *in_R,
-    float *out_L, float *out_R,
-    ulong count)
-{
-	for (ulong pos = 0; pos < count; pos++) {
-		out_L[pos] = process_one(&data->c[0], in_L[pos]);
-		out_R[pos] = process_one(&data->c[1], in_R[pos]);
-	}
-}
-
-INNER void
-process_double(personal *data,
-    double *in_L, double *in_R,
-    double *out_L, double *out_R,
+    T *in_L, T *in_R,
+    T *out_L, T *out_R,
     ulong count)
 {
 	for (ulong pos = 0; pos < count; pos++) {
