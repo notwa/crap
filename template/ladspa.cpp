@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "ladspa.h"
+#include "ladspa.hpp"
 
 //#INCLUDE
 

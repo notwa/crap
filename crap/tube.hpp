@@ -12,9 +12,9 @@
 #define BLOCK_SIZE 256
 #define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
 
-#include "util.h"
-#include "param.h"
-#include "os2piir_stereo.h"
+#include "util.hpp"
+#include "param.hpp"
+#include "os2piir_stereo.hpp"
 
 typedef struct {
 	double desired, actual, speed;
@@ -63,14 +63,14 @@ process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
     ulong count)
-#include "process_nonlinear.h"
+#include "process_nonlinear.hpp"
 
 static void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
     ulong count)
-#include "process_nonlinear.h"
+#include "process_nonlinear.hpp"
 
 INNER void
 resume(personal *data)

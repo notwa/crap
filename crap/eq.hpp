@@ -12,8 +12,8 @@
 
 #define BLOCK_SIZE 256
 
-#include "util.h"
-#include "param.h"
+#include "util.hpp"
+#include "param.hpp"
 
 typedef struct {
 	biquad filters[2][BANDS];
@@ -25,14 +25,14 @@ process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
     unsigned long count)
-#include "process_biquads.h"
+#include "process_biquads.hpp"
 
 static void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
     ulong count)
-#include "process_biquads.h"
+#include "process_biquads.hpp"
 
 INNER void
 resume(personal *data)

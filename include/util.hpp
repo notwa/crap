@@ -15,14 +15,18 @@ typedef double v2df __attribute__((vector_size(16), aligned(16)));
 typedef float v2sf __attribute__((vector_size(8), aligned(8)));
 typedef float v4sf __attribute__((vector_size(16), aligned(16)));
 
-#ifndef FORCE_SINGLE
+#ifdef FORCE_SINGLE
+#define v2dt float
 #define v2df v2sf
+#else
+#define v2dt double
 #endif
 
 typedef float v4sf __attribute__((vector_size(16), aligned(16)));
 typedef unsigned long ulong; // __attribute((aligned(16)));
 
-#define V(x) (v2df){(x), (x)}
+#define V(x)     (v2df){(v2dt) (x), (v2dt) (x)}
+#define V2(x, y) (v2df){(v2dt) (x), (v2dt) (y)}
 
 INNER void
 disable_denormals()
@@ -67,5 +71,5 @@ typedef enum {
 	FILT_GAIN
 } filter_t;
 
-#include "biquad.h"
-#include "svf.h"
+#include "biquad.hpp"
+#include "svf.hpp"

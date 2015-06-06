@@ -21,9 +21,9 @@ https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
 #include <stdio.h>
 #include <string.h>
 
-#include "util.h"
-#include "param.h"
-#include "os2piir_stereo.h"
+#include "util.hpp"
+#include "param.hpp"
+#include "os2piir_stereo.hpp"
 
 #define VT 0.026
 #define N 4
@@ -102,14 +102,14 @@ process_double(personal *data,
     double *in_L, double *in_R,
     double *out_L, double *out_R,
     unsigned long count)
-#include "process_mugi4.h"
+#include "process_mugi4.hpp"
 
 static void
 process(personal *data,
     float *in_L, float *in_R,
     float *out_L, float *out_R,
     ulong count)
-#include "process_mugi4.h"
+#include "process_mugi4.hpp"
 
 INNER void
 construct(personal *data)

@@ -3,7 +3,7 @@
 #include <math.h>
 #include <errno.h>
 
-#include "util.h"
+#include "util.hpp"
 
 void
 usage()

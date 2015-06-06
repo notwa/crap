@@ -90,16 +90,16 @@ biquad_run_block_stereo(biquad *bq_L, biquad *bq_R,
 {
 	v2df b0, b1, b2, a1, a2, x1, x2, y1, y2;
 
-	b0 = (v2df){bq_L->b0, bq_L->b0};
-	b1 = (v2df){bq_L->b1, bq_L->b1};
-	b2 = (v2df){bq_L->b2, bq_L->b2};
-	a1 = (v2df){bq_L->a1, bq_L->a1};
-	a2 = (v2df){bq_L->a2, bq_L->a2};
+	b0 = V(bq_L->b0);
+	b1 = V(bq_L->b1);
+	b2 = V(bq_L->b2);
+	a1 = V(bq_L->a1);
+	a2 = V(bq_L->a2);
 
-	x1 = (v2df){bq_L->x1, bq_R->x1};
-	x2 = (v2df){bq_L->x2, bq_R->x2};
-	y1 = (v2df){bq_L->y1, bq_R->y1};
-	y2 = (v2df){bq_L->y2, bq_R->y2};
+	x1 = V2(bq_L->x1, bq_R->x1);
+	x2 = V2(bq_L->x2, bq_R->x2);
+	y1 = V2(bq_L->y1, bq_R->y1);
+	y2 = V2(bq_L->y2, bq_R->y2);
 
 	for (ulong i = 0; i < count; i++) {
 		v2df x = buf[i];
