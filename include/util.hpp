@@ -6,27 +6,20 @@
 #include <emmintrin.h>
 #endif
 
+#define TEMPLATE template<typename T>
 #define INNER static inline
 #define PURE __attribute__((pure))
 #define CONST __attribute__((const))
 #define RESTRICT __restrict__
 
-typedef double v2df __attribute__((vector_size(16), aligned(16)));
-typedef float v2sf __attribute__((vector_size(8), aligned(8)));
-typedef float v4sf __attribute__((vector_size(16), aligned(16)));
-
-#ifdef FORCE_SINGLE
-#define v2dt float
-#define v2df v2sf
-#else
-#define v2dt double
-#endif
-
-typedef float v4sf __attribute__((vector_size(16), aligned(16)));
 typedef unsigned long ulong; // __attribute((aligned(16)));
 
-#define V(x)     (v2df){(v2dt) (x), (v2dt) (x)}
-#define V2(x, y) (v2df){(v2dt) (x), (v2dt) (y)}
+#include "Dumber.hpp"
+#include "vectors.hpp"
+
+#ifdef FORCE_SINGLE
+#define v2df v2sf
+#endif
 
 INNER void
 disable_denormals()
@@ -36,15 +29,15 @@ disable_denormals()
 	#endif
 }
 
-/* via http://www.rgba.org/articles/sfrand/sfrand.htm */
-static unsigned int mirand = 1;
-
 #define LIMIT(v,l,u) ((v)<(l)?(l):((v)>(u)?(u):(v)))
 #define DB2LIN(x) ((x) > -90 ? pow(10, (x) * 0.05) : 0)
 
 /* frequency to rads/sec (angular frequency) */
 #define ANGULAR(fc, fs)     (2 * M_PI / (fs) * (fc))
 #define ANGULAR_LIM(fc, fs) (2 * M_PI / (fs) * LIMIT((fc), 1, (fs)/2))
+
+/* via http://www.rgba.org/articles/sfrand/sfrand.htm */
+static unsigned int mirand = 1;
 
 INNER float
 whitenoise()
@@ -71,5 +64,6 @@ typedef enum {
 	FILT_GAIN
 } filter_t;
 
-#include "biquad.hpp"
-#include "svf.hpp"
+// TODO: don't include these here
+//#include "biquad.hpp"
+//#include "svf.hpp"

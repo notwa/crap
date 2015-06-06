@@ -22,7 +22,7 @@ typedef struct {
 } smoothval;
 
 typedef struct {
-	halfband_t hb_up, hb_down;
+	halfband_t<v2df> hb_up, hb_down;
 	smoothval drive, wet;
 } personal;
 
@@ -46,20 +46,19 @@ smooth(smoothval *val)
 	return a;
 }
 
-INNER CONST v2df
-distort(v2df x)
+TEMPLATE INNER CONST T
+distort(T x)
 {
-	return (V(27.)*x + V(9.)) / (V(9.)*x*x + V(6.)*x + V(19.)) - V(9./19.);
+	return (T(27.)*x + T(9.)) / (T(9.)*x*x + T(6.)*x + T(19.)) - T(9./19.);
 }
 
-INNER CONST v2df
-process_one(v2df x, v2df drive, v2df wet)
+TEMPLATE INNER CONST T
+process_one(T x, T drive, T wet)
 {
-	return (distort(x*drive)/drive*V(0.79) - x)*wet + x;
+	return (distort<T>(x*drive)/drive*T(0.79) - x)*wet + x;
 }
 
-template<typename T>
-static void
+TEMPLATE static void
 process(personal *data,
     T *in_L, T *in_R,
     T *out_L, T *out_R,
@@ -71,8 +70,8 @@ process(personal *data,
 	v2df buf[BLOCK_SIZE];
 	v2df over[FULL_SIZE];
 
-	halfband_t *hb_up   = &data->hb_up;
-	halfband_t *hb_down = &data->hb_down;
+	auto *hb_up   = &data->hb_up;
+	auto *hb_down = &data->hb_down;
 
 	for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
 		ulong rem = BLOCK_SIZE;
@@ -83,16 +82,16 @@ process(personal *data,
 
 		for (ulong i = 0; i < rem2; i++) {
 			double y = smooth(&data->drive);
-			drives[i] = V(y);
+			drives[i] = v2df(y);
 		}
 		for (ulong i = 0; i < rem2; i++) {
 			double y = smooth(&data->wet);
-			wets[i] = V(y);
+			wets[i] = v2df(y);
 		}
 
 		for (ulong i = 0; i < rem; i++) {
-			buf[i][0] = in_L[i];
-			buf[i][1] = in_R[i];
+			buf[i].v[0] = in_L[i];
+			buf[i].v[1] = in_R[i];
 		}
 
 		for (ulong i = 0; i < rem; i++) {
@@ -110,8 +109,8 @@ process(personal *data,
 		}
 
 		for (ulong i = 0; i < rem; i++) {
-			out_L[i] = buf[i][0];
-			out_R[i] = buf[i][1];
+			out_L[i] = buf[i].v[0];
+			out_R[i] = buf[i].v[1];
 		}
 
 		in_L += BLOCK_SIZE;
@@ -124,8 +123,8 @@ process(personal *data,
 INNER void
 resume(personal *data)
 {
-	memset(&data->hb_up,   0, sizeof(halfband_t));
-	memset(&data->hb_down, 0, sizeof(halfband_t));
+	memset(&data->hb_up,   0, sizeof(halfband_t<v2df>));
+	memset(&data->hb_down, 0, sizeof(halfband_t<v2df>));
 }
 
 INNER void
