@@ -1,11 +1,11 @@
-#include "util.hpp"
-
 #define ID 0xEC57A71C
 #define LABEL "crap_noise"
 #define NAME "crap noise generator"
 #define AUTHOR "Connor Olding"
 #define COPYRIGHT "MIT"
 #define PARAMETERS 0
+
+#include "util.hpp"
 
 typedef struct {
 } personal;

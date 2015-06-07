@@ -1,6 +1,3 @@
-#include <string.h>
-#include <stdio.h>
-
 #define ID 0x50F7BA11
 #define LABEL "crap_tube"
 #define NAME "crap Tube Distortion"
@@ -11,6 +8,9 @@
 #define OVERSAMPLING 2
 #define BLOCK_SIZE 256
 #define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
+
+#include <string.h>
+#include <stdio.h>
 
 #include "util.hpp"
 #include "param.hpp"

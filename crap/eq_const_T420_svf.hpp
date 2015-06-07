@@ -1,7 +1,3 @@
-#include <string.h>
-#include <stdio.h>
-#include <assert.h>
-
 #define ID (0x0DEFACED+420+1337)
 #define LABEL "crap_eq_const_T420_svf"
 #define NAME "crap T420 Speaker Compensation (SVF)"
@@ -10,6 +6,10 @@
 #define PARAMETERS 0
 
 #define BLOCK_SIZE 256
+
+#include <string.h>
+#include <stdio.h>
+#include <assert.h>
 
 #include "util.hpp"
 #include "svf.hpp"

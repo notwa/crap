@@ -1,16 +1,15 @@
-#include <stdio.h>
-#include <string.h>
-
-#define BANDS 4
-
 #define ID 0x000CAFED
 #define LABEL "crap_eq"
 #define NAME "crap Parametric Equalizer"
 #define AUTHOR "Connor Olding"
 #define COPYRIGHT "MIT"
+#define BANDS 4
 #define PARAMETERS (BANDS*3)
 
 #define BLOCK_SIZE 256
+
+#include <stdio.h>
+#include <string.h>
 
 #include "util.hpp"
 #include "param.hpp"
