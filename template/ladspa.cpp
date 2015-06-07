@@ -78,7 +78,6 @@ plug_construct(const LADSPA_Descriptor *descriptor, unsigned long fs)
 {
 	plug_t *plug = (plug_t *) calloc(1, sizeof(plug_t));
 	plug->crap = new CrapPlug();
-	plug->crap->construct();
 	#if (PARAMETERS > 0)
 	memcpy(plug->params, global_params, sizeof(param)*PARAMETERS);
 	plug->crap->adjust(plug->params, fs);
@@ -92,7 +91,6 @@ static void
 plug_destruct(LADSPA_Handle instance)
 {
 	plug_t *plug = (plug_t *)instance;
-	plug->crap->destruct();
 	delete plug->crap;
 	free(plug);
 }
@@ -117,34 +115,41 @@ plug_process(LADSPA_Handle instance, unsigned long count)
 	    count);
 }
 
-static const LADSPA_Descriptor plug_desc = {
-	.UniqueID = ID,
-	.Label = LABEL,
-	.Properties = 0,
-	.Name = NAME,
-	.Maker = AUTHOR,
-	.Copyright = COPYRIGHT,
-	.PortCount = PCOUNT,
-	.PortDescriptors = p_descs,
-	.PortRangeHints = p_hints,
-	.PortNames = (const char * const *) p_names,
+TEMPLATE static constexpr
+LADSPA_Descriptor gen_desc() {
+	return LADSPA_Descriptor {
+		.UniqueID = T::id,
+		.Label = T::label,
+		.Properties = 0,
+		.Name = T::name,
+		.Maker = T::author,
+		.Copyright = T::copyright,
+		.PortCount = PCOUNT,
+		.PortDescriptors = p_descs,
+		.PortRangeHints = p_hints,
+		.PortNames = (const char * const *) p_names,
 
-	.instantiate = plug_construct,
-	.cleanup = plug_destruct,
-	.activate = plug_resume,
-	.deactivate = plug_pause,
-	.connect_port = plug_connect,
-	.run = plug_process,
-	.run_adding = NULL,
-	.set_run_adding_gain = NULL
+		.instantiate = plug_construct,
+		.cleanup = plug_destruct,
+		.activate = plug_resume,
+		.deactivate = plug_pause,
+		.connect_port = plug_connect,
+		.run = plug_process,
+		.run_adding = NULL,
+		.set_run_adding_gain = NULL
+	};
+}
+
+static constexpr LADSPA_Descriptor plug_descs[] = {
+	gen_desc<CrapPlug>()
 };
 
 const LADSPA_Descriptor *
 ladspa_descriptor(unsigned long index)
 {
-	if (index != 0)
+	if (index >= sizeof(plug_descs)/sizeof(plug_descs[0]))
 		return NULL;
-	return &plug_desc;
+	return plug_descs + index;
 }
 
 static void

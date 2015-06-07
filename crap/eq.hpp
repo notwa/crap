@@ -1,8 +1,3 @@
-#define ID 0x000CAFED
-#define LABEL "crap_eq"
-#define NAME "crap Parametric Equalizer"
-#define AUTHOR "Connor Olding"
-#define COPYRIGHT "MIT"
 #define BANDS 4
 #define PARAMETERS (BANDS*3)
 
@@ -14,69 +9,20 @@
 #include "util.hpp"
 #include "param.hpp"
 #include "Crap.hpp"
+#include "Buffer2.hpp"
 #include "biquad.hpp"
 
-template<class Mixin>
-struct Buffer2 : public virtual Mixin {
-	virtual inline void
-	process2(v2df *buf, ulong rem) = 0;
-
-	TEMPLATE void
-	_process(T *in_L, T *in_R, T *out_L, T *out_R, ulong count)
-	{
-		disable_denormals();
-
-		v2df buf[BLOCK_SIZE];
-
-		for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
-			ulong rem = BLOCK_SIZE;
-			if (pos + BLOCK_SIZE > count)
-				rem = count - pos;
-
-			for (ulong i = 0; i < rem; i++) {
-				buf[i][0] = in_L[i];
-				buf[i][1] = in_R[i];
-			}
-
-			process2(buf, rem);
-
-			for (ulong i = 0; i < rem; i++) {
-				out_L[i] = buf[i][0];
-				out_R[i] = buf[i][1];
-			}
-
-			in_L += BLOCK_SIZE;
-			in_R += BLOCK_SIZE;
-			out_L += BLOCK_SIZE;
-			out_R += BLOCK_SIZE;
-		}
-	}
-
-	void
-	process(
-	    double *in_L, double *in_R,
-	    double *out_L, double *out_R,
-	    ulong count)
-	{
-		_process(in_L, in_R, out_L, out_R, count);
-	}
-
-	void
-	process(
-	    float *in_L, float *in_R,
-	    float *out_L, float *out_R,
-	    ulong count)
-	{
-		_process(in_L, in_R, out_L, out_R, count);
-	}
-};
-
 struct Crap_eq
-:public Unconstructive<
-	 AdjustAll<
-	  Buffer2<Crap>
-	 >
-	> {
+:public AdjustAll<Buffer2<Crap>> {
+	static constexpr ulong id = 0x000CAFED;
+	static constexpr char label[] = "crap_eq";
+	static constexpr char name[] = "crap Parametric Equalizer";
+	static constexpr char author[] = "Connor Olding";
+	static constexpr char copyright[] = "MIT";
+
+	static constexpr ulong bands = 4;
+	static constexpr ulong parameters = bands*3;
+
 	biquad filters_L[BANDS];
 	biquad filters_R[BANDS];
 
@@ -146,3 +92,8 @@ struct Crap_eq
 		}
 	}
 };
+
+constexpr char Crap_eq::label[];
+constexpr char Crap_eq::name[];
+constexpr char Crap_eq::author[];
+constexpr char Crap_eq::copyright[];

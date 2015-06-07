@@ -2,12 +2,6 @@ struct Crap {
 	virtual inline
 	~Crap() {}
 
-	virtual inline void
-	construct() = 0;
-
-	virtual inline void
-	destruct() = 0;
-
 	virtual void
 	pause() = 0;
 
@@ -55,17 +49,6 @@ struct AdjustAll : public virtual Mixin {
 	{
 		adjust_all(params);
 	}
-};
-
-template<class Mixin>
-struct Unconstructive : public virtual Mixin {
-	inline void
-	construct()
-	{};
-
-	inline void
-	destruct()
-	{};
 };
 
 template<class Mixin>
