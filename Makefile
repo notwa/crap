@@ -108,7 +108,7 @@ $(BIN)/%-vst.so: $(BIN)/%-vst.o $(BIN)/vstsdk.o
 
 $(BIN)/$(DISTNAME)_%-ladspa.o: crap/%-ladspa.cpp $(HEADERS) include/ladspa.hpp
 	@echo '  CXX     '$@
-	@$(CXX) -c $(ALL_CXXFLAGS) $(LADSPA_FLAG) $(CPPFLAGS) $< -o $@
+	@$(CXX) -c $(ALL_CXXFLAGS) $(LADSPA_FLAGS) $(CPPFLAGS) $< -o $@
 
 $(BIN)/$(DISTNAME)_%-vst.o: crap/%-vst.cpp $(HEADERS)
 	@echo '  CXX     '$@

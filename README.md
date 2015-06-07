@@ -13,9 +13,9 @@ Name | Label | ID | Description
 --- | --- | --- | ---
 crap Parametric Equalizer  | crap\_eq | `0x000CAFED` | multiband parametric EQ. try redefining BANDS. #define BANDS to desired number of equalizer bands; default 4.
 crap sample delay test | crap\_delay\_test | `0xDEDEDEDE` | why did i commit this?
-crap Constant Equalizer | crap\_eq\_const | `0x0DEFACED` | simpler code than crap_eq for a static response. edit code as needed.
+crap Constant Equalizer | crap\_eq\_const | `0x0DEFACED` | simpler code than crap\_eq for a static response. edit code as needed.
 crap T420 Speaker Compensation | crap\_eq\_const\_T420 | `0x0DEFAE91` | lenovo tests
-crap T420 Speaker Compensation (SVF) | crap\_eq\_const\_T420_svf | `0x0DEFB3CA` | trying out State Variable Filters (SVFs)
+crap T420 Speaker Compensation (SVF) | crap\_eq\_const\_T420\_svf | `0x0DEFB3CA` | trying out State Variable Filters (SVFs)
 crap mugi4 (moog-like) | crap\_mugi4 | `0xD8D0D8D0` | nonlinear moog filter implementation: [see reference][moog]
 crap Tube Distortion | crap\_tube | `0x50F7BA11` | static waveshaper with 6x oversampling and parameter smoothing. doesn't actually emulate a tube. not actually for crapping in.
 
@@ -42,4 +42,4 @@ other targets:
 * rename plugins (fix capitalization consistency and such)
 * don't suffix -ladspa and -vst on built libraries; it's annoying
 * scrap overly-complex makefile for a shell script
-* maybe switch to sepples in interest of templated process functions
+* support for CPUs without SSE/NEON
