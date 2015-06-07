@@ -14,14 +14,14 @@
 
 #include "util.hpp"
 #include "param.hpp"
+#include "biquad.hpp"
 
 typedef struct {
 	biquad filters[2][BANDS];
 	float fs;
 } personal;
 
-template<typename T>
-static void
+TEMPLATE static void
 process(personal *data,
     T *in_L, T *in_R,
     T *out_L, T *out_R,

@@ -27,7 +27,7 @@ https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
 
 #define VT 0.026
 #define N 4
-#define VT2 V(2.*VT)
+#define VT2 T(2.*VT)
 
 typedef struct {
 	v2df sum, sumback, dout;
@@ -45,55 +45,55 @@ typedef struct {
 
 typedef struct {
 	ulong fs;
-	halfband_t hb_up, hb_down;
+	halfband_t<v2df> hb_up, hb_down;
 	freqdata fd;
 	stage s1, s2, s3, s4;
 	v2df sumback1, sumback2, sumback3, sumback4;
 	v2df drive, feedback;
 } personal;
 
-INNER PURE v2df
-tanh2(v2df x)
+TEMPLATE INNER PURE T
+tanh2(T x)
 {
-	//return (v2df){tanh(x[0]), tanh(x[1])};
-	v2df xx = x*x;
-	v2df a = ((xx + V(378.))*xx + V(17325.))*xx + V(135135.);
-	v2df b = ((V(28.)*xx + V(3150.))*xx + V(62370.))*xx + V(135135.);
+	//return T(tanh(x[0]), tanh(x[1]));
+	T xx = x*x;
+	T a = ((xx + T(378))*xx + T(17325))*xx + T(135135);
+	T b = ((T(28)*xx + T(3150))*xx + T(62370))*xx + T(135135);
 	return x*a/b;
 }
 
-INNER v2df
-process_stage(stage *s, freqdata fd, v2df in)
+TEMPLATE INNER T
+process_stage(stage *s, freqdata fd, T in)
 {
-	v2df temp = (in + s->sumback)*VT2*fd.L_p0*fd.g;
-	v2df out = temp + s->sum;
-	s->sum += V(2.)*temp;
-	s->dout = tanh2(out/VT2);
+	T temp = (in + s->sumback)*VT2*fd.L_p0*fd.g;
+	T out = temp + s->sum;
+	s->sum += T(2)*temp;
+	s->dout = tanh2<T>(out/VT2);
 	s->sumback = in*fd.L_r1 - s->dout*fd.L_q0;
 	return out;
 }
 
-INNER v2df
-process_one(v2df in, personal *data)
+TEMPLATE INNER T
+process_one(T in, personal *data)
 {
-	const freqdata fd = data->fd;
+	freqdata fd = data->fd;
 
 	in *= data->drive;
 
-	v2df sum = in + data->sumback1;
-	v2df pre = -fd.p0*sum;
-	           process_stage(&data->s1, fd, tanh2(pre/VT2));
-	           process_stage(&data->s2, fd, data->s1.dout);
-	           process_stage(&data->s3, fd, data->s2.dout);
-	v2df out = process_stage(&data->s4, fd, data->s3.dout);
+	T sum = in + data->sumback1;
+	T pre = -fd.p0*sum;
+	        process_stage<T>(&data->s1, fd, tanh2<T>(pre/VT2));
+	        process_stage<T>(&data->s2, fd, data->s1.dout);
+	        process_stage<T>(&data->s3, fd, data->s2.dout);
+	T out = process_stage<T>(&data->s4, fd, data->s3.dout);
 
-	v2df back = data->feedback*out;
+	T back = data->feedback*out;
 	data->sumback1 = fd.r1*in + fd.q0*back + data->sumback2;
 	data->sumback2 = fd.r2*in + fd.q1*back + data->sumback3;
 	data->sumback3 = fd.r3*in + fd.q2*back + data->sumback4;
 	data->sumback4 = fd.r4*in + fd.q3*back;
 
-	v2df compensate = -(data->feedback + V(1.));
+	T compensate = -(data->feedback + T(1));
 	return out/data->drive*compensate;
 }
 
@@ -108,8 +108,8 @@ process(personal *data,
 	v2df buf[BLOCK_SIZE];
 	v2df over[FULL_SIZE];
 
-	halfband_t *hb_up   = &data->hb_up;
-	halfband_t *hb_down = &data->hb_down;
+	halfband_t<v2df> *hb_up   = &data->hb_up;
+	halfband_t<v2df> *hb_down = &data->hb_down;
 
 	for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
 		ulong rem = BLOCK_SIZE;
@@ -188,8 +188,8 @@ destruct(personal *data)
 INNER void
 resume(personal *data)
 {
-	memset(&data->hb_up,   0, sizeof(halfband_t));
-	memset(&data->hb_down, 0, sizeof(halfband_t));
+	memset(&data->hb_up,   0, sizeof(halfband_t<v2df>));
+	memset(&data->hb_down, 0, sizeof(halfband_t<v2df>));
 }
 
 INNER void

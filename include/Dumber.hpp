@@ -25,24 +25,24 @@ struct DumberBase {
 	}
 
 	inline DumberBase
+	operator-()
+	{ return -v; }
+
+	inline DumberBase
 	operator+(const DumberBase &v2)
-	{ return DumberBase(v + v2.v); }
+	{ return v + v2.v; }
 
 	inline DumberBase
 	operator-(const DumberBase &v2)
-	{ return DumberBase(v - v2.v); }
-
-	inline DumberBase
-	operator-()
-	{ return DumberBase(-v); }
+	{ return v - v2.v; }
 
 	inline DumberBase
 	operator*(const DumberBase &v2)
-	{ return DumberBase(v * v2.v); }
+	{ return v*v2.v; }
 
 	inline DumberBase
 	operator/(const DumberBase &v2)
-	{ return DumberBase(v / v2.v); }
+	{ return v/v2.v; }
 
 	inline DumberBase&
 	operator+=(const DumberBase &v2)
@@ -61,14 +61,14 @@ struct DumberBase {
 	inline DumberBase&
 	operator*=(const DumberBase &v2)
 	{
-		v = v * v2.v;
+		v = v*v2.v;
 		return *this;
 	}
 
 	inline DumberBase&
 	operator/=(const DumberBase &v2)
 	{
-		v = v / v2.v;
+		v = v/v2.v;
 		return *this;
 	}
 };

@@ -10,14 +10,14 @@
 #define BLOCK_SIZE 256
 
 #include "util.hpp"
+#include "biquad.hpp"
 
 #define BANDS 12
 typedef struct {
 	biquad filters[2][BANDS];
 } personal;
 
-template<typename T>
-static void
+TEMPLATE static void
 process(personal *data,
     T *in_L, T *in_R,
     T *out_L, T *out_R,

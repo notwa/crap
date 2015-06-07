@@ -30,7 +30,7 @@ load_ladspa(char *path)
 	atexit(cleanup);
 
 	LADSPA_Descriptor_Function df;
-	df = (typeof(df)) dlsym(plug, "ladspa_descriptor");
+	df = (decltype(df)) dlsym(plug, "ladspa_descriptor");
 	assert(df);
 
 	const LADSPA_Descriptor *d = df(0);
@@ -100,7 +100,7 @@ main(int argc, char **argv)
 		if (LADSPA_IS_PORT_AUDIO(d->PortDescriptors[i]))
 			audio_count++;
 
-	audio_buffer = (typeof(audio_buffer)) calloc(audio_count*BLOCK_SIZE, sizeof(float));
+	audio_buffer = (decltype(audio_buffer)) calloc(audio_count*BLOCK_SIZE, sizeof(float));
 
 	int a = 0;
 	for (int i = 0; i < d->PortCount; i++) {
@@ -108,7 +108,7 @@ main(int argc, char **argv)
 			d->connect_port(h, i, audio_buffer + a++*BLOCK_SIZE);
 		} else {
 			float *x;
-			x = (typeof(x)) alloca(sizeof(float));
+			x = (decltype(x)) alloca(sizeof(float));
 			*x = get_default(d->PortRangeHints[i]);
 			d->connect_port(h, i, x);
 		}

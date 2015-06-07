@@ -7,7 +7,6 @@
 */
 
 #define copy(dst, src) memcpy(dst, src, sizeof(T)*8)
-//#define copy(dst, src) _copy(dst, src)
 
 // all should be initialized to 0
 TEMPLATE

@@ -1,7 +1,3 @@
-#include "util.hpp"
-
-typedef unsigned long ulong;
-
 #define ID 0xDEDEDEDE
 #define LABEL "crap_delay_test"
 #define NAME "crap sample delay test"
@@ -9,6 +5,9 @@ typedef unsigned long ulong;
 #define COPYRIGHT "MIT"
 #define PARAMETERS 0
 #define DELAY
+
+#include "util.hpp"
+#include "biquad.hpp"
 
 static ulong global_delay = 2;
 static double oversample = 4;

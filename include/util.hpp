@@ -63,7 +63,3 @@ typedef enum {
 	FILT_NOTCH,
 	FILT_GAIN
 } filter_t;
-
-// TODO: don't include these here
-//#include "biquad.hpp"
-//#include "svf.hpp"
