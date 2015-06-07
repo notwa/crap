@@ -40,6 +40,5 @@ other targets:
 * LV2 support
 * automatically generate markdown table based on crap contents
 * rename plugins (fix capitalization consistency and such)
-* don't suffix -ladspa and -vst on built libraries; it's annoying
 * scrap overly-complex makefile for a shell script
 * support for CPUs without SSE/NEON

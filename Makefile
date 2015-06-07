@@ -19,11 +19,11 @@ BENCH_AGAINST = eq_const
 PROGRAM = ${UTILS:%=$(BIN)/%}
 HEADERS = ${INCLUDES:%=include/%.hpp}
 
-LADSPA_SHOBJ = ${LADSPA:%=$(BIN)/$(DISTNAME)_%-ladspa.so}
-VST_SHOBJ = ${VST:%=$(BIN)/$(DISTNAME)_%-vst.so}
+LADSPA_SHOBJ = ${LADSPA:%=$(BIN)/ladspa/$(DISTNAME)_%.so}
+VST_SHOBJ = ${VST:%=$(BIN)/vst/$(DISTNAME)_%.so}
 SHOBJ = $(LADSPA_SHOBJ) $(VST_SHOBJ)
 OBJ = ${SHOBJ:.so=.o}
-AGAINST = $(BIN)/$(DISTNAME)_$(BENCH_AGAINST)-ladspa.so
+AGAINST = $(BIN)/ladspa/$(DISTNAME)_$(BENCH_AGAINST).so
 #EXE = ${PROGRAM:=.exe}
 EXE = $(BIN)/design.exe
 DLL = ${SHOBJ:.so=.dll}
@@ -34,7 +34,7 @@ VST_SRC = ${VST_CPP:%=$(VST_CPP_DIR)/%}
 VST_OBJ = ${VST_CPP:%.cpp=$(BIN)/%.o}
 VST_DEF = $(VST_SDK_DIR)/public.sdk/samples/vst2.x/win/vstplug.def
 
-GENERAL_FLAGS = -Wall -Winline -Wno-unused-function -Wno-sign-compare -I include
+GENERAL_FLAGS = -Wall -Winline -Wno-unused-function -Wno-sign-compare -I . -I include
 ALL_CXXFLAGS = $(GENERAL_FLAGS) -std=gnu++11 $(CXXFLAGS)
 ALL_LDFLAGS = -lm $(LDFLAGS)
 
@@ -98,29 +98,29 @@ $(BIN)/%.dll: $(BIN)/%.so
 	@echo '  OBJCOPY '$@
 	@$(OBJCOPY) -S $< $@
 
-$(BIN)/%-ladspa.so: $(BIN)/%-ladspa.o
+$(BIN)/ladspa/%.so: $(BIN)/ladspa/%.o
 	@echo '  CXXLD   '$@
 	@$(CXX) $(ALL_CXXFLAGS) $(LADSPA_FLAGS) -shared $^ -o $@ $(ALL_LDFLAGS)
 
-$(BIN)/%-vst.so: $(BIN)/%-vst.o $(BIN)/vstsdk.o
+$(BIN)/vst/%.so: $(BIN)/vst/%.o $(BIN)/vstsdk.o
 	@echo '  CXXLD   '$@
 	@$(CXX) $(ALL_CXXFLAGS) $(VST_FLAGS) -shared $^ -o $@ $(ALL_LDFLAGS)
 
-$(BIN)/$(DISTNAME)_%-ladspa.o: crap/%-ladspa.cpp $(HEADERS) include/ladspa.hpp
+$(BIN)/ladspa/$(DISTNAME)_%.o: crap/ladspa/%.cpp $(HEADERS) include/ladspa.hpp
 	@echo '  CXX     '$@
 	@$(CXX) -c $(ALL_CXXFLAGS) $(LADSPA_FLAGS) $(CPPFLAGS) $< -o $@
 
-$(BIN)/$(DISTNAME)_%-vst.o: crap/%-vst.cpp $(HEADERS)
+$(BIN)/vst/$(DISTNAME)_%.o: crap/vst/%.cpp $(HEADERS)
 	@echo '  CXX     '$@
 	@$(CXX) -c $(ALL_CXXFLAGS) $(VST_FLAGS) $(CPPFLAGS) $< -o $@
 
-crap/%-ladspa.cpp: crap/%.hpp template/ladspa.cpp util/generate
+crap/ladspa/%.cpp: crap/%.hpp template/ladspa.cpp util/generate
 	@echo '  GEN     '$@
-	@util/generate $(notdir $<) $@ template/ladspa.cpp
+	@util/generate crap/$(notdir $<) $@ template/ladspa.cpp
 
-crap/%-vst.cpp: crap/%.hpp template/vst.cpp util/generate
+crap/vst/%.cpp: crap/%.hpp template/vst.cpp util/generate
 	@echo '  GEN     '$@
-	@util/generate $(notdir $<) $@ template/vst.cpp
+	@util/generate crap/$(notdir $<) $@ template/vst.cpp
 
 $(BIN)/vstsdk.o: $(VST_OBJ)
 	@echo '  LD      '$@
