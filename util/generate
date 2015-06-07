@@ -2,7 +2,10 @@
 set -e
 set -u
 
+pp_class="${1%*.hpp}"
+pp_class="${pp_class#crap/*}"
 pp_include="#include \"$1\""
+pp_redefine="#define CrapPlug Crap_$pp_class"
 out="$2"
 template="$3"
 
@@ -10,6 +13,7 @@ template="$3"
     case "$REPLY" in
 
     '//#INCLUDE') echo "$pp_include" ;;
+    '//#REDEFINE') echo "$pp_redefine" ;;
 
     *) echo -E "$REPLY" ;;
     esac

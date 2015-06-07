@@ -2,6 +2,7 @@
 #include "ladspa.hpp"
 
 //#INCLUDE
+//#REDEFINE
 
 #ifndef PARAM_NAME_LEN
 #define PARAM_NAME_LEN 24
@@ -33,7 +34,7 @@ typedef struct {
 	LADSPA_Data *output_L;
 	LADSPA_Data *output_R;
 
-	personal data;
+	Crap *crap;
 	#if (PARAMETERS > 0)
 	LADSPA_Data *values[PARAMETERS];
 	param params[PARAMETERS];
@@ -62,26 +63,27 @@ static void
 plug_resume(LADSPA_Handle instance)
 {
 	plug_t *plug = (plug_t *)instance;
-	resume(&plug->data);
+	plug->crap->resume();
 }
 
 static void
 plug_pause(LADSPA_Handle instance)
 {
 	plug_t *plug = (plug_t *)instance;
-	pause(&plug->data);
+	plug->crap->pause();
 }
 
 static LADSPA_Handle
 plug_construct(const LADSPA_Descriptor *descriptor, unsigned long fs)
 {
 	plug_t *plug = (plug_t *) calloc(1, sizeof(plug_t));
-	construct(&plug->data);
+	plug->crap = new CrapPlug();
+	plug->crap->construct();
 	#if (PARAMETERS > 0)
 	memcpy(plug->params, global_params, sizeof(param)*PARAMETERS);
-	adjust(&plug->data, plug->params, fs);
+	plug->crap->adjust(plug->params, fs);
 	#else
-	adjust(&plug->data, fs);
+	plug->crap->adjust(NULL, fs);
 	#endif
 	return (LADSPA_Handle) plug;
 }
@@ -90,7 +92,8 @@ static void
 plug_destruct(LADSPA_Handle instance)
 {
 	plug_t *plug = (plug_t *)instance;
-	destruct(&plug->data);
+	plug->crap->destruct();
+	delete plug->crap;
 	free(plug);
 }
 
@@ -104,11 +107,11 @@ plug_process(LADSPA_Handle instance, unsigned long count)
 			continue;
 		if (*plug->values[i] != plug->params[i].value) {
 			plug->params[i].value = *plug->values[i];
-			adjust_one(&plug->data, plug->params, i);
+			plug->crap->adjust_one(plug->params, i);
 		}
 	}
 	#endif
-	process(&plug->data,
+	plug->crap->process(
 	    plug->input_L, plug->input_R,
 	    plug->output_L, plug->output_R,
 	    count);
@@ -155,7 +158,7 @@ plug_init()
 	}
 
 	#if (PARAMETERS > 0)
-	construct_params(global_params);
+	CrapPlug::construct_params(global_params);
 	for (int i = 0; i < PARAMETERS; i++) {
 		int j = i + 4;
 		param *p = &global_params[i];
