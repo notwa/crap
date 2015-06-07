@@ -26,12 +26,18 @@ INNER const LADSPA_Descriptor*
 load_ladspa(char *path)
 {
 	plug = dlopen(path, RTLD_NOW);
-	assert(plug);
+	if (!plug) {
+		puts(dlerror());
+		exit(1);
+	}
 	atexit(cleanup);
 
 	LADSPA_Descriptor_Function df;
 	df = (decltype(df)) dlsym(plug, "ladspa_descriptor");
-	assert(df);
+	if (!df) {
+		puts(dlerror());
+		exit(1);
+	}
 
 	const LADSPA_Descriptor *d = df(0);
 	assert(d);
@@ -88,7 +94,10 @@ get_default(LADSPA_PortRangeHint hint)
 int
 main(int argc, char **argv)
 {
-	assert(argc > 1);
+	if (argc < 2) {
+		fprintf(stderr, "Please supply a path to the plugin to test.\n");
+		return 1;
+	}
 
 	const LADSPA_Descriptor *d = load_ladspa(argv[1]);
 
