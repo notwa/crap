@@ -14,7 +14,7 @@
 
 #include "util.hpp"
 #include "param.hpp"
-#include "os2piir_stereo.hpp"
+#include "os2piir.hpp"
 
 typedef struct {
 	double desired, actual, speed;

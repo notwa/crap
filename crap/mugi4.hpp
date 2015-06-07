@@ -23,7 +23,7 @@ https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
 
 #include "util.hpp"
 #include "param.hpp"
-#include "os2piir_stereo.hpp"
+#include "os2piir.hpp"
 
 #define VT 0.026
 #define N 4
