@@ -1,4 +1,5 @@
-#define PARAM_NAME_LEN 24
+// including null-terminator!
+#define PARAM_NAME_LEN 25
 
 // TOOD: dump enums in param namespace
 
@@ -24,7 +25,7 @@ typedef enum {
 } param_default;
 
 struct Param {
-	char name[PARAM_NAME_LEN + 1];
+	char name[PARAM_NAME_LEN];
 	float value, min, max;
 	param_scale scale;
 	param_default def;

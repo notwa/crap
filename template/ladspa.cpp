@@ -5,7 +5,7 @@
 //#REDEFINE
 
 #ifndef PARAM_NAME_LEN
-#define PARAM_NAME_LEN 24
+#define PARAM_NAME_LEN 25
 #endif
 
 enum {
@@ -18,7 +18,7 @@ enum {
 
 #define ALLOC(type, amount) (type *) calloc(amount, sizeof(type))
 
-char p_default_strings[IO_PLUGS][PARAM_NAME_LEN + 1] = {
+char p_default_strings[IO_PLUGS][PARAM_NAME_LEN] = {
 	"Input L", "Input R",
 	"Output L", "Output R"
 };
@@ -59,16 +59,22 @@ struct plug_t {
 
 TEMPLATE
 struct LADSPA_Plugin : public T {
+	//static constexpr ulong name_buf_size = (portcount)*PARAM_NAME_LEN;
+	static constexpr ulong portcount = IO_PLUGS + T::parameters;
 	static Param default_params[T::parameters];
-	static LADSPA_PortDescriptor descs[IO_PLUGS + T::parameters];
-	static LADSPA_PortRangeHint hints[IO_PLUGS + T::parameters];
-	static char names[IO_PLUGS + T::parameters][PARAM_NAME_LEN + 1];
+	static LADSPA_PortDescriptor descs[portcount];
+	static LADSPA_PortRangeHint hints[portcount];
+	static char* names[portcount];
+	static char name_buffer[portcount][PARAM_NAME_LEN];
 
 	static void
 	init()
 	{
+		for (int i = 0; i < portcount; i++)
+			names[i] = name_buffer[i];
+
 		for (int i = 0; i < IO_PLUGS; i++) {
-			memcpy(names[i], p_default_strings[i], PARAM_NAME_LEN + 1);
+			memcpy(names[i], p_default_strings[i], PARAM_NAME_LEN);
 			descs[i] = LADSPA_PORT_AUDIO;
 			descs[i] |= (i < 2) ? LADSPA_PORT_INPUT : LADSPA_PORT_OUTPUT;
 			hints[i] = (LADSPA_PortRangeHint){.HintDescriptor = 0};
@@ -79,7 +85,7 @@ struct LADSPA_Plugin : public T {
 			int j = i + IO_PLUGS;
 			Param *p = &default_params[i];
 
-			memcpy(names[j], p->name, PARAM_NAME_LEN + 1);
+			memcpy(names[j], p->name, PARAM_NAME_LEN);
 			descs[j] = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
 
 			hints[j].LowerBound = p->min;
@@ -164,10 +170,13 @@ struct LADSPA_Plugin : public T {
 	}
 };
 
-TEMPLATE Param LADSPA_Plugin<T>::default_params[T::parameters];
-TEMPLATE LADSPA_PortDescriptor LADSPA_Plugin<T>::descs[IO_PLUGS + T::parameters];
-TEMPLATE LADSPA_PortRangeHint LADSPA_Plugin<T>::hints[IO_PLUGS + T::parameters];
-TEMPLATE char LADSPA_Plugin<T>::names[IO_PLUGS + T::parameters][PARAM_NAME_LEN + 1];
+#define P LADSPA_Plugin<T>
+TEMPLATE Param P::default_params[T::parameters];
+TEMPLATE LADSPA_PortDescriptor P::descs[P::portcount];
+TEMPLATE LADSPA_PortRangeHint P::hints[P::portcount];
+TEMPLATE char* P::names[P::portcount];
+TEMPLATE char P::name_buffer[P::portcount][PARAM_NAME_LEN];
+#undef P
 
 TEMPLATE static
 LADSPA_Descriptor gen_desc() {
@@ -179,10 +188,10 @@ LADSPA_Descriptor gen_desc() {
 		.Name = T::name,
 		.Maker = T::author,
 		.Copyright = T::copyright,
-		.PortCount = IO_PLUGS + T::parameters,
+		.PortCount = T::portcount,
 		.PortDescriptors = T::descs,
 		.PortRangeHints = T::hints,
-		.PortNames = (const char * const *) T::names,
+		.PortNames = (const char *const *) T::names,
 
 		.instantiate = T::plug_construct,
 		.cleanup = T::plug_destruct,
