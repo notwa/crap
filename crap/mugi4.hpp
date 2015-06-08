@@ -34,11 +34,7 @@ tanh2(T x)
 	return x*a/b;
 }
 
-typedef struct {
-	v2df sum, sumback, dout;
-} stage;
-
-typedef struct {
+struct freqdata {
 	v2df g;
 	v2df p0;
 	v2df q0, q1, q2, q3;
@@ -46,53 +42,40 @@ typedef struct {
 	v2df L_p0;
 	v2df L_q0;
 	v2df L_r1;
-} freqdata;
+};
 
-// TODO: namespace
-TEMPLATE INNER T
-process_stage(stage *s, freqdata fd, T in)
-{
-	T temp = (in + s->sumback)*VT2*fd.L_p0*fd.g;
-	T out = temp + s->sum;
-	s->sum += T(2)*temp;
-	s->dout = tanh2<T>(out/VT2);
-	s->sumback = in*fd.L_r1 - s->dout*fd.L_q0;
-	return out;
-}
+struct stage {
+	v2df sum, sumback, dout;
 
-struct Crap_mugi4
-:public AdjustAll<BufferOS2<Crap>> {
-	static constexpr ulong id = 0xD8D0D8D0;
-	static constexpr char label[] = "crap_mugi4";
-	static constexpr char name[] = "crap mugi4 (moog-like)";
-	static constexpr char author[] = "Connor Olding";
-	static constexpr char copyright[] = "MIT";
+	TEMPLATE inline T
+	process(freqdata fd, T in)
+	{
+		T temp = (in + sumback)*VT2*fd.L_p0*fd.g;
+		T out = temp + sum;
+		sum += T(2)*temp;
+		dout = tanh2<T>(out/VT2);
+		sumback = in*fd.L_r1 - dout*fd.L_q0;
+		return out;
+	}
+};
 
-	static constexpr ulong parameters = 3;
-
+struct mugi4 {
 	freqdata fd;
 	stage s1, s2, s3, s4;
 	v2df sumback1, sumback2, sumback3, sumback4;
 	v2df drive, feedback;
 
-	inline
-	Crap_mugi4()
-	{
-		// FIXME
-		//memset(data, 0, sizeof(personal));
-	}
-
 	TEMPLATE inline T
-	process_one(T in)
+	process(T in)
 	{
 		in *= drive;
 
 		T sum = in + sumback1;
 		T pre = -fd.p0*sum;
-			process_stage<T>(&s1, fd, tanh2<T>(pre/VT2));
-			process_stage<T>(&s2, fd, s1.dout);
-			process_stage<T>(&s3, fd, s2.dout);
-		T out = process_stage<T>(&s4, fd, s3.dout);
+			s1.process<T>(fd, tanh2<T>(pre/VT2));
+			s2.process<T>(fd, s1.dout);
+			s3.process<T>(fd, s2.dout);
+		T out = s4.process<T>(fd, s3.dout);
 
 		T back = feedback*out;
 		sumback1 = fd.r1*in + fd.q0*back + sumback2;
@@ -104,10 +87,63 @@ struct Crap_mugi4
 		return out/drive*compensate;
 	}
 
+	inline void
+	setup(double wc, double drive_, double feedback_)
+	{
+		drive = v2df(drive_);
+		feedback = v2df(feedback_);
+		double k = feedback_;
+
+		double bc1 = -4; //-binomial(N, 1);
+		double bc2 = -6; //-binomial(N, 2);
+		double bc3 = -4; //-binomial(N, 3);
+		double bc4 = -1; //-binomial(N, 4);
+
+		#define fd_set(L, R) double L = R; fd.L = (v2df){L, L}
+		fd_set(g, tan(wc));
+		double gg1 = g/(g + 1);
+		double gg1Nk = k*gg1*gg1*gg1*gg1;
+		double g1g1 = (g - 1)/(g + 1);
+
+		fd_set(p0, 1/(1 + gg1Nk));
+		fd_set(r1, bc1*gg1Nk);
+		fd_set(r2, bc2*gg1Nk);
+		fd_set(r3, bc3*gg1Nk);
+		fd_set(r4, bc4*gg1Nk);
+		fd_set(q0, r1 + bc1*g1g1);
+		fd_set(q1, r2 + bc2*g1g1*g1g1);
+		fd_set(q2, r3 + bc3*g1g1*g1g1*g1g1);
+		fd_set(q3, r4 + bc4*g1g1*g1g1*g1g1*g1g1);
+
+		fd_set(L_p0, 1/(1 + g));
+		fd_set(L_q0, 1 - g);
+		fd_set(L_r1, -g);
+		#undef fd_set
+	}
+};
+
+struct Crap_mugi4
+:public AdjustAll<BufferOS2<Crap>> {
+	static constexpr ulong id = 0xD8D0D8D0;
+	static constexpr char label[] = "crap_mugi4";
+	static constexpr char name[] = "crap mugi4 (moog-like)";
+	static constexpr char author[] = "Connor Olding";
+	static constexpr char copyright[] = "MIT";
+
+	static constexpr ulong parameters = 3;
+
+	mugi4 filter;
+
+	inline
+	Crap_mugi4()
+	{
+		memset(&filter, 0, sizeof(mugi4));
+	}
+
 	virtual inline v2df
 	process2(v2df in)
 	{
-		return process_one(in);
+		return filter.process(in);
 	}
 
 	static inline void
@@ -118,21 +154,20 @@ struct Crap_mugi4
 		params[0].max = 20000;
 		params[0].scale = SCALE_HZ;
 		params[0].def = DEFAULT_MAX;
+		params[0].reset();
 
 		sprintf(params[1].name, "Drive");
 		params[1].min = -40;
 		params[1].max = 0;
 		params[1].scale = SCALE_DB;
 		params[1].def = DEFAULT_MIN;
+		params[1].reset();
 
 		sprintf(params[2].name, "Feedback");
 		params[2].min = 0;
 		params[2].max = 1;
 		params[2].scale = SCALE_FLOAT;
 		params[2].def = DEFAULT_MIN;
-
-		params[0].reset();
-		params[1].reset();
 		params[2].reset();
 	}
 
@@ -153,38 +188,10 @@ struct Crap_mugi4
 		double f = params[0].value;
 		if (f < 20) f = 20;
 		if (f > fs/6*OVERSAMPLING) f = fs/6*OVERSAMPLING;
-		double _drive = DB2LIN(params[1].value);
-		double k = params[2].value*N;
-		drive = v2df(_drive, _drive);
-		feedback = v2df(k, k);
-
-		double bc1 = -4; //-binomial(N, 1);
-		double bc2 = -6; //-binomial(N, 2);
-		double bc3 = -4; //-binomial(N, 3);
-		double bc4 = -1; //-binomial(N, 4);
-
-		#define fd_set(L, R) double L = R; fd.L = (v2df){L, L}
-		fd_set(g, tan(M_PI*f/fs/OVERSAMPLING));
-		double gg1 = g/(g + 1);
-		double gg1Nk = k*gg1*gg1*gg1*gg1;
-		double g1g1 = (g - 1)/(g + 1);
-
-		fd_set(p0, 1/(1 + gg1Nk));
-		fd_set(r1, bc1*gg1Nk);
-		fd_set(r2, bc2*gg1Nk);
-		fd_set(r3, bc3*gg1Nk);
-		fd_set(r4, bc4*gg1Nk);
-		fd_set(q0, r1 + bc1*g1g1);
-		fd_set(q1, r2 + bc2*g1g1*g1g1);
-		fd_set(q2, r3 + bc3*g1g1*g1g1*g1g1);
-		fd_set(q3, r4 + bc4*g1g1*g1g1*g1g1*g1g1);
-
-		fd_set(L_p0, 1/(1 + g));
-		fd_set(L_q0, 1 - g);
-		fd_set(L_r1, -g);
-		#undef fd_set
-
-		fd = fd;
+		double wc = M_PI*f/fs/OVERSAMPLING;
+		double drive = DB2LIN(params[1].value);
+		double feedback = params[2].value*N;
+		filter.setup(wc, drive, feedback);
 	}
 };
 
