@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "util.hpp"
-#include "param.hpp"
+#include "Param.hpp"
 #include "Crap.hpp"
 #include "Buffer2.hpp"
 #include "biquad.hpp"
@@ -53,7 +53,7 @@ struct Crap_eq
 	}
 
 	static inline void
-	construct_params(param *params)
+	construct_params(Param *params)
 	{
 		for (int i = 0; i < BANDS; i++) {
 			sprintf(params[0].name, "Band %i Frequency", i + 1);
@@ -61,28 +61,28 @@ struct Crap_eq
 			params[0].max = 20000;
 			params[0].scale = SCALE_HZ;
 			params[0].def = DEFAULT_440;
-			param_reset(&params[0]);
+			params[0].reset();
 
 			sprintf(params[1].name, "Band %i Gain", i + 1);
 			params[1].min = -18;
 			params[1].max = 18;
 			params[1].scale = SCALE_DB;
 			params[1].def = DEFAULT_0;
-			param_reset(&params[1]);
+			params[1].reset();
 
 			sprintf(params[2].name, "Band %i Bandwidth", i + 1);
 			params[2].min = 0.0625; // 2^-4 could probably be 2^-3
 			params[2].max = 8;      // 2^3  could probably be 2^2
 			params[2].scale = SCALE_FLOAT;
 			params[2].def = DEFAULT_1;
-			param_reset(&params[2]);
+			params[2].reset();
 
 			params += 3;
 		}
 	}
 
 	inline void
-	adjust_all(param *params)
+	adjust_all(Param *params)
 	{
 		for (int i = 0; i < BANDS; i++) {
 			filters_L[i] = biquad_gen(FILT_PEAKING,

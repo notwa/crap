@@ -14,142 +14,34 @@
 #define PLUG_OUTPUT_R 3
 #define PCOUNT (PARAMETERS + 4)
 
+// LADSPA is a jerk and won't let us initialize anything
+// before asking for a descriptor.
+// in reality we could use a crap-ton of constexprs,
+// but i just need something functional for now
 static void __attribute__ ((constructor)) plug_init();
+static void __attribute__ ((destructor)) plug_cleanup();
 
-LADSPA_PortDescriptor p_descs[PCOUNT];
-LADSPA_PortRangeHint p_hints[PCOUNT];
+#define ALLOC(type, amount) (type *) calloc(amount, sizeof(type))
+
 char p_default_strings[4][PARAM_NAME_LEN + 1] = {
 	"Input L", "Input R",
 	"Output L", "Output R"
 };
-#if (PARAMETERS > 0)
-static param global_params[PARAMETERS];
-char p_name_strings[PARAMETERS][PARAM_NAME_LEN + 1];
-#endif
+
+LADSPA_PortDescriptor p_descs[PCOUNT];
+LADSPA_PortRangeHint p_hints[PCOUNT];
+static Param *global_params;
+char **p_name_strings;
 char *p_names[PCOUNT];
 
-typedef struct {
-	LADSPA_Data *input_L;
-	LADSPA_Data *input_R;
-	LADSPA_Data *output_L;
-	LADSPA_Data *output_R;
-
-	Crap *crap;
-	#if (PARAMETERS > 0)
-	LADSPA_Data *values[PARAMETERS];
-	param params[PARAMETERS];
-	#endif
-} plug_t;
-
 static void
-plug_connect(LADSPA_Handle instance, unsigned long port, LADSPA_Data *data)
+plug_cleanup()
 {
-	plug_t *plug = (plug_t *)instance;
-	if (port == PLUG_INPUT_L)
-		plug->input_L = data;
-	else if (port == PLUG_INPUT_R)
-		plug->input_R = data;
-	else if (port == PLUG_OUTPUT_L)
-		plug->output_L = data;
-	else if (port == PLUG_OUTPUT_R)
-		plug->output_R = data;
-	#if (PARAMETERS > 0)
-	else if (port < PARAMETERS + 4)
-		plug->values[port - 4] = data;
-	#endif
-}
-
-static void
-plug_resume(LADSPA_Handle instance)
-{
-	plug_t *plug = (plug_t *)instance;
-	plug->crap->resume();
-}
-
-static void
-plug_pause(LADSPA_Handle instance)
-{
-	plug_t *plug = (plug_t *)instance;
-	plug->crap->pause();
-}
-
-static LADSPA_Handle
-plug_construct(const LADSPA_Descriptor *descriptor, unsigned long fs)
-{
-	plug_t *plug = (plug_t *) calloc(1, sizeof(plug_t));
-	plug->crap = new CrapPlug();
-	#if (PARAMETERS > 0)
-	memcpy(plug->params, global_params, sizeof(param)*PARAMETERS);
-	plug->crap->adjust(plug->params, fs);
-	#else
-	plug->crap->adjust(NULL, fs);
-	#endif
-	return (LADSPA_Handle) plug;
-}
-
-static void
-plug_destruct(LADSPA_Handle instance)
-{
-	plug_t *plug = (plug_t *)instance;
-	delete plug->crap;
-	free(plug);
-}
-
-static void
-plug_process(LADSPA_Handle instance, unsigned long count)
-{
-	plug_t *plug = (plug_t *)instance;
-	#if (PARAMETERS > 0)
 	for (int i = 0; i < PARAMETERS; i++) {
-		if (!plug->values[i])
-			continue;
-		if (*plug->values[i] != plug->params[i].value) {
-			plug->params[i].value = *plug->values[i];
-			plug->crap->adjust_one(plug->params, i);
-		}
+		free(p_name_strings[i]);
 	}
-	#endif
-	plug->crap->process(
-	    plug->input_L, plug->input_R,
-	    plug->output_L, plug->output_R,
-	    count);
-}
-
-TEMPLATE static constexpr
-LADSPA_Descriptor gen_desc() {
-	return LADSPA_Descriptor {
-		.UniqueID = T::id,
-		.Label = T::label,
-		.Properties = 0,
-		.Name = T::name,
-		.Maker = T::author,
-		.Copyright = T::copyright,
-		.PortCount = PCOUNT,
-		.PortDescriptors = p_descs,
-		.PortRangeHints = p_hints,
-		.PortNames = (const char * const *) p_names,
-
-		.instantiate = plug_construct,
-		.cleanup = plug_destruct,
-		.activate = plug_resume,
-		.deactivate = plug_pause,
-		.connect_port = plug_connect,
-		.run = plug_process,
-		.run_adding = NULL,
-		.set_run_adding_gain = NULL
-	};
-}
-
-static constexpr LADSPA_Descriptor plug_descs[] = {
-	gen_desc<CrapPlug>()
-};
-
-const LADSPA_Descriptor *
-ladspa_descriptor(unsigned long index)
-{
-	if (index >= sizeof(plug_descs)/sizeof(plug_descs[0]))
-		return NULL;
-	return plug_descs + index;
+	free(p_name_strings);
+	free(global_params);
 }
 
 static void
@@ -162,11 +54,15 @@ plug_init()
 		p_hints[i] = (LADSPA_PortRangeHint){.HintDescriptor = 0};
 	}
 
-	#if (PARAMETERS > 0)
+	global_params = ALLOC(Param, PARAMETERS);
+	p_name_strings = ALLOC(char *, PARAMETERS);
+
 	CrapPlug::construct_params(global_params);
 	for (int i = 0; i < PARAMETERS; i++) {
+		p_name_strings[i] = ALLOC(char, PARAM_NAME_LEN + 1);
+
 		int j = i + 4;
-		param *p = &global_params[i];
+		Param *p = &global_params[i];
 
 		memcpy(p_name_strings[i], p->name, PARAM_NAME_LEN + 1);
 		p_names[j] = p_name_strings[i];
@@ -194,5 +90,129 @@ plug_init()
 
 		p_hints[j].HintDescriptor = hint;
 	}
-	#endif
+}
+
+struct plug_t {
+	LADSPA_Data *input_L;
+	LADSPA_Data *input_R;
+	LADSPA_Data *output_L;
+	LADSPA_Data *output_R;
+
+	Crap *crap;
+	LADSPA_Data **values;
+	Param *params;
+};
+
+TEMPLATE
+struct LADSPA_Plugin : public T {
+	static LADSPA_Handle
+	plug_construct(const LADSPA_Descriptor *descriptor, unsigned long fs)
+	{
+		plug_t *plug = ALLOC(plug_t, 1);
+		plug->crap = new CrapPlug();
+		if (T::parameters > 0) {
+			plug->values = ALLOC(LADSPA_Data *, T::parameters);
+			plug->params = ALLOC(Param, T::parameters);
+			memcpy(plug->params, global_params, sizeof(Param)*T::parameters);
+			plug->crap->adjust(plug->params, fs);
+		} else {
+			plug->crap->adjust(NULL, fs);
+		}
+		return (LADSPA_Handle) plug;
+	}
+
+	static void
+	plug_destruct(LADSPA_Handle instance)
+	{
+		plug_t *plug = (plug_t *)instance;
+		delete plug->crap;
+		free(plug->values);
+		free(plug->params);
+		free(plug);
+	}
+
+	static void
+	plug_connect(LADSPA_Handle instance, unsigned long port, LADSPA_Data *data)
+	{
+		plug_t *plug = (plug_t *)instance;
+		if (port == PLUG_INPUT_L)
+			plug->input_L = data;
+		else if (port == PLUG_INPUT_R)
+			plug->input_R = data;
+		else if (port == PLUG_OUTPUT_L)
+			plug->output_L = data;
+		else if (port == PLUG_OUTPUT_R)
+			plug->output_R = data;
+		else if (T::parameters > 0 && port < T::parameters + 4)
+			plug->values[port - 4] = data;
+	}
+
+	static void
+	plug_resume(LADSPA_Handle instance)
+	{
+		plug_t *plug = (plug_t *)instance;
+		plug->crap->resume();
+	}
+
+	static void
+	plug_pause(LADSPA_Handle instance)
+	{
+		plug_t *plug = (plug_t *)instance;
+		plug->crap->pause();
+	}
+
+	static void
+	plug_process(LADSPA_Handle instance, unsigned long count)
+	{
+		plug_t *plug = (plug_t *)instance;
+		for (int i = 0; i < T::parameters; i++) {
+			if (!plug->values[i])
+				continue;
+			if (*plug->values[i] != plug->params[i].value) {
+				plug->params[i].value = *plug->values[i];
+				plug->crap->adjust_one(plug->params, i);
+			}
+		}
+		plug->crap->process(
+		    plug->input_L, plug->input_R,
+		    plug->output_L, plug->output_R,
+		    count);
+	}
+};
+
+TEMPLATE static constexpr
+LADSPA_Descriptor gen_desc() {
+	return LADSPA_Descriptor {
+		.UniqueID = T::id,
+		.Label = T::label,
+		.Properties = 0,
+		.Name = T::name,
+		.Maker = T::author,
+		.Copyright = T::copyright,
+		.PortCount = 4 + T::parameters,
+		.PortDescriptors = p_descs,
+		.PortRangeHints = p_hints,
+		.PortNames = (const char * const *) p_names,
+
+		.instantiate = T::plug_construct,
+		.cleanup = T::plug_destruct,
+		.activate = T::plug_resume,
+		.deactivate = T::plug_pause,
+		.connect_port = T::plug_connect,
+		.run = T::plug_process,
+		.run_adding = NULL,
+		.set_run_adding_gain = NULL
+	};
+}
+
+static constexpr LADSPA_Descriptor plug_descs[] = {
+	gen_desc<LADSPA_Plugin<CrapPlug>>()
+};
+
+const LADSPA_Descriptor *
+ladspa_descriptor(unsigned long index)
+{
+	if (index >= sizeof(plug_descs)/sizeof(plug_descs[0]))
+		return NULL;
+	return plug_descs + index;
 }

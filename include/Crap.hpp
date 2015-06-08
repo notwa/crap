@@ -2,6 +2,14 @@ struct Crap {
 	virtual inline
 	~Crap() {}
 
+	ulong id;
+	char *label;
+	char *name;
+	char *author;
+	char *copyright;
+	ulong bands;
+	ulong parameters;
+
 	virtual void
 	pause() = 0;
 
@@ -24,10 +32,10 @@ struct Crap {
 	//construct_params(param *params) = 0;
 
 	virtual void
-	adjust(param *params, ulong fs) = 0;
+	adjust(Param *params, ulong fs) = 0;
 
 	virtual void
-	adjust_one(param *params, int i) = 0;
+	adjust_one(Param *params, int i) = 0;
 };
 
 template<class Mixin>
@@ -35,17 +43,17 @@ struct AdjustAll : public virtual Mixin {
 	ulong fs;
 
 	virtual void
-	adjust_all(param *params) = 0;
+	adjust_all(Param *params) = 0;
 
 	inline void
-	adjust(param *params, ulong fs_new)
+	adjust(Param *params, ulong fs_new)
 	{
 		fs = fs_new;
 		adjust_all(params);
 	}
 
 	inline void
-	adjust_one(param *params, int i)
+	adjust_one(Param *params, int i)
 	{
 		adjust_all(params);
 	}
@@ -59,10 +67,10 @@ struct NoParams : public virtual Mixin {
 	//construct_params(param *params) = 0;
 
 	void
-	adjust(param *params, ulong fs)
+	adjust(Param *params, ulong fs)
 	{}
 
 	void
-	adjust_one(param *params, int i)
+	adjust_one(Param *params, int i)
 	{}
 };
