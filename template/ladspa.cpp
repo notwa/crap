@@ -8,88 +8,42 @@
 #define PARAM_NAME_LEN 24
 #endif
 
-#define PLUG_INPUT_L 0
-#define PLUG_INPUT_R 1
-#define PLUG_OUTPUT_L 2
-#define PLUG_OUTPUT_R 3
-#define PCOUNT (PARAMETERS + 4)
-
-// LADSPA is a jerk and won't let us initialize anything
-// before asking for a descriptor.
-// in reality we could use a crap-ton of constexprs,
-// but i just need something functional for now
-static void __attribute__ ((constructor)) plug_init();
-static void __attribute__ ((destructor)) plug_cleanup();
+enum {
+	PLUG_INPUT_L,
+	PLUG_INPUT_R,
+	PLUG_OUTPUT_L,
+	PLUG_OUTPUT_R,
+	IO_PLUGS
+};
 
 #define ALLOC(type, amount) (type *) calloc(amount, sizeof(type))
 
-char p_default_strings[4][PARAM_NAME_LEN + 1] = {
+char p_default_strings[IO_PLUGS][PARAM_NAME_LEN + 1] = {
 	"Input L", "Input R",
 	"Output L", "Output R"
 };
 
-LADSPA_PortDescriptor p_descs[PCOUNT];
-LADSPA_PortRangeHint p_hints[PCOUNT];
-static Param *global_params;
-char **p_name_strings;
-char *p_names[PCOUNT];
-
-static void
-plug_cleanup()
+int
+param2hint(Param *p)
 {
-	for (int i = 0; i < PARAMETERS; i++) {
-		free(p_name_strings[i]);
+	int hint = LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_BOUNDED_ABOVE;
+	if (p->scale == SCALE_INT)    hint |= LADSPA_HINT_INTEGER;
+	if (p->scale == SCALE_TOGGLE) hint |= LADSPA_HINT_TOGGLED;
+	if (p->scale >= SCALE_LOG)    hint |= LADSPA_HINT_LOGARITHMIC;
+
+	switch (p->def) {
+	case DEFAULT_0:    hint |= LADSPA_HINT_DEFAULT_0;       break;
+	case DEFAULT_1:    hint |= LADSPA_HINT_DEFAULT_1;       break;
+	case DEFAULT_100:  hint |= LADSPA_HINT_DEFAULT_100;     break;
+	case DEFAULT_440:  hint |= LADSPA_HINT_DEFAULT_440;     break;
+	case DEFAULT_MIN:  hint |= LADSPA_HINT_DEFAULT_MINIMUM; break;
+	case DEFAULT_LOW:  hint |= LADSPA_HINT_DEFAULT_LOW;     break;
+	case DEFAULT_HIGH: hint |= LADSPA_HINT_DEFAULT_HIGH;    break;
+	case DEFAULT_MAX:  hint |= LADSPA_HINT_DEFAULT_MAXIMUM; break;
+	case DEFAULT_HALF: hint |= LADSPA_HINT_DEFAULT_MIDDLE;  break;
 	}
-	free(p_name_strings);
-	free(global_params);
-}
 
-static void
-plug_init()
-{
-	for (int i = 0; i < 4; i++) {
-		p_names[i] = p_default_strings[i];
-		p_descs[i] = LADSPA_PORT_AUDIO;
-		p_descs[i] |= (i < 2) ? LADSPA_PORT_INPUT : LADSPA_PORT_OUTPUT;
-		p_hints[i] = (LADSPA_PortRangeHint){.HintDescriptor = 0};
-	}
-
-	global_params = ALLOC(Param, PARAMETERS);
-	p_name_strings = ALLOC(char *, PARAMETERS);
-
-	CrapPlug::construct_params(global_params);
-	for (int i = 0; i < PARAMETERS; i++) {
-		p_name_strings[i] = ALLOC(char, PARAM_NAME_LEN + 1);
-
-		int j = i + 4;
-		Param *p = &global_params[i];
-
-		memcpy(p_name_strings[i], p->name, PARAM_NAME_LEN + 1);
-		p_names[j] = p_name_strings[i];
-		p_descs[j] = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
-		int hint = LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_BOUNDED_ABOVE;
-
-		p_hints[j].LowerBound = p->min;
-		p_hints[j].UpperBound = p->max;
-
-		if (p->scale == SCALE_INT)    hint |= LADSPA_HINT_INTEGER;
-		if (p->scale == SCALE_TOGGLE) hint |= LADSPA_HINT_TOGGLED;
-		if (p->scale >= SCALE_LOG)    hint |= LADSPA_HINT_LOGARITHMIC;
-
-		switch (p->def) {
-		case DEFAULT_0:    hint |= LADSPA_HINT_DEFAULT_0;       break;
-		case DEFAULT_1:    hint |= LADSPA_HINT_DEFAULT_1;       break;
-		case DEFAULT_100:  hint |= LADSPA_HINT_DEFAULT_100;     break;
-		case DEFAULT_440:  hint |= LADSPA_HINT_DEFAULT_440;     break;
-		case DEFAULT_MIN:  hint |= LADSPA_HINT_DEFAULT_MINIMUM; break;
-		case DEFAULT_LOW:  hint |= LADSPA_HINT_DEFAULT_LOW;     break;
-		case DEFAULT_HIGH: hint |= LADSPA_HINT_DEFAULT_HIGH;    break;
-		case DEFAULT_MAX:  hint |= LADSPA_HINT_DEFAULT_MAXIMUM; break;
-		case DEFAULT_HALF: hint |= LADSPA_HINT_DEFAULT_MIDDLE;  break;
-		}
-
-		p_hints[j].HintDescriptor = hint;
-	}
+	return hint;
 }
 
 struct plug_t {
@@ -105,15 +59,45 @@ struct plug_t {
 
 TEMPLATE
 struct LADSPA_Plugin : public T {
+	static Param default_params[T::parameters];
+	static LADSPA_PortDescriptor descs[IO_PLUGS + T::parameters];
+	static LADSPA_PortRangeHint hints[IO_PLUGS + T::parameters];
+	static char names[IO_PLUGS + T::parameters][PARAM_NAME_LEN + 1];
+
+	static void
+	init()
+	{
+		for (int i = 0; i < IO_PLUGS; i++) {
+			memcpy(names[i], p_default_strings[i], PARAM_NAME_LEN + 1);
+			descs[i] = LADSPA_PORT_AUDIO;
+			descs[i] |= (i < 2) ? LADSPA_PORT_INPUT : LADSPA_PORT_OUTPUT;
+			hints[i] = (LADSPA_PortRangeHint){.HintDescriptor = 0};
+		}
+
+		T::construct_params(default_params);
+		for (int i = 0; i < T::parameters; i++) {
+			int j = i + IO_PLUGS;
+			Param *p = &default_params[i];
+
+			memcpy(names[j], p->name, PARAM_NAME_LEN + 1);
+			descs[j] = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
+
+			hints[j].LowerBound = p->min;
+			hints[j].UpperBound = p->max;
+
+			hints[j].HintDescriptor = param2hint(p);
+		}
+	};
+
 	static LADSPA_Handle
 	plug_construct(const LADSPA_Descriptor *descriptor, unsigned long fs)
 	{
 		plug_t *plug = ALLOC(plug_t, 1);
-		plug->crap = new CrapPlug();
+		plug->crap = new T();
 		if (T::parameters > 0) {
 			plug->values = ALLOC(LADSPA_Data *, T::parameters);
 			plug->params = ALLOC(Param, T::parameters);
-			memcpy(plug->params, global_params, sizeof(Param)*T::parameters);
+			memcpy(plug->params, default_params, sizeof(Param)*T::parameters);
 			plug->crap->adjust(plug->params, fs);
 		} else {
 			plug->crap->adjust(NULL, fs);
@@ -143,8 +127,8 @@ struct LADSPA_Plugin : public T {
 			plug->output_L = data;
 		else if (port == PLUG_OUTPUT_R)
 			plug->output_R = data;
-		else if (T::parameters > 0 && port < T::parameters + 4)
-			plug->values[port - 4] = data;
+		else if (T::parameters > 0 && port < T::parameters + IO_PLUGS)
+			plug->values[port - IO_PLUGS] = data;
 	}
 
 	static void
@@ -180,8 +164,14 @@ struct LADSPA_Plugin : public T {
 	}
 };
 
-TEMPLATE static constexpr
+TEMPLATE Param LADSPA_Plugin<T>::default_params[T::parameters];
+TEMPLATE LADSPA_PortDescriptor LADSPA_Plugin<T>::descs[IO_PLUGS + T::parameters];
+TEMPLATE LADSPA_PortRangeHint LADSPA_Plugin<T>::hints[IO_PLUGS + T::parameters];
+TEMPLATE char LADSPA_Plugin<T>::names[IO_PLUGS + T::parameters][PARAM_NAME_LEN + 1];
+
+TEMPLATE static
 LADSPA_Descriptor gen_desc() {
+	T::init();
 	return LADSPA_Descriptor {
 		.UniqueID = T::id,
 		.Label = T::label,
@@ -189,10 +179,10 @@ LADSPA_Descriptor gen_desc() {
 		.Name = T::name,
 		.Maker = T::author,
 		.Copyright = T::copyright,
-		.PortCount = 4 + T::parameters,
-		.PortDescriptors = p_descs,
-		.PortRangeHints = p_hints,
-		.PortNames = (const char * const *) p_names,
+		.PortCount = IO_PLUGS + T::parameters,
+		.PortDescriptors = T::descs,
+		.PortRangeHints = T::hints,
+		.PortNames = (const char * const *) T::names,
 
 		.instantiate = T::plug_construct,
 		.cleanup = T::plug_destruct,
@@ -205,7 +195,7 @@ LADSPA_Descriptor gen_desc() {
 	};
 }
 
-static constexpr LADSPA_Descriptor plug_descs[] = {
+static LADSPA_Descriptor plug_descs[] = {
 	gen_desc<LADSPA_Plugin<CrapPlug>>()
 };
 

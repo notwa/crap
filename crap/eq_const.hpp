@@ -1,5 +1,3 @@
-#define PARAMETERS 0
-
 #define BLOCK_SIZE 256
 
 #include <string.h>

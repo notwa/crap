@@ -1,6 +1,3 @@
-#define BANDS 4
-#define PARAMETERS (BANDS*3)
-
 #define BLOCK_SIZE 256
 
 #include <stdio.h>
@@ -23,8 +20,8 @@ struct Crap_eq
 	static constexpr ulong bands = 4;
 	static constexpr ulong parameters = bands*3;
 
-	biquad filters_L[BANDS];
-	biquad filters_R[BANDS];
+	biquad filters_L[bands];
+	biquad filters_R[bands];
 
 	inline void
 	process2(v2df *buf, ulong rem)
@@ -32,7 +29,7 @@ struct Crap_eq
 		biquad *f0, *f1;
 		f0 = filters_L;
 		f1 = filters_R;
-		for (ulong i = 0; i < BANDS; i++) {
+		for (ulong i = 0; i < bands; i++) {
 			biquad_run_block_stereo(f0, f1, buf, rem);
 			f0++;
 			f1++;
@@ -46,7 +43,7 @@ struct Crap_eq
 	inline void
 	resume()
 	{
-		for (int i = 0; i < BANDS; i++) {
+		for (int i = 0; i < bands; i++) {
 			biquad_init(&filters_L[i]);
 			biquad_init(&filters_R[i]);
 		}
@@ -55,7 +52,7 @@ struct Crap_eq
 	static inline void
 	construct_params(Param *params)
 	{
-		for (int i = 0; i < BANDS; i++) {
+		for (int i = 0; i < bands; i++) {
 			sprintf(params[0].name, "Band %i Frequency", i + 1);
 			params[0].min = 20;
 			params[0].max = 20000;
@@ -84,7 +81,7 @@ struct Crap_eq
 	inline void
 	adjust_all(Param *params)
 	{
-		for (int i = 0; i < BANDS; i++) {
+		for (int i = 0; i < bands; i++) {
 			filters_L[i] = biquad_gen(FILT_PEAKING,
 			    params[0].value, params[1].value, params[2].value, (double) fs);
 			params += 3;
