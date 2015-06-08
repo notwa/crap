@@ -18,7 +18,7 @@ https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
 #include "Param.hpp"
 #include "Crap.hpp"
 #include "os2piir.hpp"
-#include "BufferOS2.hpp"
+#include "Buffer2OS2.hpp"
 
 #define VT 0.026
 #define N 4
@@ -123,7 +123,7 @@ struct mugi4 {
 };
 
 struct Crap_mugi4
-:public AdjustAll<BufferOS2<Crap>> {
+:public AdjustAll<Buffer2OS2<Crap>> {
 	static constexpr ulong id = 0xD8D0D8D0;
 	static constexpr char label[] = "crap_mugi4";
 	static constexpr char name[] = "crap mugi4 (moog-like)";
@@ -140,10 +140,11 @@ struct Crap_mugi4
 		memset(&filter, 0, sizeof(mugi4));
 	}
 
-	virtual inline v2df
-	process2(v2df in)
+	inline void
+	process2(v2df *buf, ulong rem)
 	{
-		return filter.process(in);
+		for (ulong i = 0; i < rem; i++)
+			buf[i] = filter.process(buf[i]);
 	}
 
 	static inline void
