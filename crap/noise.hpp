@@ -1,45 +1,62 @@
-#define ID 0xEC57A71C
-#define LABEL "crap_noise"
-#define NAME "crap noise generator"
-#define AUTHOR "Connor Olding"
-#define COPYRIGHT "MIT"
-#define PARAMETERS 0
+#include <string.h>
 
 #include "util.hpp"
+#include "Param.hpp"
+#include "Crap.hpp"
 
-typedef struct {
-} personal;
+struct Crap_noise
+:public AdjustAll<Crap> {
+	static constexpr ulong id = 0xEC57A71C;
+	static constexpr char label[] = "crap_noise";
+	static constexpr char name[] = "crap noise generator";
+	static constexpr char author[] = "Connor Olding";
+	static constexpr char copyright[] = "MIT";
+	static constexpr ulong parameters = 0;
 
-template<typename T>
-INNER void
-process(personal *data,
-    T *in_L, T *in_R,
-    T *out_L, T *out_R,
-    unsigned long count)
-{
-	// TODO: separate and preserve mirand for each channel
-	for (unsigned long pos = 0; pos < count; pos++)
-		out_L[pos] = whitenoise();
-	for (unsigned long pos = 0; pos < count; pos++)
-		out_R[pos] = whitenoise();
-}
+	unsigned int mirand_L, mirand_R;
 
-INNER void
-construct(personal *data)
-{}
+	inline
+	Crap_noise()
+	: mirand_L(123), mirand_R(456)
+	{}
 
-INNER void
-destruct(personal *data)
-{}
+	inline void
+	process(
+	    double *in_L, double *in_R,
+	    double *out_L, double *out_R,
+	    ulong count)
+	{
+		for (ulong i = 0; i < count; i++)
+			out_L[i] = whitenoise(mirand_L);
+		for (ulong i = 0; i < count; i++)
+			out_R[i] = whitenoise(mirand_R);
+	}
 
-INNER void
-resume(personal *data)
-{}
+	inline void
+	process(
+	    float *in_L, float *in_R,
+	    float *out_L, float *out_R,
+	    ulong count)
+	{
+		for (ulong i = 0; i < count; i++)
+			out_L[i] = whitenoise(mirand_L);
+		for (ulong i = 0; i < count; i++)
+			out_R[i] = whitenoise(mirand_R);
+	}
 
-INNER void
-pause(personal *data)
-{}
+	static inline void
+	construct_params(Param *params)
+	{}
 
-INNER void
-adjust(personal *data, unsigned long fs)
-{}
+	inline void
+	resume()
+	{}
+
+	inline void
+	pause()
+	{}
+
+	inline void
+	adjust_all(Param *params)
+	{}
+};

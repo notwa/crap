@@ -123,9 +123,9 @@ main(int argc, char **argv)
 		}
 	}
 
-	mirand = time(NULL);
+	unsigned int mirand = time(NULL);
 	for (int i = 0; i < audio_count*BLOCK_SIZE; i++)
-		audio_buffer[i] = whitenoise();
+		audio_buffer[i] = whitenoise(mirand);
 
 	if (d->activate) d->activate(h);
 	for (int i = 0; i < 64*64*8; i++)

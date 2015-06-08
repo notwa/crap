@@ -37,10 +37,8 @@ disable_denormals()
 #define ANGULAR_LIM(fc, fs) (2 * M_PI / (fs) * LIMIT((fc), 1, (fs)/2))
 
 /* via http://www.rgba.org/articles/sfrand/sfrand.htm */
-static unsigned int mirand = 1;
-
 INNER float
-whitenoise()
+whitenoise(unsigned int &mirand)
 {
 	union either {
 		float f;
