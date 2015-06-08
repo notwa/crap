@@ -10,9 +10,9 @@
 
 struct Crap_eq_const_T420
 :public AdjustAll<Buffer2<Crap>> {
-	static constexpr ulong id = 0x0DEFACED;
-	static constexpr char label[] = "crap_eq_const";
-	static constexpr char name[] = "crap Constant Equalizer";
+	static constexpr ulong id = 0x0DEFACED + 420;
+	static constexpr char label[] = "crap_eq_const_T420";
+	static constexpr char name[] = "crap T420 Speaker Compensation";
 	static constexpr char author[] = "Connor Olding";
 	static constexpr char copyright[] = "MIT";
 
@@ -72,6 +72,8 @@ struct Crap_eq_const_T420
 		f[13] = biquad_gen(FILT_PEAKING,     490, -1.5, 0.23, fs);
 		f[14] = biquad_gen(FILT_PEAKING,    3100,  5.0, 0.33, fs);
 		f[15] = biquad_gen(FILT_LOWPASS,   14000,  0.0, 0.40, fs);
+		for (int i = 0; i < bands; i++)
+			filters_R[i] = filters_L[i];
 	}
 };
 

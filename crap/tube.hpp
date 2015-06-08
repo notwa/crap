@@ -65,7 +65,7 @@ struct Crap_tube
 		for (ulong i = 0; i < rem; i++)
 			drives[i] = v2df(drive.smooth());
 		for (ulong i = 0; i < rem; i++)
-			drives[i] = v2df(wet.smooth());
+			wets[i] = v2df(wet.smooth());
 
 		for (ulong i = 0; i < rem; i++)
 			buf[i] = Tube::process(buf[i], drives[i], wets[i]);

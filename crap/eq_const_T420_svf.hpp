@@ -13,7 +13,7 @@
 struct Crap_eq_const_T420_svf
 :public AdjustAll<Buffer4<Crap>> {
 	static constexpr ulong id = 0x0DEFACED + 420 + 1337;
-	static constexpr char label[] = "crap_eq_const";
+	static constexpr char label[] = "crap_eq_const_T420_svf";
 	static constexpr char name[] = "crap T420 Speaker Compensation (SVF)";
 	static constexpr char author[] = "Connor Olding";
 	static constexpr char copyright[] = "MIT";
@@ -24,7 +24,7 @@ struct Crap_eq_const_T420_svf
 	svf_matrix<v4sf> filters_L[bands];
 	svf_matrix<v4sf> filters_R[bands];
 
-	virtual inline void
+	inline void
 	process2(v4sf *buf_L, v4sf *buf_R, ulong rem)
 	{
 		svf_matrix<v4sf> *f0, *f1;
@@ -48,10 +48,10 @@ struct Crap_eq_const_T420_svf
 	inline void
 	resume()
 	{
-		svf_matrix<v4sf> *filters = filters_L;
-		for (int i = 0; i < bands; i++)
-			filters[i].memory = v4sf(0);
-		memcpy(filters_R, filters, bands*sizeof(svf_matrix<v4sf>));
+		for (int i = 0; i < bands; i++) {
+			filters_L[i].memory = v4sf(0);
+			filters_R[i].memory = v4sf(0);
+		}
 	}
 
 	static inline void
@@ -79,6 +79,9 @@ struct Crap_eq_const_T420_svf
 		f[13] = gen(FILT_PEAKING,     490, -1.5, 0.23, fs);
 		f[14] = gen(FILT_PEAKING,    3100,  5.0, 0.33, fs);
 		f[15] = gen(FILT_LOWPASS,   14000,  0.0, 0.40, fs);
+		#undef gen
+		for (int i = 0; i < bands; i++)
+			filters_R[i] = filters_L[i];
 	}
 };
 
