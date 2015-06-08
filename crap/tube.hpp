@@ -1,10 +1,3 @@
-#define ID 0x50F7BA11
-#define LABEL "crap_tube"
-#define NAME "crap Tube Distortion"
-#define AUTHOR "Connor Olding"
-#define COPYRIGHT "MIT"
-#define PARAMETERS 2
-
 #define OVERSAMPLING 2
 #define BLOCK_SIZE 256
 #define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
@@ -13,171 +6,118 @@
 #include <stdio.h>
 
 #include "util.hpp"
-#include "param.hpp"
+#include "Param.hpp"
+#include "Crap.hpp"
 #include "os2piir.hpp"
+#include "Buffer2OS2.hpp"
 
 typedef struct {
 	double desired, actual, speed;
 	int log; // use multiplication instead of addition for speed
+
+	inline double
+	smooth()
+	{
+		if (actual < desired) {
+			if (log) actual *= speed;
+			else actual += speed;
+			if (actual > desired) actual = desired;
+		} else if (actual > desired) {
+			if (log) actual /= speed;
+			else actual -= speed;
+			if (actual < desired) actual = desired;
+		}
+		return actual;
+	}
 } smoothval;
 
-typedef struct {
-	halfband_t<v2df> hb_up, hb_down;
+
+namespace Tube {
+	TEMPLATE INNER CONST T
+	distort(T x)
+	{
+		return (T(27.)*x + T(9.)) / (T(9.)*x*x + T(6.)*x + T(19.)) - T(9./19.);
+	}
+
+	TEMPLATE INNER CONST T
+	process(T x, T drive, T wet)
+	{
+		return (distort<T>(x*drive)/drive*T(0.79) - x)*wet + x;
+	}
+}
+
+struct Crap_tube
+:public Buffer2OS2<Crap> {
+	static constexpr ulong id = 0x50F7BA11;
+	static constexpr char label[] = "crap_tube";
+	static constexpr char name[] = "crap Tube Distortion";
+	static constexpr char author[] = "Connor Olding";
+	static constexpr char copyright[] = "MIT";
+
+	static constexpr ulong parameters = 2;
+
 	smoothval drive, wet;
-} personal;
 
-INNER double
-smooth(smoothval *val)
-{
-	double a = val->actual;
-	double d = val->desired;
-	double s = val->speed;
-	double l = val->log;
-	if (a < d) {
-		if (l) a *= s;
-		else a += s;
-		if (a > d) a = d;
-	} else if (a > d) {
-		if (l) a /= s;
-		else a -= s;
-		if (a < d) a = d;
+	inline void
+	process2(v2df *buf, ulong rem)
+	{
+		v2df drives[FULL_SIZE], wets[FULL_SIZE];
+		for (ulong i = 0; i < rem; i++)
+			drives[i] = v2df(drive.smooth());
+		for (ulong i = 0; i < rem; i++)
+			drives[i] = v2df(wet.smooth());
+
+		for (ulong i = 0; i < rem; i++)
+			buf[i] = Tube::process(buf[i], drives[i], wets[i]);
 	}
-	val->actual = a;
-	return a;
-}
 
-TEMPLATE INNER CONST T
-distort(T x)
-{
-	return (T(27.)*x + T(9.)) / (T(9.)*x*x + T(6.)*x + T(19.)) - T(9./19.);
-}
-
-TEMPLATE INNER CONST T
-process_one(T x, T drive, T wet)
-{
-	return (distort<T>(x*drive)/drive*T(0.79) - x)*wet + x;
-}
-
-TEMPLATE static void
-process(personal *data,
-    T *in_L, T *in_R,
-    T *out_L, T *out_R,
-    ulong count)
-{
-	disable_denormals();
-
-	v2df drives[FULL_SIZE], wets[FULL_SIZE];
-	v2df buf[BLOCK_SIZE];
-	v2df over[FULL_SIZE];
-
-	auto *hb_up   = &data->hb_up;
-	auto *hb_down = &data->hb_down;
-
-	for (ulong pos = 0; pos < count; pos += BLOCK_SIZE) {
-		ulong rem = BLOCK_SIZE;
-		if (pos + BLOCK_SIZE > count)
-			rem = count - pos;
-
-		ulong rem2 = rem*OVERSAMPLING;
-
-		for (ulong i = 0; i < rem2; i++) {
-			double y = smooth(&data->drive);
-			drives[i] = v2df(y);
-		}
-		for (ulong i = 0; i < rem2; i++) {
-			double y = smooth(&data->wet);
-			wets[i] = v2df(y);
-		}
-
-		for (ulong i = 0; i < rem; i++) {
-			buf[i][0] = in_L[i];
-			buf[i][1] = in_R[i];
-		}
-
-		for (ulong i = 0; i < rem; i++) {
-			over[i*2+0] = interpolate_a(hb_up, buf[i]);
-			over[i*2+1] = interpolate_b(hb_up, buf[i]);
-		}
-
-		for (ulong i = 0; i < rem2; i++) {
-			over[i] = process_one(over[i], drives[i], wets[i]);
-		}
-
-		for (ulong i = 0; i < rem; i++) {
-			         decimate_a(hb_down, over[i*2+0]);
-			buf[i] = decimate_b(hb_down, over[i*2+1]);
-		}
-
-		for (ulong i = 0; i < rem; i++) {
-			out_L[i] = buf[i][0];
-			out_R[i] = buf[i][1];
-		}
-
-		in_L += BLOCK_SIZE;
-		in_R += BLOCK_SIZE;
-		out_L += BLOCK_SIZE;
-		out_R += BLOCK_SIZE;
+	inline void
+	resume()
+	{
+		memset(&hb_up,   0, sizeof(halfband_t<v2df>));
+		memset(&hb_down, 0, sizeof(halfband_t<v2df>));
 	}
-}
 
-INNER void
-resume(personal *data)
-{
-	memset(&data->hb_up,   0, sizeof(halfband_t<v2df>));
-	memset(&data->hb_down, 0, sizeof(halfband_t<v2df>));
-}
+	inline void
+	pause()
+	{}
 
-INNER void
-pause(personal *data)
-{}
+	static inline void
+	construct_params(Param *params)
+	{
+		sprintf(params[0].name, "Drive");
+		params[0].min = -30;
+		params[0].max = 15;
+		params[0].scale = SCALE_DB;
+		params[0].def = DEFAULT_0;
+		params[0].reset();
 
-INNER void
-construct(personal *data)
-{
-	memset(data, 0, sizeof(personal));
-}
+		sprintf(params[1].name, "Wetness");
+		params[1].min = 0;
+		params[1].max = 1;
+		params[1].scale = SCALE_FLOAT;
+		params[1].def = DEFAULT_1;
+		params[1].reset();
+	}
 
-INNER void
-construct_params(param *params)
-{
-	sprintf(params[0].name, "Drive");
-	params[0].min = -30;
-	params[0].max = 15;
-	params[0].scale = SCALE_DB;
-	params[0].def = DEFAULT_0;
+	inline void
+	adjust(Param *params, ulong fs_long)
+	{
+		double fs = fs_long;
+		drive.desired = DB2LIN(params[0].value);
+		wet.desired = params[1].value;
+		drive.actual = drive.desired;
+		wet.actual = wet.desired;
+		drive.speed = 1 + 20/fs/OVERSAMPLING;
+		wet.speed = 20/fs/OVERSAMPLING;
+		drive.log = 1;
+		wet.log = 0;
+	}
 
-	sprintf(params[1].name, "Wetness");
-	params[1].min = 0;
-	params[1].max = 1;
-	params[1].scale = SCALE_FLOAT;
-	params[1].def = DEFAULT_1;
-
-	param_reset(&params[0]);
-	param_reset(&params[1]);
-}
-
-INNER void
-destruct(personal *data)
-{}
-
-INNER void
-adjust(personal *data, param *params, ulong fs_long)
-{
-	resume(data);
-	double fs = fs_long;
-	data->drive.desired = DB2LIN(params[0].value);
-	data->wet.desired = params[1].value;
-	data->drive.actual = data->drive.desired;
-	data->wet.actual = data->wet.desired;
-	data->drive.speed = 1 + 20/fs/OVERSAMPLING;
-	data->wet.speed = 20/fs/OVERSAMPLING;
-	data->drive.log = 1;
-	data->wet.log = 0;
-}
-
-INNER void
-adjust_one(personal *data, param *params, unsigned int index)
-{
-	data->drive.desired = DB2LIN(params[0].value);
-	data->wet.desired = params[1].value;
-}
+	inline void
+	adjust_one(Param *params, int index)
+	{
+		drive.desired = DB2LIN(params[0].value);
+		wet.desired = params[1].value;
+	}
+};
