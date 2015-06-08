@@ -60,3 +60,8 @@ struct Crap_noise
 	adjust_all(Param *params)
 	{}
 };
+
+constexpr char Crap_noise::label[];
+constexpr char Crap_noise::name[];
+constexpr char Crap_noise::author[];
+constexpr char Crap_noise::copyright[];

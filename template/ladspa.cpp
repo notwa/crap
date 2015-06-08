@@ -58,7 +58,7 @@ struct plug_t {
 };
 
 TEMPLATE
-struct LADSPA_Plugin : public T {
+struct LADSPA_Plugin {
 	//static constexpr ulong name_buf_size = (portcount)*PARAM_NAME_LEN;
 	static constexpr ulong portcount = IO_PLUGS + T::parameters;
 	static Param default_params[T::parameters];
@@ -176,11 +176,10 @@ TEMPLATE LADSPA_PortDescriptor P::descs[P::portcount];
 TEMPLATE LADSPA_PortRangeHint P::hints[P::portcount];
 TEMPLATE char* P::names[P::portcount];
 TEMPLATE char P::name_buffer[P::portcount][PARAM_NAME_LEN];
-#undef P
 
 TEMPLATE static
 LADSPA_Descriptor gen_desc() {
-	T::init();
+	P::init();
 	LADSPA_Descriptor d = {};
 
 	d.UniqueID = T::id;
@@ -189,25 +188,26 @@ LADSPA_Descriptor gen_desc() {
 	d.Name = T::name;
 	d.Maker = T::author;
 	d.Copyright = T::copyright;
-	d.PortCount = T::portcount;
-	d.PortDescriptors = T::descs;
-	d.PortRangeHints = T::hints;
-	d.PortNames = (const char *const *) T::names;
+	d.PortCount = P::portcount;
+	d.PortDescriptors = P::descs;
+	d.PortRangeHints = P::hints;
+	d.PortNames = (const char *const *) P::names;
 
-	d.instantiate = T::plug_construct;
-	d.cleanup = T::plug_destruct;
-	d.activate = T::plug_resume;
-	d.deactivate = T::plug_pause;
-	d.connect_port = T::plug_connect;
-	d.run = T::plug_process;
+	d.instantiate = P::plug_construct;
+	d.cleanup = P::plug_destruct;
+	d.activate = P::plug_resume;
+	d.deactivate = P::plug_pause;
+	d.connect_port = P::plug_connect;
+	d.run = P::plug_process;
 	d.run_adding = NULL;
 	d.set_run_adding_gain = NULL;
 
 	return d;
 }
+#undef P
 
 static LADSPA_Descriptor plug_descs[] = {
-	gen_desc<LADSPA_Plugin<CrapPlug>>()
+	gen_desc<CrapPlug>()
 };
 
 const LADSPA_Descriptor *

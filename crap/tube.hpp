@@ -121,3 +121,8 @@ struct Crap_tube
 		wet.desired = params[1].value;
 	}
 };
+
+constexpr char Crap_tube::label[];
+constexpr char Crap_tube::name[];
+constexpr char Crap_tube::author[];
+constexpr char Crap_tube::copyright[];
