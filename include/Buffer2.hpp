@@ -1,6 +1,6 @@
 template<class Mixin>
 struct Buffer2 : public virtual Mixin {
-	virtual inline void
+	virtual void
 	process2(v2df *buf, ulong rem) = 0;
 
 	TEMPLATE void

@@ -181,27 +181,29 @@ TEMPLATE char P::name_buffer[P::portcount][PARAM_NAME_LEN];
 TEMPLATE static
 LADSPA_Descriptor gen_desc() {
 	T::init();
-	return LADSPA_Descriptor {
-		.UniqueID = T::id,
-		.Label = T::label,
-		.Properties = 0,
-		.Name = T::name,
-		.Maker = T::author,
-		.Copyright = T::copyright,
-		.PortCount = T::portcount,
-		.PortDescriptors = T::descs,
-		.PortRangeHints = T::hints,
-		.PortNames = (const char *const *) T::names,
+	LADSPA_Descriptor d = {};
 
-		.instantiate = T::plug_construct,
-		.cleanup = T::plug_destruct,
-		.activate = T::plug_resume,
-		.deactivate = T::plug_pause,
-		.connect_port = T::plug_connect,
-		.run = T::plug_process,
-		.run_adding = NULL,
-		.set_run_adding_gain = NULL
-	};
+	d.UniqueID = T::id;
+	d.Label = T::label;
+	d.Properties = 0;
+	d.Name = T::name;
+	d.Maker = T::author;
+	d.Copyright = T::copyright;
+	d.PortCount = T::portcount;
+	d.PortDescriptors = T::descs;
+	d.PortRangeHints = T::hints;
+	d.PortNames = (const char *const *) T::names;
+
+	d.instantiate = T::plug_construct;
+	d.cleanup = T::plug_destruct;
+	d.activate = T::plug_resume;
+	d.deactivate = T::plug_pause;
+	d.connect_port = T::plug_connect;
+	d.run = T::plug_process;
+	d.run_adding = NULL;
+	d.set_run_adding_gain = NULL;
+
+	return d;
 }
 
 static LADSPA_Descriptor plug_descs[] = {
