@@ -23,6 +23,16 @@ crap Tube Distortion | crap\_tube | `0x50F7BA11` | static waveshaper with 6x ove
 
 ## build notes
 
+### clang is strongly recommended
+
+gcc can potentially produce significantly slower code,
+and odds are that your version is horribly outdated anyway.
+
+*Debian/Ubuntu users:* your stable version of g++ can't even build this.
+just `apt-get install clang-3.6` and export `CXX=clang++-3.6` when building.
+
+### general building
+
 `make linux` or `make windows` (works well with [mxe])
 [mxe]: //mxe.cc
 
