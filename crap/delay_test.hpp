@@ -1,30 +1,17 @@
-#define ID 0xDEDEDEDE
-#define LABEL "crap_delay_test"
-#define NAME "crap sample delay test"
-#define AUTHOR "Connor Olding"
-#define COPYRIGHT "MIT"
-#define PARAMETERS 0
 #define DELAY
+static auto global_delay = 2;
 
-#include "util.hpp"
-#include "biquad.hpp"
+#define OVERSAMPLE 4
 
-static ulong global_delay = 2;
-static double oversample = 4;
-
-// taps. coefficients via:
+// number of taps. coefficients via:
 // http://vladgsound.wordpress.com/2013/06/01/iir-based-eq-and-distortions/
 #define UP 19
 #define DOWN 5
 
-typedef struct {
-	double up[UP], down[DOWN];
-	biquad filter;
-} channel;
-
-typedef struct {
-	channel c[2];
-} personal;
+#include "util.hpp"
+#include "Param.hpp"
+#include "Crap.hpp"
+#include "biquad.hpp"
 
 INNER double
 fir_up(double *x, double s)
@@ -68,56 +55,78 @@ fir_down(double *x, double s)
 	return s;
 }
 
-INNER double
-process_one(channel *c, double s)
-{
-	s =    fir_down(c->down, biquad_run(&c->filter, fir_up(c->up, s)));
-	       fir_down(c->down, biquad_run(&c->filter, fir_up(c->up, 0)));
-	       fir_down(c->down, biquad_run(&c->filter, fir_up(c->up, 0)));
-	       fir_down(c->down, biquad_run(&c->filter, fir_up(c->up, 0)));
-	return s;
-}
+struct channel {
+	double up[UP], down[DOWN]; // TODO: dumb in fir_up/fir_down struct
+	biquad filter;
 
-template<typename T>
-INNER void
-process(personal *data,
-    T *in_L, T *in_R,
-    T *out_L, T *out_R,
-    ulong count)
-{
-	for (ulong pos = 0; pos < count; pos++) {
-		out_L[pos] = process_one(&data->c[0], in_L[pos]);
-		out_R[pos] = process_one(&data->c[1], in_R[pos]);
+	inline double
+	process(double s)
+	{
+		s = fir_down(down, biquad_run(&filter, fir_up(up, s)));
+		    fir_down(down, biquad_run(&filter, fir_up(up, 0)));
+		    fir_down(down, biquad_run(&filter, fir_up(up, 0)));
+		    fir_down(down, biquad_run(&filter, fir_up(up, 0)));
+		return s;
 	}
-}
+};
 
-INNER void
-construct(personal *data)
-{}
+struct Crap_delay_test
+:public AdjustAll<Crap> {
+	static constexpr ulong id = 0xDEDEDEDE;
+	static constexpr char label[] = "crap_delay_test";
+	static constexpr char name[] = "crap sample delay test";
+	static constexpr char author[] = "Connor Olding";
+	static constexpr char copyright[] = "MIT";
+	static constexpr ulong parameters = 0;
 
-INNER void
-destruct(personal *data)
-{}
+	channel c_L, c_R;
 
-INNER void
-resume(personal *data)
-{}
+	inline void
+	process(
+	    double *in_L, double *in_R,
+	    double *out_L, double *out_R,
+	    ulong count)
+	{
+		for (ulong i = 0; i < count; i++) {
+			out_L[i] = c_L.process(in_L[i]);
+			out_R[i] = c_R.process(in_R[i]);
+		}
+	}
 
-INNER void
-pause(personal *data)
-{}
+	inline void
+	process(
+	    float *in_L, float *in_R,
+	    float *out_L, float *out_R,
+	    ulong count)
+	{
+		for (ulong i = 0; i < count; i++) {
+			out_L[i] = c_L.process(in_L[i]);
+			out_R[i] = c_R.process(in_R[i]);
+		}
+	}
 
-INNER void
-adjust(personal *data, ulong fs)
-{
-	for (int k = 0; k < 2; k++) {
-		channel *c = &data->c[k];
+	static inline void
+	construct_params(Param *params)
+	{}
+
+	inline void
+	resume()
+	{}
+
+	inline void
+	pause()
+	{}
+
+	inline void
+	adjust_all(Param *params)
+	{
 		for (int i = 0; i < UP; i++)
-			c->up[i] = 0;
+			c_L.up[i] = 0;
 		for (int i = 0; i < DOWN; i++)
-			c->down[i] = 0;
-		c->filter = biquad_gen(FILT_PEAKING,
-		    16630, 10, 1, fs*oversample);
-		biquad_init(&c->filter);
+			c_L.down[i] = 0;
+		c_L.filter = biquad_gen(FILT_PEAKING,
+		    16630, 10, 1, fs*OVERSAMPLE);
+		biquad_init(&c_L.filter);
+		c_R = c_L;
 	}
-}
+};
