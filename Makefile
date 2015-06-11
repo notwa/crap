@@ -44,6 +44,8 @@ VST_FLAGS += -I $(VST_SDK_DIR) -DBUILDING_DLL=1
 
 OPT_FLAGS = -Ofast -march=core2 -mfpmath=sse
 
+OBJCOPY ?= objcopy
+
 # any possibly produced files besides intermediates
 ALL = $(SHOBJ) $(PROGRAM) $(BIN)/vstsdk.o $(EXE) $(DLL)
 
@@ -92,11 +94,11 @@ $(UTILS): %: $(BIN)/%
 
 $(BIN)/%.exe: $(BIN)/%
 	@echo '  OBJCOPY '$@
-	@$(OBJCOPY) -S $< $@
+	@$(OBJCOPY) $< $@
 
 $(BIN)/%.dll: $(BIN)/%.so
 	@echo '  OBJCOPY '$@
-	@$(OBJCOPY) -S $< $@
+	@$(OBJCOPY) $< $@
 
 $(BIN)/ladspa/%.so: $(BIN)/ladspa/%.o
 	@echo '  CXXLD   '$@

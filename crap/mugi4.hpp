@@ -99,26 +99,27 @@ struct mugi4 {
 		double bc3 = -4; //-binomial(N, 3);
 		double bc4 = -1; //-binomial(N, 4);
 
-		#define fd_set(L, R) double L = R; fd.L = (v2df){L, L}
-		fd_set(g, tan(wc));
+		// apparently fd_set is used by some stdio implementations, so
+		#define crap_fd_set(L, R) double L = R; fd.L = (v2df){L, L}
+		crap_fd_set(g, tan(wc));
 		double gg1 = g/(g + 1);
 		double gg1Nk = k*gg1*gg1*gg1*gg1;
 		double g1g1 = (g - 1)/(g + 1);
 
-		fd_set(p0, 1/(1 + gg1Nk));
-		fd_set(r1, bc1*gg1Nk);
-		fd_set(r2, bc2*gg1Nk);
-		fd_set(r3, bc3*gg1Nk);
-		fd_set(r4, bc4*gg1Nk);
-		fd_set(q0, r1 + bc1*g1g1);
-		fd_set(q1, r2 + bc2*g1g1*g1g1);
-		fd_set(q2, r3 + bc3*g1g1*g1g1*g1g1);
-		fd_set(q3, r4 + bc4*g1g1*g1g1*g1g1*g1g1);
+		crap_fd_set(p0, 1/(1 + gg1Nk));
+		crap_fd_set(r1, bc1*gg1Nk);
+		crap_fd_set(r2, bc2*gg1Nk);
+		crap_fd_set(r3, bc3*gg1Nk);
+		crap_fd_set(r4, bc4*gg1Nk);
+		crap_fd_set(q0, r1 + bc1*g1g1);
+		crap_fd_set(q1, r2 + bc2*g1g1*g1g1);
+		crap_fd_set(q2, r3 + bc3*g1g1*g1g1*g1g1);
+		crap_fd_set(q3, r4 + bc4*g1g1*g1g1*g1g1*g1g1);
 
-		fd_set(L_p0, 1/(1 + g));
-		fd_set(L_q0, 1 - g);
-		fd_set(L_r1, -g);
-		#undef fd_set
+		crap_fd_set(L_p0, 1/(1 + g));
+		crap_fd_set(L_q0, 1 - g);
+		crap_fd_set(L_r1, -g);
+		#undef crap_fd_set
 	}
 };
 
