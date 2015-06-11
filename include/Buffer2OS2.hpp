@@ -1,5 +1,5 @@
 template<class Mixin>
-struct Buffer2OS2 : public virtual Mixin {
+struct Buffer2OS2 : public Mixin {
 	virtual void
 	process2(v2df *buf, ulong rem) = 0;
 

@@ -42,7 +42,7 @@ LADSPA_FLAGS =
 VST_FLAGS = -Wno-write-strings -Wno-narrowing
 VST_FLAGS += -I $(VST_SDK_DIR) -DBUILDING_DLL=1
 
-OPT_FLAGS = -Ofast -march=native -mfpmath=sse
+OPT_FLAGS = -Ofast -march=core2 -mfpmath=sse
 
 # any possibly produced files besides intermediates
 ALL = $(SHOBJ) $(PROGRAM) $(BIN)/vstsdk.o $(EXE) $(DLL)

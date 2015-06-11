@@ -39,18 +39,20 @@ struct plugin : public AudioEffectX
 
 	Param params[CrapPlug::parameters];
 
-	CrapPlug crap;
+	Crap *crap;
 };
 
 AudioEffect *
 createEffectInstance(audioMasterCallback audioMaster)
 {
+	// TODO: return new plugin<CrapPlug>(audioMaster);
 	return new plugin(audioMaster);
 }
 
 plugin::plugin(audioMasterCallback audioMaster)
 : AudioEffectX(audioMaster, 1, CrapPlug::parameters)
 {
+	crap = new CrapPlug();
 	setNumInputs(2);
 	setNumOutputs(2);
 	setUniqueID(CrapPlug::id);
@@ -62,12 +64,13 @@ plugin::plugin(audioMasterCallback audioMaster)
 
 plugin::~plugin()
 {
+	delete crap;
 }
 
 void
 plugin::resume()
 {
-	crap.resume();
+	crap->resume();
 	AudioEffectX::resume();
 }
 
@@ -75,14 +78,14 @@ void
 plugin::suspend()
 {
 	AudioEffectX::suspend();
-	crap.pause();
+	crap->pause();
 }
 
 void
 plugin::processReplacing(
     float **inputs, float **outputs, VstInt32 count)
 {
-	crap.process(
+	crap->process(
 	    inputs[0], inputs[1],
 	    outputs[0], outputs[1],
 	    count);
@@ -92,7 +95,7 @@ void
 plugin::processDoubleReplacing(
     double **inputs, double **outputs, VstInt32 count)
 {
-	crap.process(
+	crap->process(
 	    inputs[0], inputs[1],
 	    outputs[0], outputs[1],
 	    count);
@@ -108,7 +111,7 @@ void
 plugin::setSampleRate(float fs)
 {
 	AudioEffectX::setSampleRate(fs);
-	crap.adjust(params, (unsigned long) fs);
+	crap->adjust(params, (unsigned long) fs);
 	#ifdef DELAY
 	setInitialDelay(global_delay);
 	#endif
@@ -160,7 +163,7 @@ plugin::setParameter(VstInt32 index, float value)
 {
 	if (index >= CrapPlug::parameters) return;
 	params[index].set(value);
-	crap.adjust_one(params, index);
+	crap->adjust_one(params, index);
 }
 
 float

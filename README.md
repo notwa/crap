@@ -53,3 +53,4 @@ other targets:
 * scrap overly-complex makefile for a shell script
 * support for CPUs without SSE/NEON
 * don't mix CamelCase with underscores (only done for legacy reasons)
+* compressor plugin

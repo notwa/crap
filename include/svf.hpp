@@ -123,18 +123,18 @@ svf_run_block_mat(svf_matrix<T> *RESTRICT mat, T *RESTRICT buf, ulong count)
 	T t1, t2, t3, t4;
 	T memory = mat->memory;
 	for (ulong i = 0; i < count/2; i++) {
-		memory[0] = buf[i][0];
-		memory[1] = buf[i][1];
+		memory.v[0] = buf[i].v[0];
+		memory.v[1] = buf[i].v[1];
 		t1 = mat->a*memory;
 		t2 = mat->b*memory;
 		t3 = mat->c*memory;
 		t4 = mat->d*memory;
-		memory[0] = t1[0] + t1[1] + t1[2] + t1[3];
-		memory[1] = t2[0] + t2[1] + t2[2] + t2[3];
-		memory[2] = t3[0] + t3[1] + t3[2] + t3[3];
-		memory[3] = t4[0] + t4[1] + t4[2] + t4[3];
-		buf[i][0] = memory[0];
-		buf[i][1] = memory[1];
+		memory.v[0] = t1.v[0] + t1.v[1] + t1.v[2] + t1.v[3];
+		memory.v[1] = t2.v[0] + t2.v[1] + t2.v[2] + t2.v[3];
+		memory.v[2] = t3.v[0] + t3.v[1] + t3.v[2] + t3.v[3];
+		memory.v[3] = t4.v[0] + t4.v[1] + t4.v[2] + t4.v[3];
+		buf[i].v[0] = memory.v[0];
+		buf[i].v[1] = memory.v[1];
 	}
 	mat->memory = memory;
 }

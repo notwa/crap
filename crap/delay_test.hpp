@@ -130,3 +130,8 @@ struct Crap_delay_test
 		c_R = c_L;
 	}
 };
+
+constexpr char Crap_delay_test::label[];
+constexpr char Crap_delay_test::name[];
+constexpr char Crap_delay_test::author[];
+constexpr char Crap_delay_test::copyright[];

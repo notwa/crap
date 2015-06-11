@@ -2,14 +2,6 @@ struct Crap {
 	virtual inline
 	~Crap() {}
 
-	ulong id;
-	char *label;
-	char *name;
-	char *author;
-	char *copyright;
-	ulong bands;
-	ulong parameters;
-
 	virtual void
 	pause() = 0;
 
@@ -39,7 +31,7 @@ struct Crap {
 };
 
 template<class Mixin>
-struct AdjustAll : public virtual Mixin {
+struct AdjustAll : public Mixin {
 	ulong fs;
 
 	virtual void
@@ -60,7 +52,7 @@ struct AdjustAll : public virtual Mixin {
 };
 
 template<class Mixin>
-struct NoParams : public virtual Mixin {
+struct NoParams : public Mixin {
 	// etc
 
 	//void
