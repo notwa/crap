@@ -19,19 +19,19 @@ struct Buffer4 : public Mixin {
 				rem = count - pos;
 
 			for (ulong i = 0, j = 0; i < rem; i += 2, j++) {
-				buf_L[j].v[0] = in_L[i+0];
-				buf_L[j].v[1] = in_L[i+1];
-				buf_R[j].v[0] = in_R[i+0];
-				buf_R[j].v[1] = in_R[i+1];
+				buf_L[j][0] = in_L[i+0];
+				buf_L[j][1] = in_L[i+1];
+				buf_R[j][0] = in_R[i+0];
+				buf_R[j][1] = in_R[i+1];
 			}
 
 			process2(buf_L, buf_R, rem);
 
 			for (ulong i = 0, j = 0; i < rem; i += 2, j++) {
-				out_L[i+0] = buf_L[j].v[0];
-				out_L[i+1] = buf_L[j].v[1];
-				out_R[i+0] = buf_R[j].v[0];
-				out_R[i+1] = buf_R[j].v[1];
+				out_L[i+0] = buf_L[j][0];
+				out_L[i+1] = buf_L[j][1];
+				out_R[i+0] = buf_R[j][0];
+				out_R[i+1] = buf_R[j][1];
 			}
 
 			in_L += BLOCK_SIZE;

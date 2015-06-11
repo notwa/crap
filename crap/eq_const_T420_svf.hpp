@@ -1,5 +1,3 @@
-#define BLOCK_SIZE 256
-
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>

@@ -9,7 +9,7 @@
 #include "ladspa.hpp"
 #include "util.hpp"
 
-#define BLOCK_SIZE 2048
+#define BENCH_BLOCK 2048
 
 void *plug = NULL;
 static float *audio_buffer;
@@ -109,12 +109,12 @@ main(int argc, char **argv)
 		if (LADSPA_IS_PORT_AUDIO(d->PortDescriptors[i]))
 			audio_count++;
 
-	audio_buffer = (decltype(audio_buffer)) calloc(audio_count*BLOCK_SIZE, sizeof(float));
+	audio_buffer = (decltype(audio_buffer)) calloc(audio_count*BENCH_BLOCK, sizeof(float));
 
 	int a = 0;
 	for (int i = 0; i < d->PortCount; i++) {
 		if (LADSPA_IS_PORT_AUDIO(d->PortDescriptors[i])) {
-			d->connect_port(h, i, audio_buffer + a++*BLOCK_SIZE);
+			d->connect_port(h, i, audio_buffer + a++*BENCH_BLOCK);
 		} else {
 			float *x;
 			x = (decltype(x)) alloca(sizeof(float));
@@ -124,12 +124,12 @@ main(int argc, char **argv)
 	}
 
 	unsigned int mirand = time(NULL);
-	for (int i = 0; i < audio_count*BLOCK_SIZE; i++)
+	for (int i = 0; i < audio_count*BENCH_BLOCK; i++)
 		audio_buffer[i] = whitenoise(mirand);
 
 	if (d->activate) d->activate(h);
 	for (int i = 0; i < 64*64*8; i++)
-		d->run(h, BLOCK_SIZE);
+		d->run(h, BENCH_BLOCK);
 	if (d->deactivate) d->deactivate(h);
 
 	d->cleanup(h);

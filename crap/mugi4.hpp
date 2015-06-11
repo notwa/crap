@@ -1,7 +1,3 @@
-#define BLOCK_SIZE 256
-#define OVERSAMPLING 2
-#define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
-
 /*
 an implementation of:
 S. D Angelo and V. Välimäki. Generalized Moog Ladder Filter: Part II
@@ -18,6 +14,9 @@ https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
 #include "Param.hpp"
 #include "Crap.hpp"
 #include "os2piir.hpp"
+
+#define OVERSAMPLING 2
+#define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
 #include "Buffer2OS2.hpp"
 
 #define VT 0.026

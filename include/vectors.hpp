@@ -73,6 +73,16 @@ struct Dumber<_v4sf> : public DumberBase<_v4sf> {
 	TEMPLATE inline
 	Dumber(T x)
 	{ v = (_v4sf){float(x), float(x), float(x), float(x)}; }
+
+	inline float &
+	operator[](int index) {
+		return ((float *)&v)[index];
+	}
+
+	inline const float &
+	operator[](int index) const {
+		return ((float *)&v)[index];
+	}
 };
 
 typedef Dumber<_v2df> v2df;

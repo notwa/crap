@@ -94,11 +94,11 @@ $(UTILS): %: $(BIN)/%
 
 $(BIN)/%.exe: $(BIN)/%
 	@echo '  OBJCOPY '$@
-	@$(OBJCOPY) $< $@
+	@$(OBJCOPY) -S $< $@
 
 $(BIN)/%.dll: $(BIN)/%.so
 	@echo '  OBJCOPY '$@
-	@$(OBJCOPY) $< $@
+	@$(OBJCOPY) -S $< $@
 
 $(BIN)/ladspa/%.so: $(BIN)/ladspa/%.o
 	@echo '  CXXLD   '$@

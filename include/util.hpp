@@ -14,6 +14,10 @@
 
 typedef unsigned long ulong; // __attribute((aligned(16)));
 
+#ifndef BLOCK_SIZE
+#define BLOCK_SIZE 256
+#endif
+
 #include "Dumber.hpp"
 #include "vectors.hpp"
 

@@ -83,4 +83,3 @@ struct Dumber : public DumberBase<T> {
 	Dumber(DumberBase<T> v2) : DumberBase<T>(v2)
 	{}
 };
-

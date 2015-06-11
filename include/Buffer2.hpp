@@ -16,15 +16,15 @@ struct Buffer2 : public Mixin {
 				rem = count - pos;
 
 			for (ulong i = 0; i < rem; i++) {
-				buf[i].v[0] = in_L[i];
-				buf[i].v[1] = in_R[i];
+				buf[i][0] = in_L[i];
+				buf[i][1] = in_R[i];
 			}
 
 			process2(buf, rem);
 
 			for (ulong i = 0; i < rem; i++) {
-				out_L[i] = buf[i].v[0];
-				out_R[i] = buf[i].v[1];
+				out_L[i] = buf[i][0];
+				out_R[i] = buf[i][1];
 			}
 
 			in_L += BLOCK_SIZE;

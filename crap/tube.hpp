@@ -1,7 +1,3 @@
-#define OVERSAMPLING 2
-#define BLOCK_SIZE 256
-#define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
-
 #include <string.h>
 #include <stdio.h>
 
@@ -9,6 +5,9 @@
 #include "Param.hpp"
 #include "Crap.hpp"
 #include "os2piir.hpp"
+
+#define OVERSAMPLING 2
+#define FULL_SIZE (BLOCK_SIZE*OVERSAMPLING)
 #include "Buffer2OS2.hpp"
 
 typedef struct {
