@@ -66,6 +66,8 @@ struct Crap_eq_const
 		f[ 9] = biquad_gen(FILT_PEAKING,  6300, -6.4, 1.00, fs);
 		f[10] = biquad_gen(FILT_PEAKING,  8390,  1.5, 0.15, fs);
 		f[11] = biquad_gen(FILT_PEAKING, 13333,  3.1, 0.19, fs);
+		for (int i = 0; i < bands; i++)
+			filters_R[i] = filters_L[i];
 	}
 };
 
