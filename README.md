@@ -18,6 +18,7 @@ crap T420 Speaker Compensation | crap\_eq\_const\_T420 | `0x0DEFAE91` | lenovo t
 crap T420 Speaker Compensation (SVF) | crap\_eq\_const\_T420\_svf | `0x0DEFB3CA` | trying out State Variable Filters (SVFs)
 crap mugi4 (moog-like) | crap\_mugi4 | `0xD8D0D8D0` | nonlinear moog filter implementation: [see reference][moog]
 crap Tube Distortion | crap\_tube | `0x50F7BA11` | static waveshaper with 6x oversampling and parameter smoothing. doesn't actually emulate a tube. not actually for crapping in.
+crap Leveller | crap\_level | `0xAAAAAAAA` | an early prototype of a heavy leveller.
 
 [moog]: https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
 
