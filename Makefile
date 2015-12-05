@@ -62,6 +62,7 @@ exe: $(EXE)
 dll: $(DLL)
 
 windows: ALL_CXXFLAGS += $(OPT_FLAGS)
+windows: ALL_CXXFLAGS += -mstackrealign
 windows: dll
 
 linux: ALL_CXXFLAGS += $(OPT_FLAGS) -fpic

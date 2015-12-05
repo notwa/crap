@@ -32,6 +32,9 @@ and odds are that your version is horribly outdated anyway.
 *Debian/Ubuntu users:* your stable version of g++ can't even build this.
 just `apt-get install clang-3.6` and export `CXX=clang++-3.6` when building.
 
+If you really have to use g++,
+you may need to add `-fabi-version=6` to CXXFLAGS.
+
 ### general building
 
 `make linux` or `make windows` (works well with [mxe])
