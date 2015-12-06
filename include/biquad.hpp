@@ -19,14 +19,15 @@ design(double cw, double sw,
     double num0, double num1, double num2,
     double den0, double den1, double den2)
 {
-	return (biquad_interim) {
-		.b0 = num0*   (1 + cw) + num1*sw + num2*  (1 - cw),
-		.b1 = num0*-2*(1 + cw)           + num2*2*(1 - cw),
-		.b2 = num0*   (1 + cw) - num1*sw + num2*  (1 - cw),
-		.a0 = den0*   (1 + cw) + den1*sw + den2*  (1 - cw),
-		.a1 = den0*-2*(1 + cw)           + den2*2*(1 - cw),
-		.a2 = den0*   (1 + cw) - den1*sw + den2*  (1 - cw),
+	const biquad_interim ret = {
+		num0*   (1 + cw) + num1*sw + num2*  (1 - cw),
+		num0*-2*(1 + cw)           + num2*2*(1 - cw),
+		num0*   (1 + cw) - num1*sw + num2*  (1 - cw),
+		den0*   (1 + cw) + den1*sw + den2*  (1 - cw),
+		den0*-2*(1 + cw)           + den2*2*(1 - cw),
+		den0*   (1 + cw) - den1*sw + den2*  (1 - cw),
 	};
+	return ret;
 }
 
 // TODO: rename to biquad_gen_raw, fix up parameters like you did with svf
@@ -55,6 +56,8 @@ biquad_gen(filter_t type, double fc, double gain, double bw, double fs)
 	case FILT_BANDPASS_2: d(0,  1/Q, 0,   1,    1/Q,   1); break;
 	case FILT_NOTCH:      d(1,    0, 1,   1,    1/Q,   1); break;
 	case FILT_GAIN:       d(A,    A, A, 1/A,    1/A, 1/A); break;
+	// TODO: error or something
+	default:              d(1,    1, 1,   1,      1,   1); break;
 	}
 	#undef d
 

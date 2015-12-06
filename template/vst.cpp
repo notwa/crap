@@ -37,7 +37,7 @@ struct plugin : public AudioEffectX
 
 	char programName[kVstMaxProgNameLen];
 
-	Param params[CrapPlug::parameters];
+	Param *params;
 
 	Crap *crap;
 };
@@ -53,6 +53,8 @@ plugin::plugin(audioMasterCallback audioMaster)
 : AudioEffectX(audioMaster, 1, CrapPlug::parameters)
 {
 	crap = new CrapPlug();
+	if (CrapPlug::parameters)
+		params = new Param[CrapPlug::parameters];
 	setNumInputs(2);
 	setNumOutputs(2);
 	setUniqueID(CrapPlug::id);
@@ -65,6 +67,8 @@ plugin::plugin(audioMasterCallback audioMaster)
 plugin::~plugin()
 {
 	delete crap;
+	if (CrapPlug::parameters)
+		delete[] params;
 }
 
 void

@@ -10,14 +10,14 @@
 
 struct Crap_eq_const_T420_svf
 :public AdjustAll<Buffer4<Crap>> {
-	static constexpr ulong id = 0x0DEFACED + 420 + 1337;
-	static constexpr char label[] = "crap_eq_const_T420_svf";
-	static constexpr char name[] = "crap T420 Speaker Compensation (SVF)";
-	static constexpr char author[] = "Connor Olding";
-	static constexpr char copyright[] = "MIT";
+	static const ulong id = 0x0DEFACED + 420 + 1337;
+	static const char *label;
+	static const char *name;
+	static const char *author;
+	static const char *copyright;
+	static const ulong parameters = 0;
 
-	static constexpr ulong bands = 16;
-	static constexpr ulong parameters = 0;
+	static const ulong bands = 16;
 
 	svf_matrix<v4sf> filters_L[bands];
 	svf_matrix<v4sf> filters_R[bands];
@@ -83,7 +83,7 @@ struct Crap_eq_const_T420_svf
 	}
 };
 
-constexpr char Crap_eq_const_T420_svf::label[];
-constexpr char Crap_eq_const_T420_svf::name[];
-constexpr char Crap_eq_const_T420_svf::author[];
-constexpr char Crap_eq_const_T420_svf::copyright[];
+const char *Crap_eq_const_T420_svf::label = "crap_eq_const_T420_svf";
+const char *Crap_eq_const_T420_svf::name = "crap T420 Speaker Compensation (SVF)";
+const char *Crap_eq_const_T420_svf::author = "Connor Olding";
+const char *Crap_eq_const_T420_svf::copyright = "MIT";

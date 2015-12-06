@@ -12,7 +12,7 @@ static ulong global_delay = 0;
 
 TEMPLATE
 struct Delay {
-	static constexpr ulong size = 4096;
+	static const ulong size = 4096;
 
 	// needs to be twice the size for a memcpy trick later
 	T buf[size*2];
@@ -28,7 +28,7 @@ struct Delay {
 	};
 
 	inline T
-	delay(T s)
+	delay(const T &s)
 	{
 		pos--;
 		if (pos <= 0) {
@@ -52,14 +52,13 @@ struct Delay {
 
 struct Crap_level
 :public AdjustAll<Buffer2<Crap>> {
-	static constexpr ulong id = 0xAAAAAAAA;
-	static constexpr char label[] = "crap_level";
-	static constexpr char name[] = "crap Leveller";
-	static constexpr char author[] = "Connor Olding";
-	static constexpr char copyright[] = "MIT";
-
-	static constexpr ulong bands = 2;
-	static constexpr ulong parameters = 0;
+	static const ulong id = 0xAAAAAAAA;
+	static const char *label;
+	static const char *name;
+	static const char *author;
+	static const char *copyright;
+	static const ulong bands = 2;
+	static const ulong parameters = 0;
 
 	v2df sc[BLOCK_SIZE]; // sidechain
 	biquad filters_L[bands];
@@ -80,7 +79,7 @@ struct Crap_level
 	~Crap_level()
 	{
 		if (window)
-			free(window);
+			delete window;
 	}
 
 	inline void
@@ -89,20 +88,21 @@ struct Crap_level
 		biquad *f0, *f1;
 		f0 = filters_L;
 		f1 = filters_R;
-		memcpy(sc, buf, rem*sizeof(v2df));
+		for (ulong i = 0; i < rem; i++)
+			sc[i] = buf[i];
 		for (ulong i = 0; i < bands; i++) {
 			biquad_run_block_stereo(f0, f1, sc, rem);
 			f0++;
 			f1++;
 		}
-		double envs[rem];
+		double envs[BLOCK_SIZE];
 		for (ulong i = 0; i < rem; i++)
 			envs[i] = fabs(sc[i][0]) + fabs(sc[i][1]);
 		for (ulong i = 0; i < rem; i++)
 			envs[i] *= 0.5;
 
 		// MaxFIR
-		double applied[window_size];
+		double *applied = new double[window_size];
 		for (ulong i = 0; i < rem; i++) {
 			window_delay.delay(envs[i]);
 			for (ulong j = 0; j < window_size; j++)
@@ -112,6 +112,7 @@ struct Crap_level
 				max_ = fmax(max_, applied[j]);
 			envs[i] = max_;
 		}
+		delete applied;
 
 		// Follower
 		for (ulong i = 0; i < rem; i++) {
@@ -119,7 +120,7 @@ struct Crap_level
 			env = fmax(0.00001, env);
 			envs[i] = env;
 		}
-		double gains[rem];
+		double gains[BLOCK_SIZE];
 		for (ulong i = 0; i < rem; i++)
 			gains[i] = 0.3991 - 0.01769/(envs[i] + 0.044);
 		for (ulong i = 0; i < rem; i++)
@@ -153,7 +154,7 @@ struct Crap_level
 	construct_params(Param *params)
 	{}
 
-	virtual void
+	void
 	adjust_all(Param *params)
 	{
 		biquad *f = filters_L;
@@ -163,15 +164,15 @@ struct Crap_level
 			filters_R[i] = filters_L[i];
 
 		double window_length = fs*0.010/0.60;
-		window_size = round(window_length);
-		lookahead = round(window_length*0.6);
+		window_size = (ulong) round(window_length);
+		lookahead = (ulong) round(window_length*0.6);
 		global_delay = lookahead;
 
 		if (window)
-			free(window);
-		window = (double *) calloc(window_size, sizeof(double));
+			delete window;
+		window = new double[window_size];
 
-		for (int i = 0; i < window_size; i++) {
+		for (ulong i = 0; i < window_size; i++) {
 			double x = double(i)/window_size;
 			double y = -(x - 0)*(x - 1)*(x + 0.6)/0.288;
 			window[i] = y;
@@ -184,7 +185,7 @@ struct Crap_level
 	}
 };
 
-constexpr char Crap_level::label[];
-constexpr char Crap_level::name[];
-constexpr char Crap_level::author[];
-constexpr char Crap_level::copyright[];
+const char *Crap_level::label = "crap_level";
+const char *Crap_level::name = "crap Leveller";
+const char *Crap_level::author = "Connor Olding";
+const char *Crap_level::copyright = "MIT";

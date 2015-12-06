@@ -33,13 +33,13 @@ typedef struct {
 
 namespace Tube {
 	TEMPLATE INNER CONST T
-	distort(T x)
+	distort(const T &x)
 	{
 		return (T(27.)*x + T(9.)) / (T(9.)*x*x + T(6.)*x + T(19.)) - T(9./19.);
 	}
 
 	TEMPLATE INNER CONST T
-	process(T x, T drive, T wet)
+	process(const T &x, const T &drive, const T &wet)
 	{
 		return (distort<T>(x*drive)/drive*T(0.79) - x)*wet + x;
 	}
@@ -47,13 +47,12 @@ namespace Tube {
 
 struct Crap_tube
 :public Buffer2OS2<Crap> {
-	static constexpr ulong id = 0x50F7BA11;
-	static constexpr char label[] = "crap_tube";
-	static constexpr char name[] = "crap Tube Distortion";
-	static constexpr char author[] = "Connor Olding";
-	static constexpr char copyright[] = "MIT";
-
-	static constexpr ulong parameters = 2;
+	static const ulong id = 0x50F7BA11;
+	static const char *label;
+	static const char *name;
+	static const char *author;
+	static const char *copyright;
+	static const ulong parameters = 2;
 
 	smoothval drive, wet;
 
@@ -121,7 +120,7 @@ struct Crap_tube
 	}
 };
 
-constexpr char Crap_tube::label[];
-constexpr char Crap_tube::name[];
-constexpr char Crap_tube::author[];
-constexpr char Crap_tube::copyright[];
+const char *Crap_tube::label = "crap_tube";
+const char *Crap_tube::name = "crap Tube Distortion";
+const char *Crap_tube::author = "Connor Olding";
+const char *Crap_tube::copyright = "MIT";

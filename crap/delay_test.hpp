@@ -72,12 +72,12 @@ struct channel {
 
 struct Crap_delay_test
 :public AdjustAll<Crap> {
-	static constexpr ulong id = 0xDEDEDEDE;
-	static constexpr char label[] = "crap_delay_test";
-	static constexpr char name[] = "crap sample delay test";
-	static constexpr char author[] = "Connor Olding";
-	static constexpr char copyright[] = "MIT";
-	static constexpr ulong parameters = 0;
+	static const ulong id = 0xDEDEDEDE;
+	static const char *label;
+	static const char *name;
+	static const char *author;
+	static const char *copyright;
+	static const ulong parameters = 0;
 
 	channel c_L, c_R;
 
@@ -100,8 +100,8 @@ struct Crap_delay_test
 	    ulong count)
 	{
 		for (ulong i = 0; i < count; i++) {
-			out_L[i] = c_L.process(in_L[i]);
-			out_R[i] = c_R.process(in_R[i]);
+			out_L[i] = (float)c_L.process(in_L[i]);
+			out_R[i] = (float)c_R.process(in_R[i]);
 		}
 	}
 
@@ -131,7 +131,7 @@ struct Crap_delay_test
 	}
 };
 
-constexpr char Crap_delay_test::label[];
-constexpr char Crap_delay_test::name[];
-constexpr char Crap_delay_test::author[];
-constexpr char Crap_delay_test::copyright[];
+const char *Crap_delay_test::label = "crap_delay_test";
+const char *Crap_delay_test::name = "crap sample delay test";
+const char *Crap_delay_test::author = "Connor Olding";
+const char *Crap_delay_test::copyright = "MIT";

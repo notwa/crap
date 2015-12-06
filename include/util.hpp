@@ -2,15 +2,27 @@
 #include <math.h>
 #include <stdint.h>
 
+#ifndef M_PI
+#define M_PI            3.14159265358979323846
+#define M_SQRT2         1.41421356237309504880
+#define M_SQRT1_2       0.707106781186547524401
+#endif
+
 #ifdef __SSE2__
 #include <emmintrin.h>
 #endif
 
 #define TEMPLATE template<typename T>
 #define INNER static inline
+#ifdef _MSC_VER
+#define PURE
+#define CONST
+#define RESTRICT
+#else
 #define PURE __attribute__((pure))
 #define CONST __attribute__((const))
 #define RESTRICT __restrict__
+#endif
 
 typedef unsigned long ulong; // __attribute((aligned(16)));
 
@@ -18,8 +30,12 @@ typedef unsigned long ulong; // __attribute((aligned(16)));
 #define BLOCK_SIZE 256
 #endif
 
+#ifdef _MSC_VER
+#include "vectors_simple.hpp"
+#else
 #include "Dumber.hpp"
 #include "vectors.hpp"
+#endif
 
 #ifdef FORCE_SINGLE
 #define v2df v2sf

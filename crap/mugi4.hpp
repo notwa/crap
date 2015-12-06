@@ -21,10 +21,10 @@ https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
 
 #define VT 0.026
 #define N 4
-#define VT2 T(2.*VT)
+#define VT2 2.*VT
 
 TEMPLATE INNER PURE T
-tanh2(T x)
+tanh2(const T &x)
 {
 	//return T(tanh(x[0]), tanh(x[1]));
 	T xx = x*x;
@@ -47,12 +47,12 @@ struct stage {
 	v2df sum, sumback, dout;
 
 	TEMPLATE inline T
-	process(freqdata fd, T in)
+	process(const freqdata &fd, const T &in)
 	{
-		T temp = (in + sumback)*VT2*fd.L_p0*fd.g;
+		T temp = (in + sumback)*T(VT2)*fd.L_p0*fd.g;
 		T out = temp + sum;
 		sum += T(2)*temp;
-		dout = tanh2<T>(out/VT2);
+		dout = tanh2<T>(out/T(VT2));
 		sumback = in*fd.L_r1 - dout*fd.L_q0;
 		return out;
 	}
@@ -64,25 +64,26 @@ struct mugi4 {
 	v2df sumback1, sumback2, sumback3, sumback4;
 	v2df drive, feedback;
 
-	TEMPLATE inline T
-	process(T in)
+	inline v2df
+	process(const v2df &in_)
 	{
-		in *= drive;
+		v2df in = in_*drive;
 
-		T sum = in + sumback1;
-		T pre = -fd.p0*sum;
-			s1.process<T>(fd, tanh2<T>(pre/VT2));
-			s2.process<T>(fd, s1.dout);
-			s3.process<T>(fd, s2.dout);
-		T out = s4.process<T>(fd, s3.dout);
+		v2df sum = in + sumback1;
+		v2df pre = -fd.p0*sum;
+		v2df temp = tanh2<v2df>(pre/VT2);
+		           s1.process<v2df>(fd, temp);
+		           s2.process<v2df>(fd, s1.dout);
+		           s3.process<v2df>(fd, s2.dout);
+		v2df out = s4.process<v2df>(fd, s3.dout);
 
-		T back = feedback*out;
+		v2df back = feedback*out;
 		sumback1 = fd.r1*in + fd.q0*back + sumback2;
 		sumback2 = fd.r2*in + fd.q1*back + sumback3;
 		sumback3 = fd.r3*in + fd.q2*back + sumback4;
 		sumback4 = fd.r4*in + fd.q3*back;
 
-		T compensate = -(feedback + T(1));
+		v2df compensate = -(feedback + v2df(1));
 		return out/drive*compensate;
 	}
 
@@ -99,7 +100,7 @@ struct mugi4 {
 		double bc4 = -1; //-binomial(N, 4);
 
 		// apparently fd_set is used by some stdio implementations, so
-		#define crap_fd_set(L, R) double L = R; fd.L = (v2df){L, L}
+		#define crap_fd_set(L, R) double L = R; fd.L = v2df(L, L)
 		crap_fd_set(g, tan(wc));
 		double gg1 = g/(g + 1);
 		double gg1Nk = k*gg1*gg1*gg1*gg1;
@@ -124,13 +125,12 @@ struct mugi4 {
 
 struct Crap_mugi4
 :public AdjustAll<Buffer2OS2<Crap>> {
-	static constexpr ulong id = 0xD8D0D8D0;
-	static constexpr char label[] = "crap_mugi4";
-	static constexpr char name[] = "crap mugi4 (moog-like)";
-	static constexpr char author[] = "Connor Olding";
-	static constexpr char copyright[] = "MIT";
-
-	static constexpr ulong parameters = 3;
+	static const ulong id = 0xD8D0D8D0;
+	static const char *label;
+	static const char *name;
+	static const char *author;
+	static const char *copyright;
+	static const ulong parameters = 3;
 
 	mugi4 filter;
 
@@ -196,7 +196,7 @@ struct Crap_mugi4
 	}
 };
 
-constexpr char Crap_mugi4::label[];
-constexpr char Crap_mugi4::name[];
-constexpr char Crap_mugi4::author[];
-constexpr char Crap_mugi4::copyright[];
+const char *Crap_mugi4::label = "crap_mugi4";
+const char *Crap_mugi4::name = "crap mugi4 (moog-like)";
+const char *Crap_mugi4::author = "Connor Olding";
+const char *Crap_mugi4::copyright = "MIT";

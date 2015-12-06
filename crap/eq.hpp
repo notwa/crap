@@ -9,14 +9,14 @@
 
 struct Crap_eq
 :public AdjustAll<Buffer2<Crap>> {
-	static constexpr ulong id = 0x000CAFED;
-	static constexpr char label[] = "crap_eq";
-	static constexpr char name[] = "crap Parametric Equalizer";
-	static constexpr char author[] = "Connor Olding";
-	static constexpr char copyright[] = "MIT";
+	static const ulong bands = 4;
 
-	static constexpr ulong bands = 4;
-	static constexpr ulong parameters = bands*3;
+	static const ulong id = 0x000CAFED;
+	static const char *label;
+	static const char *name;
+	static const char *author;
+	static const char *copyright;
+	static const ulong parameters = bands*3;
 
 	biquad filters_L[bands];
 	biquad filters_R[bands];
@@ -88,7 +88,7 @@ struct Crap_eq
 	}
 };
 
-constexpr char Crap_eq::label[];
-constexpr char Crap_eq::name[];
-constexpr char Crap_eq::author[];
-constexpr char Crap_eq::copyright[];
+const char *Crap_eq::label = "crap_eq";
+const char *Crap_eq::name = "crap Parametric Equalizer";
+const char *Crap_eq::author = "Connor Olding";
+const char *Crap_eq::copyright = "MIT";

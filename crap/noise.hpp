@@ -6,12 +6,12 @@
 
 struct Crap_noise
 :public AdjustAll<Crap> {
-	static constexpr ulong id = 0xEC57A71C;
-	static constexpr char label[] = "crap_noise";
-	static constexpr char name[] = "crap noise generator";
-	static constexpr char author[] = "Connor Olding";
-	static constexpr char copyright[] = "MIT";
-	static constexpr ulong parameters = 0;
+	static const ulong id = 0xEC57A71C;
+	static const char *label;
+	static const char *name;
+	static const char *author;
+	static const char *copyright;
+	static const ulong parameters = 0;
 
 	unsigned int mirand_L, mirand_R;
 
@@ -61,7 +61,7 @@ struct Crap_noise
 	{}
 };
 
-constexpr char Crap_noise::label[];
-constexpr char Crap_noise::name[];
-constexpr char Crap_noise::author[];
-constexpr char Crap_noise::copyright[];
+const char *Crap_noise::label = "crap_noise";
+const char *Crap_noise::name = "crap noise generator";
+const char *Crap_noise::author = "Connor Olding";
+const char *Crap_noise::copyright = "MIT";

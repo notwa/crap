@@ -17,7 +17,7 @@ struct halfband_t {
 };
 
 TEMPLATE INNER void
-halfband_a(T a[8], T ao[8], T x0, T x2)
+halfband_a(T a[8], T ao[8], const T &x0, const T &x2)
 {
 	a[0] = x2    + (x0   - ao[0])*T(0.006185967461045014);
 	a[1] = ao[0] + (a[0] - ao[1])*T(0.054230780876613788);
@@ -30,7 +30,7 @@ halfband_a(T a[8], T ao[8], T x0, T x2)
 }
 
 TEMPLATE INNER void
-halfband_b(T b[8], T bo[8], T x1, T x3)
+halfband_b(T b[8], T bo[8], const T &x1, const T &x3)
 {
 	b[0] = x3    + (x1   - bo[0])*T(0.024499027624721819);
 	b[1] = bo[0] + (b[0] - bo[1])*T(0.094283481125726432);
@@ -43,7 +43,7 @@ halfband_b(T b[8], T bo[8], T x1, T x3)
 }
 
 TEMPLATE INNER T
-halfband(halfband_t<T> *h, T x0)
+halfband(halfband_t<T> *h, const T &x0)
 {
 	T a[8], b[8];
 	halfband_a(a, h->ao,    x0, h->x2);
@@ -59,7 +59,7 @@ halfband(halfband_t<T> *h, T x0)
 }
 
 TEMPLATE INNER T
-decimate_a(halfband_t<T> *h, T x0)
+decimate_a(halfband_t<T> *h, const T &x0)
 {
 	T c[8];
 	halfband_b(c, h->bo, x0, h->x2);
@@ -70,7 +70,7 @@ decimate_a(halfband_t<T> *h, T x0)
 }
 
 TEMPLATE INNER T
-decimate_b(halfband_t<T> *h, T x0)
+decimate_b(halfband_t<T> *h, const T &x0)
 {
 	T c[8];
 	halfband_a(c, h->ao, x0, h->x2);
@@ -82,7 +82,7 @@ decimate_b(halfband_t<T> *h, T x0)
 
 // note: do not zero-stuff! send the input each time.
 TEMPLATE INNER T
-interpolate_a(halfband_t<T> *h, T x0)
+interpolate_a(halfband_t<T> *h, const T &x0)
 {
 	T c[8];
 	halfband_a(c, h->ao, x0, h->x1);
@@ -92,7 +92,7 @@ interpolate_a(halfband_t<T> *h, T x0)
 
 // note: do not zero-stuff! send the input each time.
 TEMPLATE INNER T
-interpolate_b(halfband_t<T> *h, T x0)
+interpolate_b(halfband_t<T> *h, const T &x0)
 {
 	T c[8];
 	halfband_b(c, h->bo, x0, h->x1);

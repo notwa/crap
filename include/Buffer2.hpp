@@ -23,8 +23,8 @@ struct Buffer2 : public Mixin {
 			process2(buf, rem);
 
 			for (ulong i = 0; i < rem; i++) {
-				out_L[i] = buf[i][0];
-				out_R[i] = buf[i][1];
+				out_L[i] = (T)buf[i][0];
+				out_R[i] = (T)buf[i][1];
 			}
 
 			in_L += BLOCK_SIZE;
