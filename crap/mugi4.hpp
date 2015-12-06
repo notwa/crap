@@ -71,7 +71,7 @@ struct mugi4 {
 
 		v2df sum = in + sumback1;
 		v2df pre = -fd.p0*sum;
-		v2df temp = tanh2<v2df>(pre/VT2);
+		v2df temp = tanh2<v2df>(pre/v2df(VT2));
 		           s1.process<v2df>(fd, temp);
 		           s2.process<v2df>(fd, s1.dout);
 		           s3.process<v2df>(fd, s2.dout);

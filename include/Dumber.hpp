@@ -18,59 +18,65 @@ struct DumberBase {
 	DumberBase(const DumberBase &x)
 	{ v = x.v; }
 
-	inline DumberBase&
-	operator=(const DumberBase& v2) {
-		v = v2.v;
-		return *this;
-	}
+	friend inline DumberBase
+	operator-(const DumberBase &a)
+	{ return -a.v; }
 
-	inline DumberBase
-	operator-()
-	{ return -v; }
+	friend inline DumberBase
+	operator+(const DumberBase &a, const DumberBase &b)
+	{ return a.v + b.v; }
 
-	inline DumberBase
-	operator+(const DumberBase &v2)
-	{ return v + v2.v; }
+	friend inline DumberBase
+	operator-(const DumberBase &a, const DumberBase &b)
+	{ return a.v - b.v; }
 
-	inline DumberBase
-	operator-(const DumberBase &v2)
-	{ return v - v2.v; }
+	friend inline DumberBase
+	operator*(const DumberBase &a, const DumberBase &b)
+	{ return a.v*b.v; }
 
-	inline DumberBase
-	operator*(const DumberBase &v2)
-	{ return v*v2.v; }
+	friend inline DumberBase
+	operator/(const DumberBase &a, const DumberBase &b)
+	{ return a.v/b.v; }
 
-	inline DumberBase
-	operator/(const DumberBase &v2)
-	{ return v/v2.v; }
+	inline DumberBase &
+	operator+=(const DumberBase &a)
+	{ v += a.v; return *this; }
 
-	inline DumberBase&
-	operator+=(const DumberBase &v2)
-	{
-		v = v + v2.v;
-		return *this;
-	}
+	inline DumberBase &
+	operator-=(const DumberBase &a)
+	{ v -= a.v; return *this; }
 
-	inline DumberBase&
-	operator-=(const DumberBase &v2)
-	{
-		v = v - v2.v;
-		return *this;
-	}
+	inline DumberBase &
+	operator*=(const DumberBase &a)
+	{ v *= a.v; return *this; }
 
-	inline DumberBase&
-	operator*=(const DumberBase &v2)
-	{
-		v = v*v2.v;
-		return *this;
-	}
+	inline DumberBase &
+	operator/=(const DumberBase &a)
+	{ v /= a.v; return *this; }
 
-	inline DumberBase&
-	operator/=(const DumberBase &v2)
-	{
-		v = v/v2.v;
-		return *this;
-	}
+	friend inline DumberBase
+	operator&(const DumberBase &a, const DumberBase &b)
+	{ return a.v & b.v; }
+
+	friend inline DumberBase
+	operator|(const DumberBase &a, const DumberBase &b)
+	{ return a.v | b.v; }
+
+	friend inline DumberBase
+	operator^(const DumberBase &a, const DumberBase &b)
+	{ return a.v ^ b.v; }
+
+	friend inline DumberBase
+	operator<(const DumberBase &a, const DumberBase &b)
+	{ return a.v < b.v; }
+
+	friend inline DumberBase
+	operator>(const DumberBase &a, const DumberBase &b)
+	{ return a.v > b.v; }
+
+	friend inline DumberBase
+	operator==(const DumberBase &a, const DumberBase &b)
+	{ return a.v == b.v; }
 };
 
 TEMPLATE
