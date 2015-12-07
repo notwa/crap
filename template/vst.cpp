@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include "public.sdk/source/vst2.x/audioeffectx.h"
-
 //#INCLUDE
 //#REDEFINE
+
+#include <stdio.h>
+
+#include "public.sdk/source/vst2.x/audioeffectx.h"
 
 // VST 2.4 by standard only holds 8 (+ 1 null) length strings,
 // but this is never the case in practice. I've seen up to 24.

@@ -1,9 +1,10 @@
 Set FSO = CreateObject("Scripting.FileSystemObject")
 
 Name = WScript.Arguments(0)
+Kind = WScript.Arguments(1)
 
-IPath = "../template/vst.cpp"
-OPath = "../crap/vst/"&Name&".cpp"
+IPath = "../template/"&Kind&".cpp"
+OPath = "../crap/"&Kind&"/"&Name&".cpp"
 Inc = "crap/"&Name&".hpp"
 
 Set File = FSO.OpenTextFile(IPath)

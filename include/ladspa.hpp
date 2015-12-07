@@ -107,9 +107,9 @@ typedef struct _LADSPA_Descriptor {
 	void (*deactivate)(LADSPA_Handle Instance);
 	void (*cleanup)(LADSPA_Handle Instance);
 } LADSPA_Descriptor;
-#ifdef WIN32
+#if WIN32 || _WIN32
 // weird clang bug workaround
-#if (__clang__ != 1) || (_X86_ != 1)
+#if (__clang__ != 1) || (_X86_ != 1) || _MSC_VER
 __declspec(dllexport)
 #endif
 #endif

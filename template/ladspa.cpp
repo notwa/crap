@@ -1,9 +1,14 @@
-#include <stdlib.h>
-
-#include "ladspa.hpp"
-
 //#INCLUDE
 //#REDEFINE
+
+#include <stdlib.h>
+#include <stdio.h>
+#ifdef _MSC_VER
+// we need memcpy
+#include <memory.h>
+#endif
+
+#include "ladspa.hpp"
 
 #ifndef PARAM_NAME_LEN
 #define PARAM_NAME_LEN 25
@@ -60,9 +65,9 @@ struct plug_t {
 
 TEMPLATE
 struct LADSPA_Plugin {
-	//static constexpr ulong name_buf_size = (portcount)*PARAM_NAME_LEN;
-	static constexpr ulong portcount = IO_PLUGS + T::parameters;
-	static Param default_params[T::parameters];
+	//static const ulong name_buf_size = (portcount)*PARAM_NAME_LEN;
+	static const ulong portcount = IO_PLUGS + T::parameters;
+	static Param *default_params;
 	static LADSPA_PortDescriptor descs[portcount];
 	static LADSPA_PortRangeHint hints[portcount];
 	static char* names[portcount];
@@ -78,9 +83,12 @@ struct LADSPA_Plugin {
 			memcpy(names[i], p_default_strings[i], PARAM_NAME_LEN);
 			descs[i] = LADSPA_PORT_AUDIO;
 			descs[i] |= (i < 2) ? LADSPA_PORT_INPUT : LADSPA_PORT_OUTPUT;
-			hints[i] = (LADSPA_PortRangeHint){.HintDescriptor = 0};
+			hints[i] = {0, 0, 0};
 		}
 
+		default_params = NULL;
+		if (T::parameters)
+			default_params = new Param[T::parameters];
 		T::construct_params(default_params);
 		for (int i = 0; i < T::parameters; i++) {
 			int j = i + IO_PLUGS;
@@ -172,7 +180,7 @@ struct LADSPA_Plugin {
 };
 
 #define P LADSPA_Plugin<T>
-TEMPLATE Param P::default_params[T::parameters];
+TEMPLATE Param *P::default_params;
 TEMPLATE LADSPA_PortDescriptor P::descs[P::portcount];
 TEMPLATE LADSPA_PortRangeHint P::hints[P::portcount];
 TEMPLATE char* P::names[P::portcount];
