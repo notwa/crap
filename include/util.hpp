@@ -2,6 +2,12 @@
 #include <math.h>
 #include <stdint.h>
 
+#include <Eigen/Core>
+
+struct Aligned {
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
 #ifndef M_PI
 #define M_PI            3.14159265358979323846
 #define M_SQRT2         1.41421356237309504880
@@ -30,12 +36,7 @@ typedef unsigned long ulong; // __attribute((aligned(16)));
 #define BLOCK_SIZE 256
 #endif
 
-#ifdef _MSC_VER
-#include "vectors_simple.hpp"
-#else
-#include "Dumber.hpp"
 #include "vectors.hpp"
-#endif
 
 #ifdef FORCE_SINGLE
 #define v2df v2sf

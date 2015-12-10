@@ -1,5 +1,3 @@
-#include "Aligned.hpp"
-
 struct Crap : public Aligned {
 	virtual inline
 	~Crap() {}

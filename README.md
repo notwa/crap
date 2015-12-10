@@ -24,6 +24,15 @@ crap Leveller | crap\_level | `0xAAAAAAAA` | an early prototype of a heavy level
 
 ## build notes
 
+### dependencies
+
+crap is now dependent on [the Eigen header library.][eigen]
+for your convenience, a `get_eigen` bash script is provided.
+this script simply downloads and extracts the Eigen header files
+required to build crap.
+
+[eigen]: http://eigen.tuxfamily.org/
+
 ### clang is strongly recommended
 
 gcc can potentially produce significantly slower code,
@@ -54,7 +63,6 @@ other targets:
 * LV2 support
 * automatically generate markdown table based on crap contents
 * rename plugins (fix capitalization consistency and such)
+* fix code style; particularily braces in method definitions and spaces in casts
 * scrap overly-complex makefile for a shell script
-* support for CPUs without SSE/NEON
 * don't mix CamelCase with underscores (only done for legacy reasons)
-* compressor plugin

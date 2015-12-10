@@ -1,90 +1,119 @@
-// all of this is just so i can:
-// v2df(0.5)
+typedef Eigen::Vector2d _v2df;
+typedef Eigen::Vector2f _v2sf;
+typedef Eigen::Vector4f _v4sf;
 
-typedef double _v2df __attribute__((vector_size(16), aligned(16)));
-typedef float _v2sf __attribute__((vector_size(8), aligned(8)));
-typedef float _v4sf __attribute__((vector_size(16), aligned(16)));
+template<typename T, typename Base>
+struct Vector : public Aligned {
+	T v;
 
-template<>
-struct Dumber<_v2df> : public DumberBase<_v2df> {
-	inline Dumber() {}
-	inline Dumber(DumberBase<_v2df> v2) : DumberBase<_v2df>(v2) {}
+	Vector()
+	{}
 
-	template<typename T1, typename T2>
-	inline
-	Dumber(T1 x, T2 y)
-	{ v = (_v2df){double(x), double(y)}; }
+	Vector(const Base &d)
+	{ v.setConstant(d); }
 
-	TEMPLATE inline
-	Dumber(T x)
-	{ v = (_v2df){double(x), double(x)}; }
+	Vector(const Base &d0, const Base &d1)
+	{ v[0] = d0; v[1] = d1; }
 
-	inline double &
+	Vector(const Base &d0, const Base &d1, const Base &d2, const Base &d3)
+	{ v[0] = d0; v[1] = d1; v[2] = d2; v[3] = d3; }
+
+	template<typename Derived>
+	Vector(const Eigen::ArrayBase<Derived> &v2)
+	//{ v = v2.cast<Base>(); } // FIXME
+	{ v = v2; }
+
+	template<typename Derived>
+	Vector(const Eigen::MatrixBase<Derived> &v2)
+	{ v = v2; }
+
+	friend inline Vector
+	operator-(const Vector &a)
+	{ return -a.v.array(); }
+
+	friend inline Vector
+	operator+(const Vector &a, const Vector &b)
+	{ return a.v.array() + b.v.array(); }
+
+	friend inline Vector
+	operator-(const Vector &a, const Vector &b)
+	{ return a.v.array() - b.v.array(); }
+
+	friend inline Vector
+	operator*(const Vector &a, const Vector &b)
+	{ return a.v.array() * b.v.array(); }
+
+	friend inline Vector
+	operator/(const Vector &a, const Vector &b)
+	{ return a.v.array() / b.v.array(); }
+
+	friend inline Vector
+	sqrt(const Vector &a)
+	{ return a.v.cwiseSqrt(); }
+
+	inline Vector &
+	operator+=(const Vector &a)
+	{ v.array() += a.v.array(); return *this; }
+
+	inline Vector &
+	operator-=(const Vector &a)
+	{ v.array() -= a.v.array(); return *this; }
+
+	inline Vector &
+	operator*=(const Vector &a)
+	{ v.array() *= a.v.array(); return *this; }
+
+	inline Vector &
+	operator/=(const Vector &a)
+	{ v.array() /= a.v.array(); return *this; }
+
+	/* unimplemented for now
+	friend inline Vector
+	operator&(const Vector &a, const Vector &b)
+	{}
+
+	friend inline Vector
+	operator|(const Vector &a, const Vector &b)
+	{}
+
+	friend inline Vector
+	operator^(const Vector &a, const Vector &b)
+	{}
+
+	friend inline Vector
+	andnot(const Vector &a, const Vector &b)
+	{}
+	*/
+
+	/*
+	friend inline Vector
+	operator<(const Vector &a, const Vector &b)
+	{ return a.v.array() < b.v.array(); }
+
+	friend inline Vector
+	operator>(const Vector &a, const Vector &b)
+	{ return a.v.array() > b.v.array(); }
+
+	friend inline Vector
+	operator==(const Vector &a, const Vector &b)
+	{ return a.v.array() == b.v.array(); }
+	*/
+
+	friend inline Vector
+	max(const Vector &a, const Vector &b)
+	{ return a.v.cwiseMax(b.v); }
+
+	inline Base &
 	operator[](int index) {
-		return ((double *)&v)[index];
+		return v[index];
 	}
 
-	inline const double &
+	inline const Base &
 	operator[](int index) const {
-		return ((double *)&v)[index];
+		return v[index];
 	}
 };
 
-template<>
-struct Dumber<_v2sf> : public DumberBase<_v2sf> {
-	inline Dumber() {}
-	inline Dumber(DumberBase<_v2sf> v2) : DumberBase<_v2sf>(v2) {}
-
-	template<typename T1, typename T2>
-	inline
-	Dumber(T1 x, T2 y)
-	{ v = (_v2sf){float(x), float(y)}; }
-
-	TEMPLATE inline
-	Dumber(T x)
-	{ v = (_v2sf){float(x), float(x)}; }
-
-	inline float &
-	operator[](int index) {
-		return ((float *)&v)[index];
-	}
-
-	inline const float &
-	operator[](int index) const {
-		return ((float *)&v)[index];
-	}
-};
-
-template<>
-struct Dumber<_v4sf> : public DumberBase<_v4sf> {
-	inline Dumber() {}
-	inline Dumber(DumberBase<_v4sf> v2) : DumberBase<_v4sf>(v2) {}
-
-	template<typename T1, typename T2, typename T3, typename T4>
-	inline
-	Dumber(T1 x, T2 y, T3 z, T4 w)
-	{ v = (_v4sf){float(x), float(y), float(z), float(w)}; }
-
-	template<typename T1, typename T2>
-	inline
-	Dumber(T1 x, T2 y)
-	{ v = (_v4sf){float(x), float(y), float(x), float(y)}; }
-
-	TEMPLATE inline
-	Dumber(T x)
-	{ v = (_v4sf){float(x), float(x), float(x), float(x)}; }
-
-	inline float &
-	operator[](int index) {
-		return ((float *)&v)[index];
-	}
-
-	inline const float &
-	operator[](int index) const {
-		return ((float *)&v)[index];
-	}
-};
-
-typedef Dumber<_v2df> v2df;
-typedef Dumber<_v2sf> v2sf;
-typedef Dumber<_v4sf> v4sf;
+typedef Vector<_v2df,double> v2df;
+typedef Vector<_v2sf,float> v2sf;
+typedef Vector<_v4sf,float> v4sf;

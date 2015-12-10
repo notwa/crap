@@ -12,14 +12,14 @@ set vstsrc=%vst2x%audioeffect.cpp %vst2x%audioeffectx.cpp %vst2x%vstplugmain.cpp
 set wall=/Wall /wd4100 /wd4668 /wd4820 /wd4514 /wd4365 /wd4711 /wd4996 /wd4127
 REM the warning disabled below is function-not-inlined
 set common_c=/LD /I"../" /I"../include/" %wall% /wd4710
-set release_c=%common_c% /O2 /Oy- /GL /EHsc /fp:fast /analyze- /nologo
+set release_c=%common_c% /O2 /Oy- /GL /EHsc /fp:fast /analyze- /nologo /DNDEBUG
 set release_ld=
 
 call:compile delay_test
 call:compile eq
 call:compile eq_const
 call:compile eq_const_T420
-REM call:compile eq_const_T420_svf
+call:compile eq_const_T420_svf
 call:compile level
 call:compile mugi4
 call:compile noise
