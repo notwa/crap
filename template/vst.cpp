@@ -12,7 +12,7 @@
 struct plugin : public AudioEffectX
 {
 	plugin(audioMasterCallback audioMaster);
-	~plugin();
+	virtual ~plugin();
 
 	void resume();
 	void suspend();
@@ -36,7 +36,7 @@ struct plugin : public AudioEffectX
 	void getParameterDisplay(VstInt32, char *); // eg. -3.3
 	void getParameterLabel(VstInt32, char *); // eg. dB
 
-	char programName[kVstMaxProgNameLen];
+	char programName[kVstMaxProgNameLen + 1];
 
 	Param *params;
 
