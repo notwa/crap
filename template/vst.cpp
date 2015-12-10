@@ -191,7 +191,7 @@ plugin::getParameterDisplay(VstInt32 index, char *text)
 	if (index >= CrapPlug::parameters) return;
 
 	Param *p = &params[index];
-	char display[MAX_PARAM_LEN];
+	char display[MAX_PARAM_LEN + 1];
 
 	switch (p->scale) {
 	case SCALE_FLOAT:
@@ -219,7 +219,7 @@ plugin::getParameterLabel(VstInt32 index, char *text)
 	if (index >= CrapPlug::parameters) return;
 
 	Param *p = &params[index];
-	char display[MAX_PARAM_LEN];
+	char display[MAX_PARAM_LEN + 1];
 
 	switch (p->scale) {
 	case SCALE_HZ:
