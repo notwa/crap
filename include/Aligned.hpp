@@ -1,3 +1,4 @@
+#ifndef _MSC_VER
 // http://stackoverflow.com/a/18137117
 struct Aligned {
 	static void*
@@ -20,3 +21,18 @@ struct Aligned {
 		delete[] mem;
 	}
 };
+#else
+#include <malloc.h>
+struct Aligned {
+	static void*
+	operator new(size_t sz) {
+		return _aligned_malloc(sz, 16);
+	}
+
+	static void
+	operator delete(void* aligned, size_t sz)
+	{
+		_aligned_free(aligned);
+	}
+};
+#endif
