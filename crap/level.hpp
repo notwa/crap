@@ -65,7 +65,7 @@ struct Crap_level
 	biquad filters_R[bands];
 	ulong window_size;
 	ulong lookahead;
-	double *window;
+	double *window, window_sum;
 	double env, attack, release;
 	Delay<v2df> delay;
 	Delay<double> window_delay;
@@ -101,18 +101,14 @@ struct Crap_level
 		for (ulong i = 0; i < rem; i++)
 			envs[i] *= 0.5;
 
-		// MaxFIR
-		double *applied = new double[window_size];
+		// FIR
 		for (ulong i = 0; i < rem; i++) {
 			window_delay.delay(envs[i]);
+			double sum = 0;
 			for (ulong j = 0; j < window_size; j++)
-				applied[j] = window[j]*window_delay[j];
-			double max_ = 0;
-			for (ulong j = 0; j < window_size; j++)
-				max_ = fmax(max_, applied[j]);
-			envs[i] = max_;
+				sum += window[j]*window_delay[j];
+			envs[i] = sum/window_sum*2;
 		}
-		delete applied;
 
 		// Follower
 		for (ulong i = 0; i < rem; i++) {
@@ -172,10 +168,12 @@ struct Crap_level
 			delete window;
 		window = new double[window_size];
 
+		window_sum = 0;
 		for (ulong i = 0; i < window_size; i++) {
 			double x = double(i)/window_size;
 			double y = -(x - 0)*(x - 1)*(x + 0.6)/0.288;
 			window[i] = y;
+			window_sum += y;
 		}
 
 		attack  = 1 - exp(-1/(fs*0.002));
