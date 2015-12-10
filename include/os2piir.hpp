@@ -10,7 +10,7 @@
 
 // all should be initialized to 0
 TEMPLATE
-struct halfband_t {
+struct halfband_t : public Aligned {
 	T ao[8], bo[8];
 	T at[8], bt[8];
 	T x1, x2, x3;
