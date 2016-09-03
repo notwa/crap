@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-a='eigen-eigen-b30b87236a1b'
+a='eigen-eigen-dc6cfdf9bcec'
 gz="${a}.tar.gz"
-url='https://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz'
+url='https://bitbucket.org/eigen/eigen/get/3.2.9.tar.gz'
 
 SRCDIR="$(readlink -f "$(dirname "$0")" )"
 cd "$SRCDIR"
