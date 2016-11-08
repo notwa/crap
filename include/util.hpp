@@ -2,7 +2,11 @@
 #include <math.h>
 #include <stdint.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmisleading-indentation"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <Eigen/Core>
+#pragma GCC diagnostic pop
 
 struct Aligned {
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW

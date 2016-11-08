@@ -34,7 +34,8 @@ VST_SRC = ${VST_CPP:%=$(VST_CPP_DIR)/%}
 VST_OBJ = ${VST_CPP:%.cpp=$(BIN)/%.o}
 VST_DEF = $(VST_SDK_DIR)/public.sdk/samples/vst2.x/win/vstplug.def
 
-GENERAL_FLAGS = -Wall -Winline -Wno-unused-function -Wno-sign-compare -I . -I include
+GENERAL_FLAGS = -Wall -Winline -Wno-unused-function -Wno-sign-compare
+GENERAL_FLAGS += -I . -I include
 ALL_CXXFLAGS = $(GENERAL_FLAGS) -std=gnu++11 $(CXXFLAGS)
 ALL_LDFLAGS = -lm $(LDFLAGS)
 

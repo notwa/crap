@@ -33,25 +33,18 @@ required to build crap.
 
 [eigen]: http://eigen.tuxfamily.org/
 
-### clang is strongly recommended
-
-gcc can potentially produce significantly slower code,
-and odds are that your version is horribly outdated anyway.
-
-*Debian/Ubuntu users:* your stable version of g++ can't even build this.
-just `apt-get install clang-3.6` and export `CXX=clang++-3.6` when building.
-
-If you really have to use g++,
-you may need to add `-fabi-version=6` to CXXFLAGS.
+you may need to add `-fabi-version=6` to CXXFLAGS if you use g++.
 
 ### general building
 
-`make linux` or `make windows` (works well with [mxe])
+`make linux` or `make windows`
+(works well with [mxe][mxe] and [msys2 mingw64][msys2])
 [mxe]: //mxe.cc
+[msys2]: //msys2.github.io
 
 `make linux-arm` requires a CPU with a NEON unit
 
-remember to export `VST_SDK_DIR` to the path of your `vstsdk2.4/`
+**remember to export** `VST_SDK_DIR` **to the path of your** `vstsdk2.4/`
 
 other targets:
 * all: no hand-holding.
