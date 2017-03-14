@@ -7,6 +7,11 @@ in the personal interest of learning and experimenting.
 
 MIT-licensed; go wild.
 
+[eigen]: http://eigen.tuxfamily.org/
+[moog]: https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
+[mxe]: //mxe.cc
+[msys2]: //msys2.github.io
+
 ## plugs
 
 Name | Label | ID | Description
@@ -20,8 +25,6 @@ crap mugi4 (moog-like) | crap\_mugi4 | `0xD8D0D8D0` | nonlinear moog filter impl
 crap Tube Distortion | crap\_tube | `0x50F7BA11` | static waveshaper with 6x oversampling and parameter smoothing. doesn't actually emulate a tube. not actually for crapping in.
 crap Leveller | crap\_level | `0xAAAAAAAA` | an early prototype of a heavy leveller.
 
-[moog]: https://aaltodoc.aalto.fi/bitstream/handle/123456789/14420/article6.pdf
-
 ## build notes
 
 ### dependencies
@@ -31,16 +34,12 @@ for your convenience, a `get_eigen` bash script is provided.
 this script simply downloads and extracts the Eigen header files
 required to build crap.
 
-[eigen]: http://eigen.tuxfamily.org/
-
 you may need to add `-fabi-version=6` to CXXFLAGS if you use g++.
 
 ### general building
 
 `make linux` or `make windows`
 (works well with [mxe][mxe] and [msys2 mingw64][msys2])
-[mxe]: //mxe.cc
-[msys2]: //msys2.github.io
 
 `make linux-arm` requires a CPU with a NEON unit
 
